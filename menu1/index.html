@@ -1,0 +1,390 @@
+<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/JuliaTutorials/libs/highlight/styles/github.min.css"> <link rel=stylesheet  href="/JuliaTutorials/css/franklin.css"> <link rel=stylesheet  href="/JuliaTutorials/css/poole_hyde.css"> <style> html {font-size: 17px;} .franklin-content {position: relative; padding-left: 8%; padding-right: 5%; line-height: 1.35em;} @media (min-width: 940px) { .franklin-content {width: 100%; margin-left: auto; margin-right: auto;} } @media (max-width: 768px) { .franklin-content {padding-left: 6%; padding-right: 6%;} } </style> <link rel=icon  href="/JuliaTutorials/assets/favicon.png"> <title>Introduction to Data Analysis</title> <div class=sidebar > <div class="container sidebar-sticky"> <div class=sidebar-about > <h1><a href="/JuliaTutorials/">Julia Tutorials</a></h1> <p class=lead >Systems Biology Enabling Platform, AgResearch</p> </div> <nav class=sidebar-nav > <a class="sidebar-nav-item " href="/JuliaTutorials/">Home</a> <a class="sidebar-nav-item active" href="/JuliaTutorials/menu1/">Introduction</a> <a class="sidebar-nav-item " href="/JuliaTutorials/menu2/">Hypothesis Testing</a> <a class="sidebar-nav-item " href="/JuliaTutorials/menu3/">Machine Learning</a> </nav> <p>&copy; Josie Athens.</p> </div> </div> <div class="content container"> <div class=franklin-content ><h1 id=introduction_to_data_analysis ><a href="#introduction_to_data_analysis" class=header-anchor >Introduction to Data Analysis</a></h1> <div class=franklin-toc ><ol><li><a href="#introduction_to_data_analysis">Introduction to Data Analysis</a><li><a href="#data_frames">Data Frames</a><ol><li><a href="#data_manipulation">Data Manipulation</a><ol><li><a href="#import_from_csv">Import from CSV</a><li><a href="#import_from_rds">Import from rds</a><li><a href="#changing_names_of_variables">Changing names of variables</a><li><a href="#creating_factors">Creating Factors</a><li><a href="#transforming_to_a_binary_variable">Transforming to a binary variable</a><li><a href="#simple_numeric_transformations">Simple numeric transformations</a></ol><li><a href="#indexing_and_subsets">Indexing and subsets</a><li><a href="#descriptive_statistics">Descriptive Statistics</a><ol><li><a href="#functions">Functions</a><li><a href="#converting_the_data">Converting the data</a><li><a href="#missing_values">Missing values</a></ol><li><a href="#group_manipulations">Group manipulations</a><ol><li><a href="#split-apply-combine">Split-Apply-Combine</a></ol></ol></ol></div> <h1 id=data_frames ><a href="#data_frames" class=header-anchor >Data Frames</a></h1> <h2 id=data_manipulation ><a href="#data_manipulation" class=header-anchor >Data Manipulation</a></h2> <h3 id=import_from_csv ><a href="#import_from_csv" class=header-anchor >Import from CSV</a></h3> <pre><code class="julia hljs"><span class=hljs-keyword >using</span> DataFramesMeta, RCall, RDatasets, RData, FreqTables
+<span class=hljs-keyword >using</span> StatsKit, PrettyTables
+<span class=hljs-keyword >using</span> ScientificTypes: schema
+
+wcgs2 = DataFrame(CSV.File(<span class=hljs-string >&quot;data/wcgs.csv&quot;</span>))
+wcgs2 |&gt; schema</code></pre><pre><code class="plaintext hljs">┌─────────┬──────────┬───────┐
+│ names   │ scitypes │ types │
+├─────────┼──────────┼───────┤
+│ id      │ Count    │ Int64 │
+│ age0    │ Count    │ Int64 │
+│ height0 │ Count    │ Int64 │
+│ weight0 │ Count    │ Int64 │
+│ sbp0    │ Count    │ Int64 │
+│ dbp0    │ Count    │ Int64 │
+│ chol0   │ Count    │ Int64 │
+│ behpat0 │ Count    │ Int64 │
+│ ncigs0  │ Count    │ Int64 │
+│ dibpat0 │ Count    │ Int64 │
+│ chd69   │ Count    │ Int64 │
+│ typechd │ Count    │ Int64 │
+│ time169 │ Count    │ Int64 │
+│ arcus0  │ Count    │ Int64 │
+└─────────┴──────────┴───────┘
+</code></pre> <p>Dimensions:</p> <pre><code class="julia hljs">wcgs2 |&gt; size</code></pre><pre><code class="plaintext hljs">(3140, 14)</code></pre>
+<p>Names of columns &#40;variables&#41;:</p>
+<pre><code class="julia hljs">wcgs2 |&gt; names</code></pre><pre><code class="plaintext hljs">14-element Vector{String}:
+ &quot;id&quot;
+ &quot;age0&quot;
+ &quot;height0&quot;
+ &quot;weight0&quot;
+ &quot;sbp0&quot;
+ &quot;dbp0&quot;
+ &quot;chol0&quot;
+ &quot;behpat0&quot;
+ &quot;ncigs0&quot;
+ &quot;dibpat0&quot;
+ &quot;chd69&quot;
+ &quot;typechd&quot;
+ &quot;time169&quot;
+ &quot;arcus0&quot;</code></pre>
+<h3 id=import_from_rds ><a href="#import_from_rds" class=header-anchor >Import from rds</a></h3>
+<pre><code class="julia hljs">kfm = load(<span class=hljs-string >&quot;data/kfm.rds&quot;</span>)
+kfm |&gt; schema</code></pre><pre><code class="plaintext hljs">┌────────────┬───────────────┬─────────────────────────────────┐
+│ names      │ scitypes      │ types                           │
+├────────────┼───────────────┼─────────────────────────────────┤
+│ no         │ Count         │ Int32                           │
+│ dl_milk    │ Continuous    │ Float64                         │
+│ sex        │ Multiclass{2} │ CategoricalValue{String, UInt8} │
+│ weight     │ Continuous    │ Float64                         │
+│ ml_suppl   │ Count         │ Int32                           │
+│ mat_weight │ Count         │ Int32                           │
+│ mat_height │ Count         │ Int32                           │
+└────────────┴───────────────┴─────────────────────────────────┘
+</code></pre>
+<h3 id=changing_names_of_variables ><a href="#changing_names_of_variables" class=header-anchor >Changing names of variables</a></h3>
+<pre><code class="julia hljs">wcgs = DataFrames.rename!(
+	wcgs2,
+	:age0 =&gt; :age,
+	:height0 =&gt; :height,
+	:weight0 =&gt; :weight,
+	:sbp0 =&gt; :sbp,
+	:dbp0 =&gt; :dbp,
+	:chol0 =&gt; :chol,
+	:behpat0 =&gt; :beh_pat,
+	:ncigs0 =&gt; :ncigs,
+	:dibpat0 =&gt; :dib_pat,
+	:chd69 =&gt; :chd,
+	:typechd =&gt; :type_chd,
+	:time169 =&gt; :time,
+	:arcus0 =&gt; :arcus
+);
+
+first(wcgs, <span class=hljs-number >5</span>)
+
+wcgs[<span class=hljs-number >1</span>:<span class=hljs-number >5</span>, <span class=hljs-number >2</span>:<span class=hljs-number >6</span>]</code></pre><pre><code class="plaintext hljs">5×5 DataFrame
+ Row │ age    height  weight  sbp    dbp
+     │ Int64  Int64   Int64   Int64  Int64
+─────┼─────────────────────────────────────
+   1 │    49      73     150    110     76
+   2 │    42      70     160    154     84
+   3 │    42      69     160    110     78
+   4 │    41      68     152    124     78
+   5 │    59      70     150    144     86</code></pre>
+<h3 id=creating_factors ><a href="#creating_factors" class=header-anchor >Creating Factors</a></h3>
+<pre><code class="julia hljs">wcgs.chd = categorical(recode(wcgs.chd, <span class=hljs-number >0</span> =&gt; <span class=hljs-string >&quot;No CHD&quot;</span>, <span class=hljs-number >1</span> =&gt; <span class=hljs-string >&quot;CHD&quot;</span>), ordered=<span class=hljs-literal >true</span>)
+wcgs.arcus = categorical(recode(wcgs.arcus, <span class=hljs-number >0</span> =&gt; <span class=hljs-string >&quot;Absent&quot;</span>, <span class=hljs-number >1</span> =&gt; <span class=hljs-string >&quot;Present&quot;</span>), ordered=<span class=hljs-literal >true</span>)
+wcgs.beh_pat = categorical(recode(wcgs.beh_pat, <span class=hljs-number >1</span> =&gt; <span class=hljs-string >&quot;A1&quot;</span>, <span class=hljs-number >2</span> =&gt; <span class=hljs-string >&quot;A2&quot;</span>, <span class=hljs-number >3</span> =&gt; <span class=hljs-string >&quot;B1&quot;</span>, <span class=hljs-number >4</span> =&gt; <span class=hljs-string >&quot;B2&quot;</span>), ordered=<span class=hljs-literal >true</span>)
+wcgs.dib_pat = categorical(recode(wcgs.dib_pat, <span class=hljs-number >0</span> =&gt; <span class=hljs-string >&quot;B&quot;</span>, <span class=hljs-number >1</span> =&gt; <span class=hljs-string >&quot;A&quot;</span>), ordered=<span class=hljs-literal >true</span>)
+wcgs.type_chd = categorical(recode(wcgs.type_chd, <span class=hljs-number >0</span> =&gt; <span class=hljs-string >&quot;No CHD&quot;</span>, <span class=hljs-number >1</span> =&gt; <span class=hljs-string >&quot;MI or SD&quot;</span>,
+	<span class=hljs-number >2</span> =&gt; <span class=hljs-string >&quot;Angina&quot;</span>, <span class=hljs-number >3</span> =&gt; <span class=hljs-string >&quot;Silent MI&quot;</span>), ordered=<span class=hljs-literal >true</span>);
+
+<span class=hljs-meta >@chain</span> wcgs <span class=hljs-keyword >begin</span>
+    select([:chd, :arcus, :beh_pat, :dib_pat, :type_chd])
+    schema
+<span class=hljs-keyword >end</span>
+
+levels(wcgs.chd)
+
+freqtable(wcgs, :chd, :dib_pat)</code></pre><pre><code class="plaintext hljs">2×2 Named Matrix{Int64}
+chd ╲ dib_pat │    A     B
+──────────────┼───────────
+CHD           │  177    78
+No CHD        │ 1406  1479</code></pre>
+<h3 id=transforming_to_a_binary_variable ><a href="#transforming_to_a_binary_variable" class=header-anchor >Transforming to a binary variable</a></h3>
+<p>One of our variables is a count and stores the number of smoked cigarettes/day. We can define a new variable <code>Smoker</code> in which, everyone who smokes one or more cigarette/day will be a smoker. One of the easiest ways to create binary variables is to use a conditional statement. For example, the result of <code>wcgs.ncigs .&gt; 0</code> is a vector with TRUE and FALSE results.</p>
+<pre><code class="julia hljs">wcgs.smoker = wcgs.ncigs .&gt; <span class=hljs-number >0</span>
+freqtable(wcgs, :chd, :smoker)
+
+wcgs.smoker = categorical(recode(wcgs.smoker, <span class=hljs-number >0</span> =&gt; <span class=hljs-string >&quot;Non-Smoker&quot;</span>, <span class=hljs-number >1</span> =&gt; <span class=hljs-string >&quot;Smoker&quot;</span>), ordered=<span class=hljs-literal >true</span>)
+freqtable(wcgs, :chd, :smoker)
+
+pretty_table(
+	freqtable(wcgs, :smoker, :chd);
+	header = [<span class=hljs-string >&quot;CHD&quot;</span>, <span class=hljs-string >&quot;No CHD&quot;</span>],
+	row_labels = [<span class=hljs-string >&quot;Non Smoker&quot;</span>, <span class=hljs-string >&quot;Smoker&quot;</span>]
+)
+
+<span class=hljs-meta >@chain</span> wcgs <span class=hljs-keyword >begin</span>
+	freqtable(:smoker, :chd)
+	prop(margins = <span class=hljs-number >2</span>)
+<span class=hljs-keyword >end</span>
+
+pretty_table(
+	<span class=hljs-meta >@chain</span> wcgs <span class=hljs-keyword >begin</span>
+		freqtable(:smoker, :chd)
+		prop(margins = <span class=hljs-number >2</span>)
+	<span class=hljs-keyword >end</span>;
+	header = [<span class=hljs-string >&quot;CHD&quot;</span>, <span class=hljs-string >&quot;No CHD&quot;</span>],
+	row_labels = [<span class=hljs-string >&quot;Non Smoker&quot;</span>, <span class=hljs-string >&quot;Smoker&quot;</span>],
+	formatters = ft_printf(<span class=hljs-string >&quot;%5.2f&quot;</span>)
+)</code></pre><pre><code class="plaintext hljs">┌────────────┬─────┬────────┐
+│            │ CHD │ No CHD │
+├────────────┼─────┼────────┤
+│ Non Smoker │  97 │   1549 │
+│     Smoker │ 158 │   1336 │
+└────────────┴─────┴────────┘
+┌────────────┬───────┬────────┐
+│            │   CHD │ No CHD │
+├────────────┼───────┼────────┤
+│ Non Smoker │  0.38 │   0.54 │
+│     Smoker │  0.62 │   0.46 │
+└────────────┴───────┴────────┘
+</code></pre>
+<h3 id=simple_numeric_transformations ><a href="#simple_numeric_transformations" class=header-anchor >Simple numeric transformations</a></h3>
+<p>We also, prefer units in the metric system. We will convert from inches to centimetres and from pounds to kg.</p>
+<pre><code class="julia hljs">wcgs.height = wcgs.height * <span class=hljs-number >2.54</span>
+wcgs.weight = wcgs.weight * <span class=hljs-number >0.4536</span>;</code></pre>
+<h2 id=indexing_and_subsets ><a href="#indexing_and_subsets" class=header-anchor >Indexing and subsets</a></h2>
+<p>Let’s said that we are only interested in subjects who are smokers. If that is the case, we can create a new data frame. We can use either, the <code>subset</code> function from <code>DataFramesMeta</code>.</p>
+<pre><code class="julia hljs"><span class=hljs-meta >@subset</span>(wcgs, :smoker .== <span class=hljs-string >&quot;Smoker&quot;</span>) |&gt; nrow
+
+smokers = <span class=hljs-meta >@subset</span>(wcgs, :smoker .== <span class=hljs-string >&quot;Smoker&quot;</span>)
+smokers[<span class=hljs-number >1</span>:<span class=hljs-number >5</span>, <span class=hljs-number >2</span>:<span class=hljs-number >6</span>]</code></pre><pre><code class="plaintext hljs">5×5 DataFrame
+ Row │ age    height   weight   sbp    dbp
+     │ Int64  Float64  Float64  Int64  Int64
+─────┼───────────────────────────────────────
+   1 │    49   185.42  68.04      110     76
+   2 │    42   177.8   72.576     154     84
+   3 │    41   172.72  68.9472    124     78
+   4 │    59   177.8   68.04      144     86
+   5 │    43   182.88  86.184     146     76</code></pre>
+<p>Let&#39;s check for the number of observations:</p>
+<pre><code class="julia hljs">wcgs |&gt; nrow
+
+smokers |&gt; nrow</code></pre><pre><code class="plaintext hljs">1494</code></pre>
+<p>We can access one of those columns easily using <code>.colname</code>, this returns a vector that you can access like any Julia vector:</p>
+<pre><code class="julia hljs">wcgs.chd[<span class=hljs-number >1</span>:<span class=hljs-number >5</span>]</code></pre><pre><code class="plaintext hljs">5-element CategoricalArrays.CategoricalArray{String,1,UInt32}:
+ &quot;No CHD&quot;
+ &quot;No CHD&quot;
+ &quot;No CHD&quot;
+ &quot;No CHD&quot;
+ &quot;CHD&quot;</code></pre>
+<p>Another option is to use <code>select</code> and for negative indexing, <code>Not</code></p>
+<pre><code class="julia hljs"><span class=hljs-meta >@chain</span> wcgs <span class=hljs-keyword >begin</span>
+	select(:ncigs, :smoker)
+	first(<span class=hljs-number >5</span>)
+<span class=hljs-keyword >end</span>
+
+<span class=hljs-meta >@chain</span> smokers <span class=hljs-keyword >begin</span>
+	select(Not([:id, :type_chd, :ncigs, :beh_pat]))
+	size
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">(1494, 11)</code></pre>
+<blockquote>
+<p><strong>Note:</strong> In the case of negative indexing, a list of variables is given in vector format; the equivalent to <code>c</code>, the concatenate function in <code>R</code>.</p>
+</blockquote>
+<h2 id=descriptive_statistics ><a href="#descriptive_statistics" class=header-anchor >Descriptive Statistics</a></h2>
+<p><code>Statistics</code> offers a convenient <code>describe</code> function which you can use on a data frame to get an overview of the data:</p>
+<pre><code class="julia hljs"><span class=hljs-meta >@chain</span> kfm <span class=hljs-keyword >begin</span>
+    select(Not(<span class=hljs-number >1</span>, <span class=hljs-number >3</span>))
+	describe(:min, :max, :mean, :median, :std)
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">5×6 DataFrame
+ Row │ variable    min     max      mean       median   std
+     │ Symbol      Real    Real     Float64    Float64  Float64
+─────┼─────────────────────────────────────────────────────────────
+   1 │ dl_milk       4.44   10.43     7.5044     7.66     1.51151
+   2 │ weight        4.12    6.578    5.31874    5.352    0.548303
+   3 │ ml_suppl      0     590       96.0       57.5    130.22
+   4 │ mat_weight   47      80       59.96      58.0      8.38113
+   5 │ mat_height  153     185      167.44     167.0      6.51892</code></pre>
+<p>We can pass a number of symbols to the <code>describe</code> function to indicate which statistics to compute for each feature:</p>
+<ul>
+<li><p><code>mean</code>, <code>std</code>, <code>min</code>, <code>max</code>, <code>median</code>, <code>first</code>, <code>last</code> are all fairly self explanatory</p>
+
+<li><p><code>q25</code>, <code>q75</code> are respectively for the 25th and 75th percentile,</p>
+
+<li><p><code>eltype</code>, <code>nunique</code>, <code>nmissing</code> can also be used</p>
+
+</ul>
+<h3 id=functions ><a href="#functions" class=header-anchor >Functions</a></h3>
+<pre><code class="julia hljs"><span class=hljs-string >&quot;&quot;&quot;
+	rel_dis()
+
+Estimates the relative dispersion (coefficient of variation) of a vector.
+&quot;&quot;&quot;</span>
+rel_dis(x) = std(x) / mean(x)
+
+<span class=hljs-meta >@chain</span> kfm <span class=hljs-keyword >begin</span>
+	select(Not(<span class=hljs-number >1</span>, <span class=hljs-number >3</span>, <span class=hljs-number >5</span>))
+	describe(:mean, :median, :std, rel_dis =&gt; :cv)
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">4×5 DataFrame
+ Row │ variable    mean       median   std       cv
+     │ Symbol      Float64    Float64  Float64   Float64
+─────┼─────────────────────────────────────────────────────
+   1 │ dl_milk       7.5044     7.66   1.51151   0.201417
+   2 │ weight        5.31874    5.352  0.548303  0.103089
+   3 │ mat_weight   59.96      58.0    8.38113   0.139779
+   4 │ mat_height  167.44     167.0    6.51892   0.0389329</code></pre>
+<blockquote>
+<p>For <strong><code>Not</code></strong> we define columns by number. If we want to use names, the names of the columuns go inside square brackets.</p>
+</blockquote>
+<pre><code class="julia hljs"><span class=hljs-meta >@chain</span> kfm <span class=hljs-keyword >begin</span>
+	select(Not([:no, :sex, :ml_suppl]))
+	describe(:mean, :median, :std, rel_dis =&gt; :cv)
+<span class=hljs-keyword >end</span>
+
+kfm_tbl = DataFrame(
+	<span class=hljs-meta >@chain</span> kfm <span class=hljs-keyword >begin</span>
+		select(Not([:no, :sex, :ml_suppl]))
+		describe(:mean, :median, :std, rel_dis =&gt; :cv)
+	<span class=hljs-keyword >end</span>
+);
+
+kfm_tbl.variable = [
+	<span class=hljs-string >&quot;Breast milk intake (dl/day)&quot;</span>,
+	<span class=hljs-string >&quot;Weight (kg)&quot;</span>,
+	<span class=hljs-string >&quot;Maternal Weight (kg)&quot;</span>,
+	<span class=hljs-string >&quot;Maternal Height (m)&quot;</span>
+];
+
+pretty_table(
+	kfm_tbl;
+	header = [<span class=hljs-string >&quot;Variable&quot;</span>, <span class=hljs-string >&quot;Mean&quot;</span>, <span class=hljs-string >&quot;Median&quot;</span>, <span class=hljs-string >&quot;SD&quot;</span>, <span class=hljs-string >&quot;CV&quot;</span>],
+	formatters = ft_printf(<span class=hljs-string >&quot;%5.2f&quot;</span>)
+)</code></pre><pre><code class="plaintext hljs">┌─────────────────────────────┬────────┬────────┬───────┬───────┐
+│                    Variable │   Mean │ Median │    SD │    CV │
+├─────────────────────────────┼────────┼────────┼───────┼───────┤
+│ Breast milk intake (dl/day) │   7.50 │   7.66 │  1.51 │  0.20 │
+│                 Weight (kg) │   5.32 │   5.35 │  0.55 │  0.10 │
+│        Maternal Weight (kg) │  59.96 │  58.00 │  8.38 │  0.14 │
+│         Maternal Height (m) │ 167.44 │ 167.00 │  6.52 │  0.04 │
+└─────────────────────────────┴────────┴────────┴───────┴───────┘
+</code></pre>
+<h3 id=converting_the_data ><a href="#converting_the_data" class=header-anchor >Converting the data</a></h3>
+<p>If we want to get the content of the dataframe as one big matrix, use <code>Matrix</code>:</p>
+<pre><code class="julia hljs">kfm_mat = <span class=hljs-built_in >Matrix</span>(
+	<span class=hljs-meta >@chain</span> kfm <span class=hljs-keyword >begin</span>
+		select(Not(<span class=hljs-number >1</span>, <span class=hljs-number >3</span>, <span class=hljs-number >5</span>))
+	<span class=hljs-keyword >end</span>
+);
+
+kfm |&gt; size
+
+kfm_mat |&gt; size
+
+kfm_mat[<span class=hljs-number >1</span>:<span class=hljs-number >5</span>, :]</code></pre><pre><code class="plaintext hljs">5×4 Matrix{Float64}:
+ 8.42  5.002  65.0  173.0
+ 8.44  5.128  48.0  158.0
+ 8.41  5.445  62.0  160.0
+ 9.65  5.106  55.0  162.0
+ 6.44  5.196  58.0  170.0</code></pre>
+<h3 id=missing_values ><a href="#missing_values" class=header-anchor >Missing values</a></h3>
+<pre><code class="julia hljs">mao = dataset(<span class=hljs-string >&quot;gap&quot;</span>, <span class=hljs-string >&quot;mao&quot;</span>)
+mao |&gt; schema
+
+mao[<span class=hljs-number >1</span>:<span class=hljs-number >7</span>, <span class=hljs-number >2</span>:<span class=hljs-number >6</span>]
+
+describe(mao, :nmissing)</code></pre><pre><code class="plaintext hljs">19×2 DataFrame
+ Row │ variable  nmissing
+     │ Symbol    Int64
+─────┼────────────────────
+   1 │ ID               0
+   2 │ Type             0
+   3 │ Gender           0
+   4 │ Age            188
+   5 │ AAO            296
+   6 │ AAD            295
+   7 │ UPDRS          301
+   8 │ MAOAI2           0
+   9 │ AI2Code          0
+  10 │ MAOBI2           0
+  11 │ BI2Code          0
+  12 │ GTBEX3           0
+  13 │ BEX3Code         0
+  14 │ MAOAVNTR        46
+  15 │ VNTRCode        46
+  16 │ VNTRCod2        46
+  17 │ MAOA31          36
+  18 │ MAO31COD        36
+  19 │ MAO31CO2        36</code></pre>
+<p>Lots of missing values... If we wanted to compute simple functions on columns, they  may just return <code>missing</code>:</p>
+<pre><code class="julia hljs">std(mao.Age)</code></pre><pre><code class="plaintext hljs">missing</code></pre>
+<p>Some functions remove missing though:</p>
+<pre><code class="julia hljs"><span class=hljs-meta >@chain</span> mao <span class=hljs-keyword >begin</span>
+	select(:Age)
+	describe(:min, :max, :mean, :median, :std, rel_dis =&gt; :cv)
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">1×7 DataFrame
+ Row │ variable  min    max    mean     median   std      cv
+     │ Symbol    Int64  Int64  Float64  Float64  Float64  Float64
+─────┼─────────────────────────────────────────────────────────────
+   1 │ Age          26     91  73.5395     77.0  11.5517  0.157082</code></pre>
+<p>The <code>skipmissing</code> and <code>dropmissing</code> functions can help counter this:</p>
+<pre><code class="julia hljs">round(
+	std(skipmissing(mao.Age)),
+	digits=<span class=hljs-number >3</span>
+)</code></pre><pre><code class="plaintext hljs">11.552</code></pre>
+<h2 id=group_manipulations ><a href="#group_manipulations" class=header-anchor >Group manipulations</a></h2>
+<h3 id=split-apply-combine ><a href="#split-apply-combine" class=header-anchor >Split-Apply-Combine</a></h3>
+<pre><code class="julia hljs">iris = dataset(<span class=hljs-string >&quot;datasets&quot;</span>, <span class=hljs-string >&quot;iris&quot;</span>)
+iris |&gt; schema</code></pre><pre><code class="plaintext hljs">┌─────────────┬───────────────┬─────────────────────────────────┐
+│ names       │ scitypes      │ types                           │
+├─────────────┼───────────────┼─────────────────────────────────┤
+│ SepalLength │ Continuous    │ Float64                         │
+│ SepalWidth  │ Continuous    │ Float64                         │
+│ PetalLength │ Continuous    │ Float64                         │
+│ PetalWidth  │ Continuous    │ Float64                         │
+│ Species     │ Multiclass{3} │ CategoricalValue{String, UInt8} │
+└─────────────┴───────────────┴─────────────────────────────────┘
+</code></pre>
+<p>The <code>groupby</code> function allows to form sub-dataframes corresponding to groups of rows. This can be very convenient to run specific analyses for specific groups without copying the data.</p>
+<p>The basic usage is <code>groupby&#40;df, cols&#41;</code> where <code>cols</code> specifies one or several columns to use for the grouping.</p>
+<p>Consider a simple example: in <code>iris</code> there is a <code>Species</code> column with 3 species:</p>
+<pre><code class="julia hljs"><span class=hljs-meta >@chain</span> iris <span class=hljs-keyword >begin</span>
+  select(:Species)
+  unique()
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">3×1 DataFrame
+ Row │ Species
+     │ Cat…
+─────┼────────────
+   1 │ setosa
+   2 │ versicolor
+   3 │ virginica</code></pre>
+<p>We can form views for each of these:</p>
+<pre><code class="julia hljs">gdf = groupby(iris, :Species)
+subdf_setosa = gdf[<span class=hljs-number >1</span>]
+describe(subdf_setosa, :mean, :median, :std, rel_dis =&gt; :cv)</code></pre><pre><code class="plaintext hljs">5×5 DataFrame
+ Row │ variable     mean    median  std       cv
+     │ Symbol       Union…  Union…  Union…    Union…
+─────┼──────────────────────────────────────────────────
+   1 │ SepalLength  5.006   5.0     0.35249   0.0704134
+   2 │ SepalWidth   3.428   3.4     0.379064  0.110579
+   3 │ PetalLength  1.462   1.5     0.173664  0.118785
+   4 │ PetalWidth   0.246   0.2     0.105386  0.428397
+   5 │ Species</code></pre>
+<p>Or using pipes &#40;<code>@chain</code>&#41;, without the need of creating subsets:</p>
+<pre><code class="julia hljs"><span class=hljs-meta >@chain</span> iris <span class=hljs-keyword >begin</span>
+  <span class=hljs-meta >@subset</span>(:Species .== <span class=hljs-string >&quot;setosa&quot;</span>)
+  select(Not(:Species))
+  describe(:mean, :median, :std, rel_dis =&gt; :cv)
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">4×5 DataFrame
+ Row │ variable     mean     median   std       cv
+     │ Symbol       Float64  Float64  Float64   Float64
+─────┼────────────────────────────────────────────────────
+   1 │ SepalLength    5.006      5.0  0.35249   0.0704134
+   2 │ SepalWidth     3.428      3.4  0.379064  0.110579
+   3 │ PetalLength    1.462      1.5  0.173664  0.118785
+   4 │ PetalWidth     0.246      0.2  0.105386  0.428397</code></pre>
+
+<div class=page-foot >
+    <div class=copyright >
+        &copy; Josie Athens. Last modified: July 11, 2023.
+    Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a> and the <a href="https://julialang.org">Julia programming language</a>.
+    </div>
+</div>
+
+</div>
+    </div>  
+    
+    
+        <script src="/JuliaTutorials/libs/highlight/highlight.min.js"></script>
+<script>hljs.highlightAll();hljs.configure({tabReplace: '    '});</script>
