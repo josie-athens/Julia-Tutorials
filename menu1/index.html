@@ -127,25 +127,25 @@ fibonacci(<span class=hljs-number >2</span>), fibonacci(<span class=hljs-number 
     <span class=hljs-keyword >end</span>
 <span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">fibonacci_mem (generic function with 1 method)</code></pre>
 <p>With the help of the famous <code>@benchmark</code> macro from the <code>BenchmarkTools</code> package you can directly compare the time and memory footprint of the two functions.</p>
-<pre><code class="julia hljs"><span class=hljs-meta >@benchmark</span> fibonacci(<span class=hljs-number >30</span>)</code></pre><pre><code class="plaintext hljs">BenchmarkTools.Trial: 1756 samples with 1 evaluation.
- Range (min … max):  2.838 ms …  2.925 ms  ┊ GC (min … max): 0.00% … 0.00%
- Time  (median):     2.844 ms              ┊ GC (median):    0.00%
- Time  (mean ± σ):   2.847 ms ± 11.640 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
+<pre><code class="julia hljs"><span class=hljs-meta >@benchmark</span> fibonacci(<span class=hljs-number >30</span>)</code></pre><pre><code class="plaintext hljs">BenchmarkTools.Trial: 1294 samples with 1 evaluation.
+ Range (min … max):  3.856 ms … 3.913 ms  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     3.862 ms             ┊ GC (median):    0.00%
+ Time  (mean ± σ):   3.862 ms ± 3.160 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
 
-  ▇▄▂▃█▆▆▄▃▁▄▂▃▁▁                                            ▁
-  ███████████████▆▆▆▄▄▅▁▆▅▆▅▄▅▅▅▅▅▅▄▅▅▅▅▅▆▅▅▆▅▆▅▅▅▅▆▆▁▅▄▅▁▄▅ █
-  2.84 ms      Histogram: log(frequency) by time      2.9 ms &lt;
+                   ▁█▅▇▁▆ ▄▅▂▅ ▃                             
+  ▅▂▁▁▁▂▃▃▃▁▁▁▁▁▁▁▂█████████████▇█▆▄▇▄▄▄▃▃▂▃▃▃▂▃▂▃▂▁▁▂▁▂▃▂▂ ▄
+  3.86 ms        Histogram: frequency by time       3.87 ms &lt;
 
  Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
 <p>Now, the benchmark of the memoize version:</p>
-<pre><code class="julia hljs"><span class=hljs-meta >@benchmark</span> fibonacci_mem(<span class=hljs-number >30</span>)</code></pre><pre><code class="plaintext hljs">BenchmarkTools.Trial: 10000 samples with 975 evaluations.
- Range (min … max):  71.488 ns … 130.361 ns  ┊ GC (min … max): 0.00% … 0.00%
- Time  (median):     77.539 ns               ┊ GC (median):    0.00%
- Time  (mean ± σ):   76.324 ns ±   2.718 ns  ┊ GC (mean ± σ):  0.00% ± 0.00%
+<pre><code class="julia hljs"><span class=hljs-meta >@benchmark</span> fibonacci_mem(<span class=hljs-number >30</span>)</code></pre><pre><code class="plaintext hljs">BenchmarkTools.Trial: 10000 samples with 985 evaluations.
+ Range (min … max):  54.213 ns … 104.467 ns  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     57.056 ns               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   57.265 ns ±   2.250 ns  ┊ GC (mean ± σ):  0.00% ± 0.00%
 
-                                      ▂█▄                       
-  ▁▁▁▁▁▃▄▆▆▄▆▇█▃▄▂▂▁▁▁▁▁▁▁▁▁▁▂▂▂▂▃▃▄▃▃███▄▂▁▁▁▂▁▂▂▂▁▁▁▁▁▁▁▁▁▁▁ ▂
-  71.5 ns         Histogram: frequency by time         82.6 ns &lt;
+     ▄              █ ▅                                         
+  ▄▃▂█▄▃▂▂▂▂▂▂▁▂▃▅▇▃█▂█▃▃▅▂▂▂▂▂▂▁▂▂▂▂▂▂▂▂▂▂▃▃▄▄▂▄▂▃▂▂▂▂▂▂▂▂▂▂▂ ▃
+  54.2 ns         Histogram: frequency by time         63.6 ns &lt;
 
  Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
 <p>Wow, that was fast&#33;&#33; As you can see the memoization kicks in and we have about constant access time.</p>
