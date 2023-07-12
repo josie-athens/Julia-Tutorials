@@ -5,8 +5,13 @@
 ### Import from CSV
 =#
 
-using DataFramesMeta, RCall, RDatasets, RData, FreqTables
-using StatsKit, PrettyTables
+using StatsKit
+using DataFramesMeta
+using FreqTables
+using PrettyTables
+using RCall
+using RData
+using RDatasets
 using ScientificTypes: schema
 
 wcgs2 = DataFrame(CSV.File("data/wcgs.csv"))
@@ -48,27 +53,38 @@ wcgs = DataFrames.rename!(
 	:arcus0 => :arcus
 );
 
-first(wcgs, 5)
-
 wcgs[1:5, 2:6]
 
 #=
 ### Creating Factors
 =#
 
-wcgs.chd = categorical(recode(wcgs.chd, 0 => "No CHD", 1 => "CHD"), ordered=true)
-wcgs.arcus = categorical(recode(wcgs.arcus, 0 => "Absent", 1 => "Present"), ordered=true)
-wcgs.beh_pat = categorical(recode(wcgs.beh_pat, 1 => "A1", 2 => "A2", 3 => "B1", 4 => "B2"), ordered=true)
-wcgs.dib_pat = categorical(recode(wcgs.dib_pat, 0 => "B", 1 => "A"), ordered=true)
-wcgs.type_chd = categorical(recode(wcgs.type_chd, 0 => "No CHD", 1 => "MI or SD",
-	2 => "Angina", 3 => "Silent MI"), ordered=true);
+wcgs.chd = categorical(
+	recode(wcgs.chd, 0 => "No CHD", 1 => "CHD"), 
+	ordered=true
+);
 
-@chain wcgs begin
-    select([:chd, :arcus, :beh_pat, :dib_pat, :type_chd])
-    schema
-end
+wcgs.arcus = categorical(
+	recode(wcgs.arcus, 0 => "Absent", 1 => "Present"), 
+	ordered=true
+);
 
-levels(wcgs.chd)
+wcgs.beh_pat = categorical(
+	recode(wcgs.beh_pat, 1 => "A1", 2 => "A2", 
+		3 => "B1", 4 => "B2"), 
+	ordered=true
+);
+
+wcgs.dib_pat = categorical(
+	recode(wcgs.dib_pat, 0 => "B", 1 => "A"), 
+	ordered=true
+);
+
+wcgs.type_chd = categorical(
+	recode(wcgs.type_chd, 0 => "No CHD", 1 => "MI or SD", 
+		2 => "Angina", 3 => "Silent MI"), 
+		ordered=true
+);
 
 freqtable(wcgs, :chd, :dib_pat)
 
@@ -78,32 +94,42 @@ freqtable(wcgs, :chd, :dib_pat)
 One of our variables is a count and stores the number of smoked cigarettes/day. We can define a new variable `Smoker` in which, everyone who smokes one or more cigarette/day will be a smoker. One of the easiest ways to create binary variables is to use a conditional statement. For example, the result of `wcgs.ncigs .> 0` is a vector with TRUE and FALSE results.
 =#
 
-wcgs.smoker = wcgs.ncigs .> 0
-freqtable(wcgs, :chd, :smoker)
+wcgs.smoker = wcgs.ncigs .> 0;
 
-wcgs.smoker = categorical(recode(wcgs.smoker, 0 => "Non-Smoker", 1 => "Smoker"), ordered=true)
-freqtable(wcgs, :chd, :smoker)
+wcgs.smoker = categorical(
+	recode(wcgs.smoker, 0 => "Non-Smoker", 1 => "Smoker"), 
+	ordered=true
+);
+
+# Contingency table between coronary heart disease and smoking status.
 
 pretty_table(
-	freqtable(wcgs, :smoker, :chd);
-	header = ["CHD", "No CHD"],
-	row_labels = ["Non Smoker", "Smoker"]
+	freqtable(wcgs, :chd, :smoker);
+	row_labels = ["CHD", "No CHD"],
+	header = ["Non Smoker", "Smoker"]
 )
 
+# An alternative to `freqtable`:
+
 @chain wcgs begin
-	freqtable(:smoker, :chd)
-	prop(margins = 2)
+	groupby([:chd, :smoker])
+	combine(nrow => :value)
+	unstack(:smoker, :value)
 end
+
+# Corresponding proportions:
 
 pretty_table(
 	@chain wcgs begin
-		freqtable(:smoker, :chd)
-		prop(margins = 2)
+		freqtable(:chd, :smoker)
+		prop(margins = 1)
 	end;
-	header = ["CHD", "No CHD"],
-	row_labels = ["Non Smoker", "Smoker"],
+	row_labels = ["CHD", "No CHD"],
+	header = ["Non Smoker", "Smoker"],
 	formatters = ft_printf("%5.2f")
 )
+
+# > **Note:** As the outcome is presented in rows, the first row shows the prevalence of coronary heart disese in both unexposed (non-smokers) and exposed (smokers) groups.
 
 #=
 ### Simple numeric transformations
@@ -127,20 +153,20 @@ smokers[1:5, 2:6]
 
 # Let's check for the number of observations:
 
-wcgs |> nrow
-
 smokers |> nrow
 
 # We can access one of those columns easily using `.colname`, this returns a vector that you can access like any Julia vector:
 
 wcgs.chd[1:5]
 
-# Another option is to use `select` and for negative indexing, `Not`
+# We can also use `select`:
 
 @chain wcgs begin
 	select(:ncigs, :smoker)
 	first(5)
 end
+
+# For negative indexing, we use `Not`:
 
 @chain smokers begin
 	select(Not([:id, :type_chd, :ncigs, :beh_pat]))
@@ -173,7 +199,7 @@ We can pass a number of symbols to the `describe` function to indicate which sta
 # ### Functions
 
 """
-	rel_dis()
+    rel_dis(x)
 
 Estimates the relative dispersion (coefficient of variation) of a vector.
 """
@@ -187,11 +213,6 @@ end
 #=
 > For **`Not`** we define columns by number. If we want to use names, the names of the columuns go inside square brackets.
 =#
-
-@chain kfm begin
-	select(Not([:no, :sex, :ml_suppl]))
-	describe(:mean, :median, :std, rel_dis => :cv)
-end
 
 kfm_tbl = DataFrame(
 	@chain kfm begin
@@ -225,10 +246,6 @@ kfm_mat = Matrix(
 	end
 );
 
-kfm |> size
-
-kfm_mat |> size
-
 kfm_mat[1:5, :]
 
 # ### Missing values
@@ -236,11 +253,9 @@ kfm_mat[1:5, :]
 mao = dataset("gap", "mao")
 mao |> schema
 
-mao[1:7, 2:6]
-
-describe(mao, :nmissing)
 
 # Lots of missing values...
+
 # If we wanted to compute simple functions on columns, they  may just return `missing`:
 
 
