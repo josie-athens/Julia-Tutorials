@@ -1,0 +1,1 @@
+fibonacci_mem (generic function with 1 method)

@@ -1,5 +1,243 @@
-<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/JuliaTutorials/libs/highlight/styles/github.min.css"> <link rel=stylesheet  href="/JuliaTutorials/css/franklin.css"> <link rel=stylesheet  href="/JuliaTutorials/css/poole_hyde.css"> <style> html {font-size: 17px;} .franklin-content {position: relative; padding-left: 8%; padding-right: 5%; line-height: 1.35em;} @media (min-width: 940px) { .franklin-content {width: 100%; margin-left: auto; margin-right: auto;} } @media (max-width: 768px) { .franklin-content {padding-left: 6%; padding-right: 6%;} } </style> <link rel=icon  href="/JuliaTutorials/assets/favicon.png"> <title>Introduction to Data Analysis</title> <div class=sidebar > <div class="container sidebar-sticky"> <div class=sidebar-about > <h1><a href="/JuliaTutorials/">Julia Tutorials</a></h1> <p class=lead >Systems Biology Enabling Platform, AgResearch</p> </div> <nav class=sidebar-nav > <a class="sidebar-nav-item " href="/JuliaTutorials/">Home</a> <a class="sidebar-nav-item active" href="/JuliaTutorials/menu1/">Introduction</a> <a class="sidebar-nav-item " href="/JuliaTutorials/menu2/">Hypothesis Testing</a> <a class="sidebar-nav-item " href="/JuliaTutorials/menu3/">Machine Learning</a> </nav> <p>&copy; Josie Athens.</p> </div> </div> <div class="content container"> <div class=franklin-content ><h1 id=introduction_to_data_analysis ><a href="#introduction_to_data_analysis" class=header-anchor >Introduction to Data Analysis</a></h1> <div class=franklin-toc ><ol><li><a href="#introduction_to_data_analysis">Introduction to Data Analysis</a><li><a href="#data_frames">Data Frames</a><ol><li><a href="#data_manipulation">Data Manipulation</a><ol><li><a href="#import_from_csv">Import from CSV</a><li><a href="#import_from_rds">Import from rds</a><li><a href="#changing_names_of_variables">Changing names of variables</a><li><a href="#creating_factors">Creating Factors</a><li><a href="#transforming_to_a_binary_variable">Transforming to a binary variable</a><li><a href="#simple_numeric_transformations">Simple numeric transformations</a></ol><li><a href="#indexing_and_subsets">Indexing and subsets</a><li><a href="#descriptive_statistics">Descriptive Statistics</a><ol><li><a href="#functions">Functions</a><li><a href="#converting_the_data">Converting the data</a><li><a href="#missing_values">Missing values</a></ol><li><a href="#group_manipulations">Group manipulations</a><ol><li><a href="#split-apply-combine">Split-Apply-Combine</a></ol></ol></ol></div> <h1 id=data_frames ><a href="#data_frames" class=header-anchor >Data Frames</a></h1> <h2 id=data_manipulation ><a href="#data_manipulation" class=header-anchor >Data Manipulation</a></h2> <h3 id=import_from_csv ><a href="#import_from_csv" class=header-anchor >Import from CSV</a></h3> <pre><code class="julia hljs"><span class=hljs-keyword >using</span> DataFramesMeta, RCall, RDatasets, RData, FreqTables
-<span class=hljs-keyword >using</span> StatsKit, PrettyTables
+<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/Julia-Tutorials/libs/highlight/styles/github.min.css"> <link rel=stylesheet  href="/Julia-Tutorials/css/franklin.css"> <link rel=stylesheet  href="/Julia-Tutorials/css/poole_hyde.css"> <style> html {font-size: 17px;} .franklin-content {position: relative; padding-left: 8%; padding-right: 5%; line-height: 1.35em;} @media (min-width: 940px) { .franklin-content {width: 100%; margin-left: auto; margin-right: auto;} } @media (max-width: 768px) { .franklin-content {padding-left: 6%; padding-right: 6%;} } </style> <link rel=icon  href="/Julia-Tutorials/assets/favicon.png"> <title>Introductory tutorial to Julia</title> <div class=sidebar > <div class="container sidebar-sticky"> <div class=sidebar-about > <h1><a href="/Julia-Tutorials/">Julia Tutorials</a></h1> <p class=lead >Systems Biology Enabling Platform, AgResearch</p> </div> <nav class=sidebar-nav > <a class="sidebar-nav-item " href="/Julia-Tutorials/">Home</a> <a class="sidebar-nav-item active" href="/Julia-Tutorials/menu1/">Introduction</a> <a class="sidebar-nav-item " href="/Julia-Tutorials/menu2/">Hypothesis Testing</a> <a class="sidebar-nav-item " href="/Julia-Tutorials/menu3/">Machine Learning</a> </nav> <p>&copy; Josie Athens.</p> </div> </div> <div class="content container"> <div class=franklin-content ><div class=franklin-toc ><ol><li><a href="#introductory_tutorial_to_julia">Introductory tutorial to Julia</a><ol><li><a href="#ifelse">If/Else</a><li><a href="#functions">Functions</a><li><a href="#memoize_and_benchmarktools">Memoize and BenchmarkTools</a><li><a href="#arrays">Arrays</a></ol><li><a href="#data_frames">Data Frames</a><ol><li><a href="#data_manipulation">Data Manipulation</a><ol><li><a href="#import_from_csv">Import from CSV</a><li><a href="#import_from_rds">Import from rds</a><li><a href="#changing_names_of_variables">Changing names of variables</a><li><a href="#creating_factors">Creating Factors</a><li><a href="#transforming_to_a_binary_variable">Transforming to a binary variable</a><li><a href="#simple_numeric_transformations">Simple numeric transformations</a></ol><li><a href="#indexing_and_subsets">Indexing and subsets</a><li><a href="#descriptive_statistics">Descriptive Statistics</a><ol><li><a href="#functions__2">Functions</a><li><a href="#converting_the_data">Converting the data</a><li><a href="#missing_values">Missing values</a></ol><li><a href="#group_manipulations">Group manipulations</a><ol><li><a href="#split-apply-combine">Split-Apply-Combine</a></ol></ol></ol></div> <p><h1 id=introductory_tutorial_to_julia ><a href="#introductory_tutorial_to_julia" class=header-anchor >Introductory tutorial to Julia</a></h1> <p>This tutorial will lead you through the 101 of Julia. After it you will be able to create your own Julia functions and understand the key language features like Multiple Dispatch. In other words, you will be able to program in Julia.</p> <pre><code class="julia hljs"><span class=hljs-keyword >using</span> StatsKit
+<span class=hljs-keyword >using</span> DataFramesMeta
+<span class=hljs-keyword >using</span> Memoize
+<span class=hljs-keyword >using</span> BenchmarkTools
+<span class=hljs-keyword >using</span> HypertextLiteral
+include(<span class=hljs-string >&quot;pubh.jl&quot;</span>);</code></pre> <p>Julia was build for doing applied math and comes with a simple syntax. You can assign variables by plain <code>&#61;</code> like in <em>Python</em> or <em>R</em>.</p> <pre><code class="julia hljs">a=<span class=hljs-number >3</span></code></pre><pre><code class="plaintext hljs">3</code></pre>
+<p>Let&#39;s do some calculations:</p>
+<pre><code class="julia hljs"><span class=hljs-number >2</span>a + a^<span class=hljs-number >2</span></code></pre><pre><code class="plaintext hljs">15</code></pre>
+<p>Quite common in Julia is the use of greek symbols and some other cool utf-8 stuff. Typing backslash &#92; and then the latex name of something, and finish with pressing TAB, you can insert many symbols quite conveniently. Try it out&#33;</p>
+<pre><code class="julia hljs">θ = <span class=hljs-number >1.34</span>; <span class=hljs-number >2</span>θ <span class=hljs-comment ># \tetha + tab</span></code></pre><pre><code class="plaintext hljs">2.68</code></pre>
+<p>Some variables are already defined:</p>
+<pre><code class="julia hljs"><span class=hljs-literal >π</span></code></pre><pre><code class="plaintext hljs">π = 3.1415926535897...</code></pre>
+<p>We can also have super and superscripts.</p>
+<pre><code class="julia hljs">a² = a*a <span class=hljs-comment ># a\^2 + tab</span></code></pre><pre><code class="plaintext hljs">9</code></pre>
+<h2 id=ifelse ><a href="#ifelse" class=header-anchor >If/Else</a></h2>
+<p>In Julia you have a multiline if/else block and the ternary question mark operator <code>?</code>.</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >if</span> a == <span class=hljs-number >1</span>
+  println(<span class=hljs-string >&quot;It&#x27;s one Jonny!! It&#x27;s one!!&quot;</span>)
+<span class=hljs-keyword >elseif</span> a <span class=hljs-keyword >in</span> (<span class=hljs-number >2</span>:<span class=hljs-number >5</span>)
+  println(<span class=hljs-string >&quot;It is a <span class=hljs-variable >$a</span>.&quot;</span>)
+<span class=hljs-keyword >else</span>
+  println(<span class=hljs-string >&quot;No idea!&quot;</span>)
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">It is a 3.
+</code></pre>
+<p>Using <code>?</code></p>
+<pre><code class="julia hljs">a == <span class=hljs-number >3</span> ? <span class=hljs-string >&quot;three&quot;</span> : <span class=hljs-string >&quot;other&quot;</span></code></pre><pre><code class="plaintext hljs">&quot;three&quot;</code></pre>
+<p>If the comparison is <code>true</code> then the first statement happens, else the second statement happens.</p>
+<pre><code class="julia hljs">a² &gt; <span class=hljs-number >10</span> ? <span class=hljs-string >&quot;Yes!&quot;</span> : <span class=hljs-string >&quot;Oh no!&quot;</span></code></pre><pre><code class="plaintext hljs">&quot;Oh no!&quot;</code></pre>
+<p>Another example:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >if</span> a == <span class=hljs-number >3</span>
+  μ = <span class=hljs-number >2</span>a
+<span class=hljs-keyword >else</span>
+  μ = <span class=hljs-number >0</span>
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">6</code></pre>
+<p>We can use <code>@show</code> to be explict on the output:</p>
+<pre><code class="julia hljs"><span class=hljs-meta >@show</span> μ</code></pre><pre><code class="plaintext hljs">μ = 6
+</code></pre>
+<p>One more example:</p>
+<pre><code class="julia hljs">a == <span class=hljs-number >3</span> ? ϕ = <span class=hljs-number >3</span>a : ϕ = <span class=hljs-number >0</span>
+<span class=hljs-meta >@show</span> ϕ</code></pre><pre><code class="plaintext hljs">ϕ = 9
+</code></pre>
+<p>In addition, we have short-cycling AND <code>&amp;&amp;</code>, and OR <code>||</code>. In both cases, the first argument has to be a boolean, however the last argument can be anything.</p>
+<p><code>&amp;&amp;</code> evaluates and returns the second argument if the first is true.</p>
+<pre><code class="julia hljs">a == <span class=hljs-number >3</span> &amp;&amp; <span class=hljs-string >&quot;The power of three!&quot;</span></code></pre><pre><code class="plaintext hljs">&quot;The power of three!&quot;</code></pre>
+<p>Otherwise, <code>&amp;&amp;</code> returns false.</p>
+<pre><code class="julia hljs"><span class=hljs-number >3</span>a &gt; <span class=hljs-number >10</span> &amp;&amp; <span class=hljs-string >&quot;I&#x27;m bigger than 10&quot;</span></code></pre><pre><code class="plaintext hljs">false</code></pre>
+<p>Another example:</p>
+<pre><code class="julia hljs">ϕ == <span class=hljs-number >9</span> &amp;&amp; <span class=hljs-meta >@show</span> <span class=hljs-number >2</span>a</code></pre><pre><code class="plaintext hljs">2a = 6
+6</code></pre>
+<p><code>||</code> evaluates and returns the second argument if the first is false.</p>
+<pre><code class="julia hljs"><span class=hljs-number >3</span>a &gt; <span class=hljs-number >10</span> || println(<span class=hljs-string >&quot;Three times <span class=hljs-variable >$a</span> is less than 10&quot;</span>)</code></pre><pre><code class="plaintext hljs">Three times 3 is less than 10
+</code></pre>
+<p>We see these in loops or functions commonly, where it is combined with <code>return</code>, <code>continue</code> or <code>break</code>.</p>
+<h2 id=functions ><a href="#functions" class=header-anchor >Functions</a></h2>
+<p>While variables are the synapsis, the brain of Julia are its functions. Really: If you understood functions in Julia, you are ready to work in Julia.</p>
+<p>There are many functions available builtin, we already saw a couple of them.</p>
+<p>An example of a function:</p>
+<pre><code class="julia hljs">isodd(<span class=hljs-number >3</span>), iseven(a), a + a, +(a, a), <span class=hljs-number >1</span> <span class=hljs-keyword >in</span> (<span class=hljs-number >1</span>,<span class=hljs-number >2</span>), <span class=hljs-keyword >in</span>(<span class=hljs-number >1</span>, [<span class=hljs-number >1</span>,<span class=hljs-number >2</span>,<span class=hljs-number >3</span>])</code></pre><pre><code class="plaintext hljs">(true, false, 6, 6, true, true)</code></pre>
+<p>Generating a vector &#91;start:increment:end;&#93;</p>
+<pre><code class="julia hljs">[<span class=hljs-number >1</span>:<span class=hljs-number >1</span>:<span class=hljs-number >4</span>;]</code></pre><pre><code class="plaintext hljs">4-element Vector{Int64}:
+ 1
+ 2
+ 3
+ 4</code></pre>
+<p>We can <strong>broadcast</strong> functions over a vector with a dot:</p>
+<pre><code class="julia hljs">a .+ [<span class=hljs-number >1</span>:<span class=hljs-number >1</span>:<span class=hljs-number >4</span>;]</code></pre><pre><code class="plaintext hljs">4-element Vector{Int64}:
+ 4
+ 5
+ 6
+ 7</code></pre>
+<p>It is relatively simple to define our own functions:</p>
+<pre><code class="julia hljs"><span class=hljs-string >&quot;&quot;&quot;
+    add2(x)
+
+adds 2 to the given input and returns the result
+&quot;&quot;&quot;</span>
+add2(x) = x + <span class=hljs-number >2</span></code></pre><pre><code class="plaintext hljs">add2</code></pre>
+<p>There is a second syntax to create functions which span multiple lines:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >function</span> add2(x, y)
+	x₁ = add2(x)
+	y₁ = add2(y)
+	<span class=hljs-keyword >return</span> x₁, y₁
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">add2 (generic function with 2 methods)</code></pre>
+<p>Here, we are applying the function over only one argument. Note how the output is reported.</p>
+<pre><code class="julia hljs">add2(<span class=hljs-number >7</span>), add2(<span class=hljs-number >9</span>), add2(<span class=hljs-number >100</span>)</code></pre><pre><code class="plaintext hljs">(9, 11, 102)</code></pre>
+<p>Here, we apply the function over two arguments:</p>
+<pre><code class="julia hljs">add2(<span class=hljs-number >1</span>, <span class=hljs-number >2</span>)</code></pre><pre><code class="plaintext hljs">(3, 4)</code></pre>
+<p>There is support for an arbitrary number of positional and keyword arguments. Functions can be overloaded with an arbitrary number of arguments, as well as arbitrary argument types.</p>
+<pre><code class="julia hljs">func(a::<span class=hljs-built_in >Int</span>) = a+<span class=hljs-number >2</span></code></pre><pre><code class="plaintext hljs">func (generic function with 1 method)</code></pre>
+<p>The name of our new function is <code>func</code>, in the previous command, when <code>a</code> is an integer, adds 2 to the number. Let&#39;s add other possibilities:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >begin</span>
+	func(a::<span class=hljs-built_in >AbstractFloat</span>) = a/<span class=hljs-number >2</span>
+	func(a::<span class=hljs-built_in >Rational</span>) = a/<span class=hljs-number >11</span>
+	func(a::<span class=hljs-built_in >Complex</span>) = sqrt(a)
+	func(a, b::<span class=hljs-built_in >String</span>) = <span class=hljs-string >&quot;<span class=hljs-variable >$a</span>, <span class=hljs-variable >$b</span>&quot;</span>
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">func (generic function with 5 methods)</code></pre>
+<p>Let&#39;s test our function when <code>a</code> is an integer:</p>
+<pre><code class="julia hljs">func(<span class=hljs-number >20</span>)</code></pre><pre><code class="plaintext hljs">22</code></pre>
+<p>But what about if <code>a</code> is a float?</p>
+<pre><code class="julia hljs">func(<span class=hljs-number >20.0</span>)</code></pre><pre><code class="plaintext hljs">10.0</code></pre>
+<p>A rational?</p>
+<pre><code class="julia hljs">func(<span class=hljs-number >3</span>/<span class=hljs-number >4</span>)</code></pre><pre><code class="plaintext hljs">0.375</code></pre>
+<p>Testing the last method:</p>
+<pre><code class="julia hljs">func(<span class=hljs-number >5</span>, <span class=hljs-string >&quot;Hola!&quot;</span>)</code></pre><pre><code class="plaintext hljs">&quot;5, Hola!&quot;</code></pre>
+<h2 id=memoize_and_benchmarktools ><a href="#memoize_and_benchmarktools" class=header-anchor >Memoize and BenchmarkTools</a></h2>
+<p>By now, we have everything we need to define our own fibonacci function :&#41; https://en.wikipedia.org/wiki/Fibonacci_number</p>
+<pre><code class="julia hljs"><span class=hljs-string >&quot;&quot;&quot;
+  fibonacci(n)
+
+Returns the nth fibonacci number
+&quot;&quot;&quot;</span>
+<span class=hljs-keyword >function</span> fibonacci(n)
+  <span class=hljs-keyword >if</span> n &lt;= <span class=hljs-number >2</span>
+    <span class=hljs-keyword >return</span> <span class=hljs-number >1</span>
+  <span class=hljs-keyword >else</span>
+    <span class=hljs-keyword >return</span> fibonacci(n - <span class=hljs-number >1</span>) + fibonacci(n - <span class=hljs-number >2</span>)
+  <span class=hljs-keyword >end</span>
+<span class=hljs-keyword >end</span>
+
+fibonacci(<span class=hljs-number >2</span>), fibonacci(<span class=hljs-number >3</span>), fibonacci(<span class=hljs-number >7</span>), fibonacci(<span class=hljs-number >10</span>)</code></pre><pre><code class="plaintext hljs">(1, 2, 13, 55)</code></pre>
+<p>This generates optimal code for small numbers of <code>n</code>, however gets quickly out of reach for larger <code>n</code>. We can optimize the function by reusing already computed results. A quick trick to do so is to use the <code>@memoize</code> Macro from the <code>Memoize</code> package.</p>
+<pre><code class="julia hljs"><span class=hljs-meta >@memoize</span> <span class=hljs-keyword >function</span> fibonacci_mem(n)
+  <span class=hljs-keyword >if</span> n &lt;= <span class=hljs-number >2</span>
+      <span class=hljs-keyword >return</span> <span class=hljs-number >1</span>
+    <span class=hljs-keyword >else</span>
+      <span class=hljs-keyword >return</span> fibonacci_mem(n - <span class=hljs-number >1</span>) + fibonacci_mem(n - <span class=hljs-number >2</span>)
+    <span class=hljs-keyword >end</span>
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">fibonacci_mem (generic function with 1 method)</code></pre>
+<p>With the help of the famous <code>@benchmark</code> macro from the <code>BenchmarkTools</code> package you can directly compare the time and memory footprint of the two functions.</p>
+<pre><code class="julia hljs"><span class=hljs-meta >@benchmark</span> fibonacci(<span class=hljs-number >30</span>)</code></pre><pre><code class="plaintext hljs">BenchmarkTools.Trial: 1756 samples with 1 evaluation.
+ Range (min … max):  2.838 ms …  2.925 ms  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     2.844 ms              ┊ GC (median):    0.00%
+ Time  (mean ± σ):   2.847 ms ± 11.640 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
+
+  ▇▄▂▃█▆▆▄▃▁▄▂▃▁▁                                            ▁
+  ███████████████▆▆▆▄▄▅▁▆▅▆▅▄▅▅▅▅▅▅▄▅▅▅▅▅▆▅▅▆▅▆▅▅▅▅▆▆▁▅▄▅▁▄▅ █
+  2.84 ms      Histogram: log(frequency) by time      2.9 ms &lt;
+
+ Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
+<p>Now, the benchmark of the memoize version:</p>
+<pre><code class="julia hljs"><span class=hljs-meta >@benchmark</span> fibonacci_mem(<span class=hljs-number >30</span>)</code></pre><pre><code class="plaintext hljs">BenchmarkTools.Trial: 10000 samples with 975 evaluations.
+ Range (min … max):  71.488 ns … 130.361 ns  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     77.539 ns               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   76.324 ns ±   2.718 ns  ┊ GC (mean ± σ):  0.00% ± 0.00%
+
+                                      ▂█▄                       
+  ▁▁▁▁▁▃▄▆▆▄▆▇█▃▄▂▂▁▁▁▁▁▁▁▁▁▁▂▂▂▂▃▃▄▃▃███▄▂▁▁▁▂▁▂▂▂▁▁▁▁▁▁▁▁▁▁▁ ▂
+  71.5 ns         Histogram: frequency by time         82.6 ns &lt;
+
+ Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
+<p>Wow, that was fast&#33;&#33; As you can see the memoization kicks in and we have about constant access time.</p>
+<h2 id=arrays ><a href="#arrays" class=header-anchor >Arrays</a></h2>
+<p>Arrays are the best supported DataType in Julia, it is multidimensional and highly optimized. You use it as both <code>list</code> and <code>numpy.array</code> in Python, i.e. no more switching between worlds.</p>
+<p>Create a column vector with respective elements:</p>
+<pre><code class="julia hljs">[<span class=hljs-number >1</span>, <span class=hljs-number >2</span>, <span class=hljs-number >3</span>, <span class=hljs-number >4</span>]</code></pre><pre><code class="plaintext hljs">4-element Vector{Int64}:
+ 1
+ 2
+ 3
+ 4</code></pre>
+<p>We generate result using a sequence:</p>
+<pre><code class="julia hljs">[<span class=hljs-number >1</span>:<span class=hljs-number >1</span>:<span class=hljs-number >4</span>;]</code></pre><pre><code class="plaintext hljs">4-element Vector{Int64}:
+ 1
+ 2
+ 3
+ 4</code></pre>
+<p>To create a row vector, we remove the commas:</p>
+<pre><code class="julia hljs">[<span class=hljs-number >1</span> <span class=hljs-number >2</span> <span class=hljs-number >3</span> <span class=hljs-number >4</span>]</code></pre><pre><code class="plaintext hljs">1×4 Matrix{Int64}:
+ 1  2  3  4</code></pre>
+<p>We can create a matrix relatively easy &#40;a small matrix, of course&#33;&#41;:</p>
+<pre><code class="julia hljs">[
+  <span class=hljs-number >1</span> <span class=hljs-number >2</span>
+  <span class=hljs-number >3</span> <span class=hljs-number >4</span>
+]</code></pre><pre><code class="plaintext hljs">2×2 Matrix{Int64}:
+ 1  2
+ 3  4</code></pre>
+<p>There are many common functions for dealing with Arrays, most importantly for construction. Using <code>Array</code>:</p>
+<pre><code class="julia hljs"><span class=hljs-built_in >Array</span>{<span class=hljs-built_in >String</span>}(<span class=hljs-literal >undef</span>, (<span class=hljs-number >2</span>, <span class=hljs-number >5</span>))</code></pre><pre><code class="plaintext hljs">2×5 Matrix{String}:
+ #undef  #undef  #undef  #undef  #undef
+ #undef  #undef  #undef  #undef  #undef</code></pre>
+<p>Using <code>Matrix</code>:</p>
+<pre><code class="julia hljs"><span class=hljs-built_in >Matrix</span>{<span class=hljs-built_in >String</span>}(<span class=hljs-literal >undef</span>, (<span class=hljs-number >2</span>, <span class=hljs-number >5</span>))</code></pre><pre><code class="plaintext hljs">2×5 Matrix{String}:
+ #undef  #undef  #undef  #undef  #undef
+ #undef  #undef  #undef  #undef  #undef</code></pre>
+<p>Using fill, first example, all zero values</p>
+<pre><code class="julia hljs">fill(<span class=hljs-number >0</span>, (<span class=hljs-number >3</span>, <span class=hljs-number >4</span>))</code></pre><pre><code class="plaintext hljs">3×4 Matrix{Int64}:
+ 0  0  0  0
+ 0  0  0  0
+ 0  0  0  0</code></pre>
+<p>A matrix with all elements equal to 5:</p>
+<pre><code class="julia hljs">fill(<span class=hljs-number >5</span>, (<span class=hljs-number >6</span>, <span class=hljs-number >3</span>))</code></pre><pre><code class="plaintext hljs">6×3 Matrix{Int64}:
+ 5  5  5
+ 5  5  5
+ 5  5  5
+ 5  5  5
+ 5  5  5
+ 5  5  5</code></pre>
+<p>We have index support:</p>
+<pre><code class="julia hljs">β = [<span class=hljs-number >100</span>, <span class=hljs-number >200</span>, <span class=hljs-number >300</span>]</code></pre><pre><code class="plaintext hljs">3-element Vector{Int64}:
+ 100
+ 200
+ 300</code></pre>
+<p>The second element:</p>
+<pre><code class="julia hljs">β[<span class=hljs-number >2</span>]</code></pre><pre><code class="plaintext hljs">200</code></pre>
+<p>The first element:</p>
+<pre><code class="julia hljs">β[<span class=hljs-number >1</span>]</code></pre><pre><code class="plaintext hljs">100</code></pre>
+<p>The last element&#33;</p>
+<pre><code class="julia hljs">β[<span class=hljs-keyword >end</span>]</code></pre><pre><code class="plaintext hljs">300</code></pre>
+<p>A beautiful aspect of julia is that many many things are not at all hardcoded, but actually have generic implementations under the hood.</p>
+<p>One of these is applying a function elementwise to an array, also called <strong>Broadcasting</strong>.</p>
+<pre><code class="julia hljs">add2.(β)</code></pre><pre><code class="plaintext hljs">3-element Vector{Int64}:
+ 102
+ 202
+ 302</code></pre>
+<p>The dot syntax translates to:</p>
+<pre><code class="julia hljs">broadcast(add2, β)</code></pre><pre><code class="plaintext hljs">3-element Vector{Int64}:
+ 102
+ 202
+ 302</code></pre>
+<p>Evaluate if each element of β is equal to 100:</p>
+<pre><code class="julia hljs">β .== <span class=hljs-number >100</span></code></pre><pre><code class="plaintext hljs">3-element BitVector:
+ 1
+ 0
+ 0</code></pre>
+<p>If we do not broadcast, the comparison is not by element:</p>
+<pre><code class="julia hljs">β == <span class=hljs-number >100</span></code></pre><pre><code class="plaintext hljs">false</code></pre>
+<p>We can <em>transpose</em> an Array by using &#39;</p>
+<pre><code class="julia hljs">β .+ β&#x27;</code></pre><pre><code class="plaintext hljs">3×3 Matrix{Int64}:
+ 200  300  400
+ 300  400  500
+ 400  500  600</code></pre>
+ <h1 id=data_frames ><a href="#data_frames" class=header-anchor >Data Frames</a></h1>
+<h2 id=data_manipulation ><a href="#data_manipulation" class=header-anchor >Data Manipulation</a></h2>
+<h3 id=import_from_csv ><a href="#import_from_csv" class=header-anchor >Import from CSV</a></h3>
+<pre><code class="julia hljs"><span class=hljs-keyword >using</span> StatsKit
+<span class=hljs-keyword >using</span> DataFramesMeta
+<span class=hljs-keyword >using</span> FreqTables
+<span class=hljs-keyword >using</span> PrettyTables
+<span class=hljs-keyword >using</span> RCall
+<span class=hljs-keyword >using</span> RData
+<span class=hljs-keyword >using</span> RDatasets
 <span class=hljs-keyword >using</span> ScientificTypes: schema
 
 wcgs2 = DataFrame(CSV.File(<span class=hljs-string >&quot;data/wcgs.csv&quot;</span>))
@@ -21,7 +259,9 @@ wcgs2 |&gt; schema</code></pre><pre><code class="plaintext hljs">┌────
 │ time169 │ Count    │ Int64 │
 │ arcus0  │ Count    │ Int64 │
 └─────────┴──────────┴───────┘
-</code></pre> <p>Dimensions:</p> <pre><code class="julia hljs">wcgs2 |&gt; size</code></pre><pre><code class="plaintext hljs">(3140, 14)</code></pre>
+</code></pre>
+<p>Dimensions:</p>
+<pre><code class="julia hljs">wcgs2 |&gt; size</code></pre><pre><code class="plaintext hljs">(3140, 14)</code></pre>
 <p>Names of columns &#40;variables&#41;:</p>
 <pre><code class="julia hljs">wcgs2 |&gt; names</code></pre><pre><code class="plaintext hljs">14-element Vector{String}:
  &quot;id&quot;
@@ -70,8 +310,6 @@ kfm |&gt; schema</code></pre><pre><code class="plaintext hljs">┌────�
 	:arcus0 =&gt; :arcus
 );
 
-first(wcgs, <span class=hljs-number >5</span>)
-
 wcgs[<span class=hljs-number >1</span>:<span class=hljs-number >5</span>, <span class=hljs-number >2</span>:<span class=hljs-number >6</span>]</code></pre><pre><code class="plaintext hljs">5×5 DataFrame
  Row │ age    height  weight  sbp    dbp
      │ Int64  Int64   Int64   Int64  Int64
@@ -82,19 +320,32 @@ wcgs[<span class=hljs-number >1</span>:<span class=hljs-number >5</span>, <span 
    4 │    41      68     152    124     78
    5 │    59      70     150    144     86</code></pre>
 <h3 id=creating_factors ><a href="#creating_factors" class=header-anchor >Creating Factors</a></h3>
-<pre><code class="julia hljs">wcgs.chd = categorical(recode(wcgs.chd, <span class=hljs-number >0</span> =&gt; <span class=hljs-string >&quot;No CHD&quot;</span>, <span class=hljs-number >1</span> =&gt; <span class=hljs-string >&quot;CHD&quot;</span>), ordered=<span class=hljs-literal >true</span>)
-wcgs.arcus = categorical(recode(wcgs.arcus, <span class=hljs-number >0</span> =&gt; <span class=hljs-string >&quot;Absent&quot;</span>, <span class=hljs-number >1</span> =&gt; <span class=hljs-string >&quot;Present&quot;</span>), ordered=<span class=hljs-literal >true</span>)
-wcgs.beh_pat = categorical(recode(wcgs.beh_pat, <span class=hljs-number >1</span> =&gt; <span class=hljs-string >&quot;A1&quot;</span>, <span class=hljs-number >2</span> =&gt; <span class=hljs-string >&quot;A2&quot;</span>, <span class=hljs-number >3</span> =&gt; <span class=hljs-string >&quot;B1&quot;</span>, <span class=hljs-number >4</span> =&gt; <span class=hljs-string >&quot;B2&quot;</span>), ordered=<span class=hljs-literal >true</span>)
-wcgs.dib_pat = categorical(recode(wcgs.dib_pat, <span class=hljs-number >0</span> =&gt; <span class=hljs-string >&quot;B&quot;</span>, <span class=hljs-number >1</span> =&gt; <span class=hljs-string >&quot;A&quot;</span>), ordered=<span class=hljs-literal >true</span>)
-wcgs.type_chd = categorical(recode(wcgs.type_chd, <span class=hljs-number >0</span> =&gt; <span class=hljs-string >&quot;No CHD&quot;</span>, <span class=hljs-number >1</span> =&gt; <span class=hljs-string >&quot;MI or SD&quot;</span>,
-	<span class=hljs-number >2</span> =&gt; <span class=hljs-string >&quot;Angina&quot;</span>, <span class=hljs-number >3</span> =&gt; <span class=hljs-string >&quot;Silent MI&quot;</span>), ordered=<span class=hljs-literal >true</span>);
+<pre><code class="julia hljs">wcgs.chd = categorical(
+	recode(wcgs.chd, <span class=hljs-number >0</span> =&gt; <span class=hljs-string >&quot;No CHD&quot;</span>, <span class=hljs-number >1</span> =&gt; <span class=hljs-string >&quot;CHD&quot;</span>),
+	ordered=<span class=hljs-literal >true</span>
+);
 
-<span class=hljs-meta >@chain</span> wcgs <span class=hljs-keyword >begin</span>
-    select([:chd, :arcus, :beh_pat, :dib_pat, :type_chd])
-    schema
-<span class=hljs-keyword >end</span>
+wcgs.arcus = categorical(
+	recode(wcgs.arcus, <span class=hljs-number >0</span> =&gt; <span class=hljs-string >&quot;Absent&quot;</span>, <span class=hljs-number >1</span> =&gt; <span class=hljs-string >&quot;Present&quot;</span>),
+	ordered=<span class=hljs-literal >true</span>
+);
 
-levels(wcgs.chd)
+wcgs.beh_pat = categorical(
+	recode(wcgs.beh_pat, <span class=hljs-number >1</span> =&gt; <span class=hljs-string >&quot;A1&quot;</span>, <span class=hljs-number >2</span> =&gt; <span class=hljs-string >&quot;A2&quot;</span>,
+		<span class=hljs-number >3</span> =&gt; <span class=hljs-string >&quot;B1&quot;</span>, <span class=hljs-number >4</span> =&gt; <span class=hljs-string >&quot;B2&quot;</span>),
+	ordered=<span class=hljs-literal >true</span>
+);
+
+wcgs.dib_pat = categorical(
+	recode(wcgs.dib_pat, <span class=hljs-number >0</span> =&gt; <span class=hljs-string >&quot;B&quot;</span>, <span class=hljs-number >1</span> =&gt; <span class=hljs-string >&quot;A&quot;</span>),
+	ordered=<span class=hljs-literal >true</span>
+);
+
+wcgs.type_chd = categorical(
+	recode(wcgs.type_chd, <span class=hljs-number >0</span> =&gt; <span class=hljs-string >&quot;No CHD&quot;</span>, <span class=hljs-number >1</span> =&gt; <span class=hljs-string >&quot;MI or SD&quot;</span>,
+		<span class=hljs-number >2</span> =&gt; <span class=hljs-string >&quot;Angina&quot;</span>, <span class=hljs-number >3</span> =&gt; <span class=hljs-string >&quot;Silent MI&quot;</span>),
+		ordered=<span class=hljs-literal >true</span>
+);
 
 freqtable(wcgs, :chd, :dib_pat)</code></pre><pre><code class="plaintext hljs">2×2 Named Matrix{Int64}
 chd ╲ dib_pat │    A     B
@@ -103,44 +354,54 @@ CHD           │  177    78
 No CHD        │ 1406  1479</code></pre>
 <h3 id=transforming_to_a_binary_variable ><a href="#transforming_to_a_binary_variable" class=header-anchor >Transforming to a binary variable</a></h3>
 <p>One of our variables is a count and stores the number of smoked cigarettes/day. We can define a new variable <code>Smoker</code> in which, everyone who smokes one or more cigarette/day will be a smoker. One of the easiest ways to create binary variables is to use a conditional statement. For example, the result of <code>wcgs.ncigs .&gt; 0</code> is a vector with TRUE and FALSE results.</p>
-<pre><code class="julia hljs">wcgs.smoker = wcgs.ncigs .&gt; <span class=hljs-number >0</span>
-freqtable(wcgs, :chd, :smoker)
+<pre><code class="julia hljs">wcgs.smoker = wcgs.ncigs .&gt; <span class=hljs-number >0</span>;
 
-wcgs.smoker = categorical(recode(wcgs.smoker, <span class=hljs-number >0</span> =&gt; <span class=hljs-string >&quot;Non-Smoker&quot;</span>, <span class=hljs-number >1</span> =&gt; <span class=hljs-string >&quot;Smoker&quot;</span>), ordered=<span class=hljs-literal >true</span>)
-freqtable(wcgs, :chd, :smoker)
-
-pretty_table(
-	freqtable(wcgs, :smoker, :chd);
-	header = [<span class=hljs-string >&quot;CHD&quot;</span>, <span class=hljs-string >&quot;No CHD&quot;</span>],
-	row_labels = [<span class=hljs-string >&quot;Non Smoker&quot;</span>, <span class=hljs-string >&quot;Smoker&quot;</span>]
-)
-
-<span class=hljs-meta >@chain</span> wcgs <span class=hljs-keyword >begin</span>
-	freqtable(:smoker, :chd)
-	prop(margins = <span class=hljs-number >2</span>)
-<span class=hljs-keyword >end</span>
-
-pretty_table(
-	<span class=hljs-meta >@chain</span> wcgs <span class=hljs-keyword >begin</span>
-		freqtable(:smoker, :chd)
-		prop(margins = <span class=hljs-number >2</span>)
-	<span class=hljs-keyword >end</span>;
-	header = [<span class=hljs-string >&quot;CHD&quot;</span>, <span class=hljs-string >&quot;No CHD&quot;</span>],
-	row_labels = [<span class=hljs-string >&quot;Non Smoker&quot;</span>, <span class=hljs-string >&quot;Smoker&quot;</span>],
-	formatters = ft_printf(<span class=hljs-string >&quot;%5.2f&quot;</span>)
-)</code></pre><pre><code class="plaintext hljs">┌────────────┬─────┬────────┐
-│            │ CHD │ No CHD │
-├────────────┼─────┼────────┤
-│ Non Smoker │  97 │   1549 │
-│     Smoker │ 158 │   1336 │
-└────────────┴─────┴────────┘
-┌────────────┬───────┬────────┐
-│            │   CHD │ No CHD │
-├────────────┼───────┼────────┤
-│ Non Smoker │  0.38 │   0.54 │
-│     Smoker │  0.62 │   0.46 │
-└────────────┴───────┴────────┘
+wcgs.smoker = categorical(
+	recode(wcgs.smoker, <span class=hljs-number >0</span> =&gt; <span class=hljs-string >&quot;Non-Smoker&quot;</span>, <span class=hljs-number >1</span> =&gt; <span class=hljs-string >&quot;Smoker&quot;</span>),
+	ordered=<span class=hljs-literal >true</span>
+);</code></pre>
+<p>Contingency table between coronary heart disease and smoking status.</p>
+<pre><code class="julia hljs">pretty_table(
+	freqtable(wcgs, :chd, :smoker);
+	row_labels = [<span class=hljs-string >&quot;CHD&quot;</span>, <span class=hljs-string >&quot;No CHD&quot;</span>],
+	header = [<span class=hljs-string >&quot;Non Smoker&quot;</span>, <span class=hljs-string >&quot;Smoker&quot;</span>]
+)</code></pre><pre><code class="plaintext hljs">┌────────┬────────────┬────────┐
+│        │ Non Smoker │ Smoker │
+├────────┼────────────┼────────┤
+│    CHD │         97 │    158 │
+│ No CHD │       1549 │   1336 │
+└────────┴────────────┴────────┘
 </code></pre>
+<p>An alternative to <code>freqtable</code>:</p>
+<pre><code class="julia hljs"><span class=hljs-meta >@chain</span> wcgs <span class=hljs-keyword >begin</span>
+	groupby([:chd, :smoker])
+	combine(nrow =&gt; :value)
+	unstack(:smoker, :value)
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">2×3 DataFrame
+ Row │ chd     Non-Smoker  Smoker
+     │ Cat…    Int64?      Int64?
+─────┼────────────────────────────
+   1 │ CHD             97     158
+   2 │ No CHD        1549    1336</code></pre>
+<p>Corresponding proportions:</p>
+<pre><code class="julia hljs">pretty_table(
+	<span class=hljs-meta >@chain</span> wcgs <span class=hljs-keyword >begin</span>
+		freqtable(:chd, :smoker)
+		prop(margins = <span class=hljs-number >1</span>)
+	<span class=hljs-keyword >end</span>;
+	row_labels = [<span class=hljs-string >&quot;CHD&quot;</span>, <span class=hljs-string >&quot;No CHD&quot;</span>],
+	header = [<span class=hljs-string >&quot;Non Smoker&quot;</span>, <span class=hljs-string >&quot;Smoker&quot;</span>],
+	formatters = ft_printf(<span class=hljs-string >&quot;%5.2f&quot;</span>)
+)</code></pre><pre><code class="plaintext hljs">┌────────┬────────────┬────────┐
+│        │ Non Smoker │ Smoker │
+├────────┼────────────┼────────┤
+│    CHD │       0.38 │   0.62 │
+│ No CHD │       0.54 │   0.46 │
+└────────┴────────────┴────────┘
+</code></pre>
+<blockquote>
+<p><strong>Note:</strong> As the outcome is presented in rows, the first row shows the prevalence of coronary heart disese in both unexposed &#40;non-smokers&#41; and exposed &#40;smokers&#41; groups.</p>
+</blockquote>
 <h3 id=simple_numeric_transformations ><a href="#simple_numeric_transformations" class=header-anchor >Simple numeric transformations</a></h3>
 <p>We also, prefer units in the metric system. We will convert from inches to centimetres and from pounds to kg.</p>
 <pre><code class="julia hljs">wcgs.height = wcgs.height * <span class=hljs-number >2.54</span>
@@ -160,9 +421,7 @@ smokers[<span class=hljs-number >1</span>:<span class=hljs-number >5</span>, <sp
    4 │    59   177.8   68.04      144     86
    5 │    43   182.88  86.184     146     76</code></pre>
 <p>Let&#39;s check for the number of observations:</p>
-<pre><code class="julia hljs">wcgs |&gt; nrow
-
-smokers |&gt; nrow</code></pre><pre><code class="plaintext hljs">1494</code></pre>
+<pre><code class="julia hljs">smokers |&gt; nrow</code></pre><pre><code class="plaintext hljs">1494</code></pre>
 <p>We can access one of those columns easily using <code>.colname</code>, this returns a vector that you can access like any Julia vector:</p>
 <pre><code class="julia hljs">wcgs.chd[<span class=hljs-number >1</span>:<span class=hljs-number >5</span>]</code></pre><pre><code class="plaintext hljs">5-element CategoricalArrays.CategoricalArray{String,1,UInt32}:
  &quot;No CHD&quot;
@@ -170,13 +429,21 @@ smokers |&gt; nrow</code></pre><pre><code class="plaintext hljs">1494</code></pr
  &quot;No CHD&quot;
  &quot;No CHD&quot;
  &quot;CHD&quot;</code></pre>
-<p>Another option is to use <code>select</code> and for negative indexing, <code>Not</code></p>
+<p>We can also use <code>select</code>:</p>
 <pre><code class="julia hljs"><span class=hljs-meta >@chain</span> wcgs <span class=hljs-keyword >begin</span>
 	select(:ncigs, :smoker)
 	first(<span class=hljs-number >5</span>)
-<span class=hljs-keyword >end</span>
-
-<span class=hljs-meta >@chain</span> smokers <span class=hljs-keyword >begin</span>
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">5×2 DataFrame
+ Row │ ncigs  smoker
+     │ Int64  Cat…
+─────┼───────────────────
+   1 │    25  Smoker
+   2 │    20  Smoker
+   3 │     0  Non-Smoker
+   4 │    20  Smoker
+   5 │    20  Smoker</code></pre>
+<p>For negative indexing, we use <code>Not</code>:</p>
+<pre><code class="julia hljs"><span class=hljs-meta >@chain</span> smokers <span class=hljs-keyword >begin</span>
 	select(Not([:id, :type_chd, :ncigs, :beh_pat]))
 	size
 <span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">(1494, 11)</code></pre>
@@ -206,9 +473,9 @@ smokers |&gt; nrow</code></pre><pre><code class="plaintext hljs">1494</code></pr
 <li><p><code>eltype</code>, <code>nunique</code>, <code>nmissing</code> can also be used</p>
 
 </ul>
-<h3 id=functions ><a href="#functions" class=header-anchor >Functions</a></h3>
+<h3 id=functions__2 ><a href="#functions__2" class=header-anchor >Functions</a></h3>
 <pre><code class="julia hljs"><span class=hljs-string >&quot;&quot;&quot;
-	rel_dis()
+    rel_dis(x)
 
 Estimates the relative dispersion (coefficient of variation) of a vector.
 &quot;&quot;&quot;</span>
@@ -228,12 +495,7 @@ rel_dis(x) = std(x) / mean(x)
 <blockquote>
 <p>For <strong><code>Not</code></strong> we define columns by number. If we want to use names, the names of the columuns go inside square brackets.</p>
 </blockquote>
-<pre><code class="julia hljs"><span class=hljs-meta >@chain</span> kfm <span class=hljs-keyword >begin</span>
-	select(Not([:no, :sex, :ml_suppl]))
-	describe(:mean, :median, :std, rel_dis =&gt; :cv)
-<span class=hljs-keyword >end</span>
-
-kfm_tbl = DataFrame(
+<pre><code class="julia hljs">kfm_tbl = DataFrame(
 	<span class=hljs-meta >@chain</span> kfm <span class=hljs-keyword >begin</span>
 		select(Not([:no, :sex, :ml_suppl]))
 		describe(:mean, :median, :std, rel_dis =&gt; :cv)
@@ -268,10 +530,6 @@ pretty_table(
 	<span class=hljs-keyword >end</span>
 );
 
-kfm |&gt; size
-
-kfm_mat |&gt; size
-
 kfm_mat[<span class=hljs-number >1</span>:<span class=hljs-number >5</span>, :]</code></pre><pre><code class="plaintext hljs">5×4 Matrix{Float64}:
  8.42  5.002  65.0  173.0
  8.44  5.128  48.0  158.0
@@ -280,34 +538,32 @@ kfm_mat[<span class=hljs-number >1</span>:<span class=hljs-number >5</span>, :]<
  6.44  5.196  58.0  170.0</code></pre>
 <h3 id=missing_values ><a href="#missing_values" class=header-anchor >Missing values</a></h3>
 <pre><code class="julia hljs">mao = dataset(<span class=hljs-string >&quot;gap&quot;</span>, <span class=hljs-string >&quot;mao&quot;</span>)
-mao |&gt; schema
-
-mao[<span class=hljs-number >1</span>:<span class=hljs-number >7</span>, <span class=hljs-number >2</span>:<span class=hljs-number >6</span>]
-
-describe(mao, :nmissing)</code></pre><pre><code class="plaintext hljs">19×2 DataFrame
- Row │ variable  nmissing
-     │ Symbol    Int64
-─────┼────────────────────
-   1 │ ID               0
-   2 │ Type             0
-   3 │ Gender           0
-   4 │ Age            188
-   5 │ AAO            296
-   6 │ AAD            295
-   7 │ UPDRS          301
-   8 │ MAOAI2           0
-   9 │ AI2Code          0
-  10 │ MAOBI2           0
-  11 │ BI2Code          0
-  12 │ GTBEX3           0
-  13 │ BEX3Code         0
-  14 │ MAOAVNTR        46
-  15 │ VNTRCode        46
-  16 │ VNTRCod2        46
-  17 │ MAOA31          36
-  18 │ MAO31COD        36
-  19 │ MAO31CO2        36</code></pre>
-<p>Lots of missing values... If we wanted to compute simple functions on columns, they  may just return <code>missing</code>:</p>
+mao |&gt; schema</code></pre><pre><code class="plaintext hljs">┌──────────┬─────────────────────────┬─────────────────────────┐
+│ names    │ scitypes                │ types                   │
+├──────────┼─────────────────────────┼─────────────────────────┤
+│ ID       │ Textual                 │ String15                │
+│ Type     │ Count                   │ Int64                   │
+│ Gender   │ Count                   │ Int64                   │
+│ Age      │ Union{Missing, Count}   │ Union{Missing, Int64}   │
+│ AAO      │ Union{Missing, Count}   │ Union{Missing, Int64}   │
+│ AAD      │ Union{Missing, Count}   │ Union{Missing, Int64}   │
+│ UPDRS    │ Union{Missing, Count}   │ Union{Missing, Int64}   │
+│ MAOAI2   │ Textual                 │ String7                 │
+│ AI2Code  │ Textual                 │ String7                 │
+│ MAOBI2   │ Textual                 │ String7                 │
+│ BI2Code  │ Textual                 │ String3                 │
+│ GTBEX3   │ Textual                 │ String7                 │
+│ BEX3Code │ Textual                 │ String3                 │
+│ MAOAVNTR │ Union{Missing, Textual} │ Union{Missing, String7} │
+│ VNTRCode │ Union{Missing, Textual} │ Union{Missing, String7} │
+│ VNTRCod2 │ Union{Missing, Textual} │ Union{Missing, String3} │
+│ MAOA31   │ Union{Missing, Textual} │ Union{Missing, String7} │
+│ MAO31COD │ Union{Missing, Textual} │ Union{Missing, String3} │
+│ MAO31CO2 │ Union{Missing, Textual} │ Union{Missing, String3} │
+└──────────┴─────────────────────────┴─────────────────────────┘
+</code></pre>
+<p>Lots of missing values...</p>
+<p>If we wanted to compute simple functions on columns, they  may just return <code>missing</code>:</p>
 <pre><code class="julia hljs">std(mao.Age)</code></pre><pre><code class="plaintext hljs">missing</code></pre>
 <p>Some functions remove missing though:</p>
 <pre><code class="julia hljs"><span class=hljs-meta >@chain</span> mao <span class=hljs-keyword >begin</span>
@@ -374,11 +630,11 @@ describe(subdf_setosa, :mean, :median, :std, rel_dis =&gt; :cv)</code></pre><pre
    2 │ SepalWidth     3.428      3.4  0.379064  0.110579
    3 │ PetalLength    1.462      1.5  0.173664  0.118785
    4 │ PetalWidth     0.246      0.2  0.105386  0.428397</code></pre>
-
+</p>
 <div class=page-foot >
     <div class=copyright >
-        &copy; Josie Athens. Last modified: July 11, 2023.
-    Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a> and the <a href="https://julialang.org">Julia programming language</a>.
+        &copy; Josie Athens. Last modified: July 12, 2023.
+    Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>, <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a> and the <a href="https://julialang.org">Julia programming language</a>.
     </div>
 </div>
 
@@ -386,5 +642,5 @@ describe(subdf_setosa, :mean, :median, :std, rel_dis =&gt; :cv)</code></pre><pre
     </div>  
     
     
-        <script src="/JuliaTutorials/libs/highlight/highlight.min.js"></script>
+        <script src="/Julia-Tutorials/libs/highlight/highlight.min.js"></script>
 <script>hljs.highlightAll();hljs.configure({tabReplace: '    '});</script>

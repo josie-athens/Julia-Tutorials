@@ -1,7 +1,12 @@
 # This file was generated, do not modify it.
 
-using DataFramesMeta, RCall, RDatasets, RData, FreqTables
-using StatsKit, PrettyTables
+using StatsKit
+using DataFramesMeta
+using FreqTables
+using PrettyTables
+using RCall
+using RData
+using RDatasets
 using ScientificTypes: schema
 
 wcgs2 = DataFrame(CSV.File("data/wcgs.csv"))
@@ -31,50 +36,63 @@ wcgs = DataFrames.rename!(
 	:arcus0 => :arcus
 );
 
-first(wcgs, 5)
-
 wcgs[1:5, 2:6]
 
-wcgs.chd = categorical(recode(wcgs.chd, 0 => "No CHD", 1 => "CHD"), ordered=true)
-wcgs.arcus = categorical(recode(wcgs.arcus, 0 => "Absent", 1 => "Present"), ordered=true)
-wcgs.beh_pat = categorical(recode(wcgs.beh_pat, 1 => "A1", 2 => "A2", 3 => "B1", 4 => "B2"), ordered=true)
-wcgs.dib_pat = categorical(recode(wcgs.dib_pat, 0 => "B", 1 => "A"), ordered=true)
-wcgs.type_chd = categorical(recode(wcgs.type_chd, 0 => "No CHD", 1 => "MI or SD",
-	2 => "Angina", 3 => "Silent MI"), ordered=true);
+wcgs.chd = categorical(
+	recode(wcgs.chd, 0 => "No CHD", 1 => "CHD"),
+	ordered=true
+);
 
-@chain wcgs begin
-    select([:chd, :arcus, :beh_pat, :dib_pat, :type_chd])
-    schema
-end
+wcgs.arcus = categorical(
+	recode(wcgs.arcus, 0 => "Absent", 1 => "Present"),
+	ordered=true
+);
 
-levels(wcgs.chd)
+wcgs.beh_pat = categorical(
+	recode(wcgs.beh_pat, 1 => "A1", 2 => "A2",
+		3 => "B1", 4 => "B2"),
+	ordered=true
+);
+
+wcgs.dib_pat = categorical(
+	recode(wcgs.dib_pat, 0 => "B", 1 => "A"),
+	ordered=true
+);
+
+wcgs.type_chd = categorical(
+	recode(wcgs.type_chd, 0 => "No CHD", 1 => "MI or SD",
+		2 => "Angina", 3 => "Silent MI"),
+		ordered=true
+);
 
 freqtable(wcgs, :chd, :dib_pat)
 
-wcgs.smoker = wcgs.ncigs .> 0
-freqtable(wcgs, :chd, :smoker)
+wcgs.smoker = wcgs.ncigs .> 0;
 
-wcgs.smoker = categorical(recode(wcgs.smoker, 0 => "Non-Smoker", 1 => "Smoker"), ordered=true)
-freqtable(wcgs, :chd, :smoker)
+wcgs.smoker = categorical(
+	recode(wcgs.smoker, 0 => "Non-Smoker", 1 => "Smoker"),
+	ordered=true
+);
 
 pretty_table(
-	freqtable(wcgs, :smoker, :chd);
-	header = ["CHD", "No CHD"],
-	row_labels = ["Non Smoker", "Smoker"]
+	freqtable(wcgs, :chd, :smoker);
+	row_labels = ["CHD", "No CHD"],
+	header = ["Non Smoker", "Smoker"]
 )
 
 @chain wcgs begin
-	freqtable(:smoker, :chd)
-	prop(margins = 2)
+	groupby([:chd, :smoker])
+	combine(nrow => :value)
+	unstack(:smoker, :value)
 end
 
 pretty_table(
 	@chain wcgs begin
-		freqtable(:smoker, :chd)
-		prop(margins = 2)
+		freqtable(:chd, :smoker)
+		prop(margins = 1)
 	end;
-	header = ["CHD", "No CHD"],
-	row_labels = ["Non Smoker", "Smoker"],
+	row_labels = ["CHD", "No CHD"],
+	header = ["Non Smoker", "Smoker"],
 	formatters = ft_printf("%5.2f")
 )
 
@@ -85,8 +103,6 @@ wcgs.weight = wcgs.weight * 0.4536;
 
 smokers = @subset(wcgs, :smoker .== "Smoker")
 smokers[1:5, 2:6]
-
-wcgs |> nrow
 
 smokers |> nrow
 
@@ -108,7 +124,7 @@ end
 end
 
 """
-	rel_dis()
+    rel_dis(x)
 
 Estimates the relative dispersion (coefficient of variation) of a vector.
 """
@@ -116,11 +132,6 @@ rel_dis(x) = std(x) / mean(x)
 
 @chain kfm begin
 	select(Not(1, 3, 5))
-	describe(:mean, :median, :std, rel_dis => :cv)
-end
-
-@chain kfm begin
-	select(Not([:no, :sex, :ml_suppl]))
 	describe(:mean, :median, :std, rel_dis => :cv)
 end
 
@@ -150,18 +161,10 @@ kfm_mat = Matrix(
 	end
 );
 
-kfm |> size
-
-kfm_mat |> size
-
 kfm_mat[1:5, :]
 
 mao = dataset("gap", "mao")
 mao |> schema
-
-mao[1:7, 2:6]
-
-describe(mao, :nmissing)
 
 std(mao.Age)
 

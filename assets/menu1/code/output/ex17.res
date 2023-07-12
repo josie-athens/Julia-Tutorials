@@ -1,23 +1,9 @@
-19×2 DataFrame
- Row │ variable  nmissing
-     │ Symbol    Int64
-─────┼────────────────────
-   1 │ ID               0
-   2 │ Type             0
-   3 │ Gender           0
-   4 │ Age            188
-   5 │ AAO            296
-   6 │ AAD            295
-   7 │ UPDRS          301
-   8 │ MAOAI2           0
-   9 │ AI2Code          0
-  10 │ MAOBI2           0
-  11 │ BI2Code          0
-  12 │ GTBEX3           0
-  13 │ BEX3Code         0
-  14 │ MAOAVNTR        46
-  15 │ VNTRCode        46
-  16 │ VNTRCod2        46
-  17 │ MAOA31          36
-  18 │ MAO31COD        36
-  19 │ MAO31CO2        36
+5×6 DataFrame
+ Row │ variable    min     max      mean       median   std
+     │ Symbol      Real    Real     Float64    Float64  Float64
+─────┼─────────────────────────────────────────────────────────────
+   1 │ dl_milk       4.44   10.43     7.5044     7.66     1.51151
+   2 │ weight        4.12    6.578    5.31874    5.352    0.548303
+   3 │ ml_suppl      0     590       96.0       57.5    130.22
+   4 │ mat_weight   47      80       59.96      58.0      8.38113
+   5 │ mat_height  153     185      167.44     167.0      6.51892

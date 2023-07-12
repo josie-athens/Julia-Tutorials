@@ -16,6 +16,4 @@ wcgs = DataFrames.rename!(
 	:arcus0 => :arcus
 );
 
-first(wcgs, 5)
-
 wcgs[1:5, 2:6]
