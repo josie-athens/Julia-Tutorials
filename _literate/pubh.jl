@@ -40,12 +40,3 @@ reference_range = function (μ, σ)
     ri = [low, up]
     return ri
 end
-
-"""
-    blue(s)
-
-Prints the corresponding text (string) blue.
-"""
-function blue(s::String)
-	@htl("<span style='color: hsl(200deg, 60%, 50%);'> $(s)  </span>")
-end

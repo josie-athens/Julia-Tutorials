@@ -6,13 +6,15 @@
 =#
 
 using StatsKit
-using DataFramesMeta
+using DataFrameMacros
+using Chain
 using FreqTables
 using PrettyTables
 using RCall
 using RData
 using RDatasets
 using ScientificTypes: schema
+include("pubh.jl");
 
 wcgs2 = DataFrame(CSV.File("data/wcgs.csv"))
 wcgs2 |> schema
@@ -141,6 +143,21 @@ wcgs.height = wcgs.height * 2.54
 wcgs.weight = wcgs.weight * 0.4536;
 
 #=
+### Centring
+
+We can centre a variable by removings its mean. Let's centre height in `wcgs` as an example.
+=#
+
+@transform!(wcgs, :height_cent = @bycol :height .- mean(:height));
+
+@chain wcgs begin
+	select(:height, :height_cent)
+	describe(:mean, :median, :std)
+end
+
+wcgs.height_cent[1:5]
+
+#=
 ## Indexing and subsets
 
 Let’s said that we are only interested in subjects who are smokers. If that is the case, we can create a new data frame. We can use either, the `subset` function from `DataFramesMeta`.
@@ -166,6 +183,13 @@ wcgs.chd[1:5]
 	first(5)
 end
 
+# Or the `@select` macro:
+
+first(
+	@select(wcgs, :ncigs, :smoker),
+	5
+)
+
 # For negative indexing, we use `Not`:
 
 @chain smokers begin
@@ -184,7 +208,7 @@ end
 =#
 
 @chain kfm begin
-    select(Not(1, 3))
+  select(Not(1, 3))
 	describe(:min, :max, :mean, :median, :std)
 end
 
@@ -195,20 +219,6 @@ We can pass a number of symbols to the `describe` function to indicate which sta
 - `q25`, `q75` are respectively for the 25th and 75th percentile,
 - `eltype`, `nunique`, `nmissing` can also be used
 =#
-
-# ### Functions
-
-"""
-    rel_dis(x)
-
-Estimates the relative dispersion (coefficient of variation) of a vector.
-"""
-rel_dis(x) = std(x) / mean(x)
-
-@chain kfm begin
-	select(Not(1, 3, 5))
-	describe(:mean, :median, :std, rel_dis => :cv)
-end
 
 #=
 > For **`Not`** we define columns by number. If we want to use names, the names of the columuns go inside square brackets.
@@ -257,7 +267,6 @@ mao |> schema
 # Lots of missing values...
 
 # If we wanted to compute simple functions on columns, they  may just return `missing`:
-
 
 std(mao.Age)
 
