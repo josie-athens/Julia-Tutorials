@@ -1,13 +1,15 @@
 # This file was generated, do not modify it.
 
 using StatsKit
-using DataFramesMeta
+using DataFrameMacros
+using Chain
 using FreqTables
 using PrettyTables
 using RCall
 using RData
 using RDatasets
 using ScientificTypes: schema
+include("pubh.jl");
 
 wcgs2 = DataFrame(CSV.File("data/wcgs.csv"))
 wcgs2 |> schema
@@ -99,6 +101,15 @@ pretty_table(
 wcgs.height = wcgs.height * 2.54
 wcgs.weight = wcgs.weight * 0.4536;
 
+@transform!(wcgs, :height_cent = @bycol :height .- mean(:height));
+
+@chain wcgs begin
+	select(:height, :height_cent)
+	describe(:mean, :median, :std)
+end
+
+wcgs.height_cent[1:5]
+
 @subset(wcgs, :smoker .== "Smoker") |> nrow
 
 smokers = @subset(wcgs, :smoker .== "Smoker")
@@ -113,26 +124,19 @@ wcgs.chd[1:5]
 	first(5)
 end
 
+first(
+	@select(wcgs, :ncigs, :smoker),
+	5
+)
+
 @chain smokers begin
 	select(Not([:id, :type_chd, :ncigs, :beh_pat]))
 	size
 end
 
 @chain kfm begin
-    select(Not(1, 3))
+  select(Not(1, 3))
 	describe(:min, :max, :mean, :median, :std)
-end
-
-"""
-    rel_dis(x)
-
-Estimates the relative dispersion (coefficient of variation) of a vector.
-"""
-rel_dis(x) = std(x) / mean(x)
-
-@chain kfm begin
-	select(Not(1, 3, 5))
-	describe(:mean, :median, :std, rel_dis => :cv)
 end
 
 kfm_tbl = DataFrame(

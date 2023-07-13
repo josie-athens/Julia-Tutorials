@@ -1,0 +1,3 @@
+REvalError: Error in birth %>% strip_error(bwt ~ smoke, pch = ~Race, col = ~Race) %>%  : 
+  could not find function "%>%"
+Calls: print

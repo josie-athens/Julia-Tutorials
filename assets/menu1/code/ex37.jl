@@ -1,5 +1,10 @@
 # This file was generated, do not modify it. # hide
-[
-  1 2
-  3 4
-]
+data(birth) *
+mapping(
+	:Race => "",
+    :bwt => "Birth weight (g)",
+    color=:Race => "Ethnicity",
+    layout = :smoke
+) *
+visual(BoxPlot) |>
+draw

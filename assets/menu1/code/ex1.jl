@@ -1,12 +1,7 @@
 # This file was generated, do not modify it. # hide
 using StatsKit
-using DataFramesMeta
-using FreqTables
-using PrettyTables
-using RCall
+using DataFrameMacros
+using Chain
 using RData
-using RDatasets
+using RCall
 using ScientificTypes: schema
-
-wcgs2 = DataFrame(CSV.File("data/wcgs.csv"))
-wcgs2 |> schema

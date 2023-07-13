@@ -1,0 +1,3 @@
+REvalError: Error in energy %>% strip_error(expend ~ stature, size = 2) %>% gf_labs(y = "Energy expenditure (MJ)",  : 
+  could not find function "%>%"
+Calls: print

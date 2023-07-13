@@ -1,12 +1,12 @@
 # This file was generated, do not modify it. # hide
-"""
-    rel_dis(x)
+let
+    plt = data(birth) *
+    mapping(:bwt) *
+    visual(QQNorm, qqline=:fitrobust, markersize=5, color=:firebrick)
 
-Estimates the relative dispersion (coefficient of variation) of a vector.
-"""
-rel_dis(x) = std(x) / mean(x)
-
-@chain kfm begin
-	select(Not(1, 3, 5))
-	describe(:mean, :median, :std, rel_dis => :cv)
+    draw(
+        plt, axis=(
+        xlabel="Normal quantiles",
+        ylabel="Birth weight (g)")
+    )
 end

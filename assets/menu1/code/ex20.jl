@@ -1,8 +1,12 @@
 # This file was generated, do not modify it. # hide
-kfm_mat = Matrix(
-	@chain kfm begin
-		select(Not(1, 3, 5))
-	end
-);
+let
+    plt = data(wcgs) * mapping(:dbp => log10) *
+    visual(QQNorm, qqline=:fitrobust, markersize=5)
 
-kfm_mat[1:5, :]
+    draw(
+        plt, axis=(xlabel="Normal quantiles",
+        ylabel="DBP (mm Hg)", yscale=log10,
+        yminorticksvisible = true, yminorgridvisible = true,
+        yminorticks = IntervalsBetween(5))
+    )
+end

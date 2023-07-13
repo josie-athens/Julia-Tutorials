@@ -1,9 +1,11 @@
-5×5 DataFrame
- Row │ age    height  weight  sbp    dbp
-     │ Int64  Int64   Int64   Int64  Int64
-─────┼─────────────────────────────────────
-   1 │    49      73     150    110     76
-   2 │    42      70     160    154     84
-   3 │    42      69     160    110     78
-   4 │    41      68     152    124     78
-   5 │    59      70     150    144     86
+┌────────────┬───────────────┬─────────────────────────────────┐
+│ names      │ scitypes      │ types                           │
+├────────────┼───────────────┼─────────────────────────────────┤
+│ no         │ Count         │ Int32                           │
+│ dl_milk    │ Continuous    │ Float64                         │
+│ sex        │ Multiclass{2} │ CategoricalValue{String, UInt8} │
+│ weight     │ Continuous    │ Float64                         │
+│ ml_suppl   │ Count         │ Int32                           │
+│ mat_weight │ Count         │ Int32                           │
+│ mat_height │ Count         │ Int32                           │
+└────────────┴───────────────┴─────────────────────────────────┘

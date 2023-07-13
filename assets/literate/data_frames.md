@@ -6,13 +6,15 @@
 
 ````julia:ex1
 using StatsKit
-using DataFramesMeta
+using DataFrameMacros
+using Chain
 using FreqTables
 using PrettyTables
 using RCall
 using RData
 using RDatasets
 using ScientificTypes: schema
+include("pubh.jl");
 
 wcgs2 = DataFrame(CSV.File("data/wcgs.csv"))
 wcgs2 |> schema
@@ -151,11 +153,26 @@ wcgs.height = wcgs.height * 2.54
 wcgs.weight = wcgs.weight * 0.4536;
 ````
 
+### Centring
+
+We can centre a variable by removings its mean. Let's centre height in `wcgs` as an example.
+
+````julia:ex12
+@transform!(wcgs, :height_cent = @bycol :height .- mean(:height));
+
+@chain wcgs begin
+	select(:height, :height_cent)
+	describe(:mean, :median, :std)
+end
+
+wcgs.height_cent[1:5]
+````
+
 ## Indexing and subsets
 
 Let’s said that we are only interested in subjects who are smokers. If that is the case, we can create a new data frame. We can use either, the `subset` function from `DataFramesMeta`.
 
-````julia:ex12
+````julia:ex13
 @subset(wcgs, :smoker .== "Smoker") |> nrow
 
 smokers = @subset(wcgs, :smoker .== "Smoker")
@@ -164,28 +181,37 @@ smokers[1:5, 2:6]
 
 Let's check for the number of observations:
 
-````julia:ex13
+````julia:ex14
 smokers |> nrow
 ````
 
 We can access one of those columns easily using `.colname`, this returns a vector that you can access like any Julia vector:
 
-````julia:ex14
+````julia:ex15
 wcgs.chd[1:5]
 ````
 
 We can also use `select`:
 
-````julia:ex15
+````julia:ex16
 @chain wcgs begin
 	select(:ncigs, :smoker)
 	first(5)
 end
 ````
 
+Or the `@select` macro:
+
+````julia:ex17
+first(
+	@select(wcgs, :ncigs, :smoker),
+	5
+)
+````
+
 For negative indexing, we use `Not`:
 
-````julia:ex16
+````julia:ex18
 @chain smokers begin
 	select(Not([:id, :type_chd, :ncigs, :beh_pat]))
 	size
@@ -198,9 +224,9 @@ end
 
 `Statistics` offers a convenient `describe` function which you can use on a data frame to get an overview of the data:
 
-````julia:ex17
+````julia:ex19
 @chain kfm begin
-    select(Not(1, 3))
+  select(Not(1, 3))
 	describe(:min, :max, :mean, :median, :std)
 end
 ````
@@ -211,25 +237,9 @@ We can pass a number of symbols to the `describe` function to indicate which sta
 - `q25`, `q75` are respectively for the 25th and 75th percentile,
 - `eltype`, `nunique`, `nmissing` can also be used
 
-### Functions
-
-````julia:ex18
-"""
-    rel_dis(x)
-
-Estimates the relative dispersion (coefficient of variation) of a vector.
-"""
-rel_dis(x) = std(x) / mean(x)
-
-@chain kfm begin
-	select(Not(1, 3, 5))
-	describe(:mean, :median, :std, rel_dis => :cv)
-end
-````
-
 > For **`Not`** we define columns by number. If we want to use names, the names of the columuns go inside square brackets.
 
-````julia:ex19
+````julia:ex20
 kfm_tbl = DataFrame(
 	@chain kfm begin
 		select(Not([:no, :sex, :ml_suppl]))
@@ -255,7 +265,7 @@ pretty_table(
 
 If we want to get the content of the dataframe as one big matrix, use `Matrix`:
 
-````julia:ex20
+````julia:ex21
 kfm_mat = Matrix(
 	@chain kfm begin
 		select(Not(1, 3, 5))
@@ -267,7 +277,7 @@ kfm_mat[1:5, :]
 
 ### Missing values
 
-````julia:ex21
+````julia:ex22
 mao = dataset("gap", "mao")
 mao |> schema
 ````
@@ -276,13 +286,13 @@ Lots of missing values...
 
 If we wanted to compute simple functions on columns, they  may just return `missing`:
 
-````julia:ex22
+````julia:ex23
 std(mao.Age)
 ````
 
 Some functions remove missing though:
 
-````julia:ex23
+````julia:ex24
 @chain mao begin
 	select(:Age)
 	describe(:min, :max, :mean, :median, :std, rel_dis => :cv)
@@ -291,7 +301,7 @@ end
 
 The `skipmissing` and `dropmissing` functions can help counter this:
 
-````julia:ex24
+````julia:ex25
 round(
 	std(skipmissing(mao.Age)),
 	digits=3
@@ -301,7 +311,7 @@ round(
 ## Group manipulations
 ### Split-Apply-Combine
 
-````julia:ex25
+````julia:ex26
 iris = dataset("datasets", "iris")
 iris |> schema
 ````
@@ -312,7 +322,7 @@ The basic usage is `groupby(df, cols)` where `cols` specifies one or several col
 
 Consider a simple example: in `iris` there is a `Species` column with 3 species:
 
-````julia:ex26
+````julia:ex27
 @chain iris begin
   select(:Species)
   unique()
@@ -321,7 +331,7 @@ end
 
 We can form views for each of these:
 
-````julia:ex27
+````julia:ex28
 gdf = groupby(iris, :Species)
 subdf_setosa = gdf[1]
 describe(subdf_setosa, :mean, :median, :std, rel_dis => :cv)
@@ -329,7 +339,7 @@ describe(subdf_setosa, :mean, :median, :std, rel_dis => :cv)
 
 Or using pipes (`@chain`), without the need of creating subsets:
 
-````julia:ex28
+````julia:ex29
 @chain iris begin
   @subset(:Species .== "setosa")
   select(Not(:Species))

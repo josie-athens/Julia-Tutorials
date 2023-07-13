@@ -1,3 +1,11 @@
 # This file was generated, do not modify it. # hide
-iris = dataset("datasets", "iris")
-iris |> schema
+let
+	layers = visual(Scatter, markersize=5) + linear()
+	data(kfm) *
+	mapping(
+		:mat_weight => "Maternal weight (kg)",
+    	:dl_milk => "Breast-milk intake (dl/day)"
+	) *
+	layers * mapping(color=:sex, marker=:sex) |>
+	draw
+end

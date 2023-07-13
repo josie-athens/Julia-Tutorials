@@ -1,6 +1,2 @@
-┌────────┬────────────┬────────┐
-│        │ Non Smoker │ Smoker │
-├────────┼────────────┼────────┤
-│    CHD │         97 │    158 │
-│ No CHD │       1549 │   1336 │
-└────────┴────────────┴────────┘
+REvalError: Error in loadNamespace(x) : there is no package called ‘ISwR’
+Calls: loadNamespace -> withRestarts -> withOneRestart -> doWithOneRestart

@@ -1,4 +1,4 @@
-<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/Julia-Tutorials/libs/highlight/styles/github.min.css"> <link rel=stylesheet  href="/Julia-Tutorials/css/franklin.css"> <link rel=stylesheet  href="/Julia-Tutorials/css/poole_hyde.css"> <style> html {font-size: 17px;} .franklin-content {position: relative; padding-left: 8%; padding-right: 5%; line-height: 1.35em;} @media (min-width: 940px) { .franklin-content {width: 100%; margin-left: auto; margin-right: auto;} } @media (max-width: 768px) { .franklin-content {padding-left: 6%; padding-right: 6%;} } </style> <link rel=icon  href="/Julia-Tutorials/assets/favicon.png"> <title>Introductory tutorial to Julia</title> <div class=sidebar > <div class="container sidebar-sticky"> <div class=sidebar-about > <h1><a href="/Julia-Tutorials/">Julia Tutorials</a></h1> <p class=lead >Systems Biology Enabling Platform, AgResearch</p> </div> <nav class=sidebar-nav > <a class="sidebar-nav-item " href="/Julia-Tutorials/">Home</a> <a class="sidebar-nav-item active" href="/Julia-Tutorials/menu1/">Introduction</a> <a class="sidebar-nav-item " href="/Julia-Tutorials/menu2/">Hypothesis Testing</a> <a class="sidebar-nav-item " href="/Julia-Tutorials/menu3/">Machine Learning</a> </nav> <p>&copy; Josie Athens.</p> </div> </div> <div class="content container"> <div class=franklin-content ><div class=franklin-toc ><ol><li><a href="#introductory_tutorial_to_julia">Introductory tutorial to Julia</a><ol><li><a href="#ifelse">If/Else</a><li><a href="#functions">Functions</a><li><a href="#memoize_and_benchmarktools">Memoize and BenchmarkTools</a><li><a href="#arrays">Arrays</a></ol><li><a href="#data_frames">Data Frames</a><ol><li><a href="#data_manipulation">Data Manipulation</a><ol><li><a href="#import_from_csv">Import from CSV</a><li><a href="#import_from_rds">Import from rds</a><li><a href="#changing_names_of_variables">Changing names of variables</a><li><a href="#creating_factors">Creating Factors</a><li><a href="#transforming_to_a_binary_variable">Transforming to a binary variable</a><li><a href="#simple_numeric_transformations">Simple numeric transformations</a></ol><li><a href="#indexing_and_subsets">Indexing and subsets</a><li><a href="#descriptive_statistics">Descriptive Statistics</a><ol><li><a href="#functions__2">Functions</a><li><a href="#converting_the_data">Converting the data</a><li><a href="#missing_values">Missing values</a></ol><li><a href="#group_manipulations">Group manipulations</a><ol><li><a href="#split-apply-combine">Split-Apply-Combine</a></ol></ol></ol></div> <p><h1 id=introductory_tutorial_to_julia ><a href="#introductory_tutorial_to_julia" class=header-anchor >Introductory tutorial to Julia</a></h1> <p>This tutorial will lead you through the 101 of Julia. After it you will be able to create your own Julia functions and understand the key language features like Multiple Dispatch. In other words, you will be able to program in Julia.</p> <pre><code class="julia hljs"><span class=hljs-keyword >using</span> StatsKit
+<!doctype html> <html lang=en > <meta charset=UTF-8 > <meta name=viewport  content="width=device-width, initial-scale=1"> <link rel=stylesheet  href="/Julia-Tutorials/libs/highlight/styles/github.min.css"> <link rel=stylesheet  href="/Julia-Tutorials/css/franklin.css"> <link rel=stylesheet  href="/Julia-Tutorials/css/poole_hyde.css"> <style> html {font-size: 17px;} .franklin-content {position: relative; padding-left: 8%; padding-right: 5%; line-height: 1.35em;} @media (min-width: 940px) { .franklin-content {width: 100%; margin-left: auto; margin-right: auto;} } @media (max-width: 768px) { .franklin-content {padding-left: 6%; padding-right: 6%;} } </style> <link rel=icon  href="/Julia-Tutorials/assets/favicon.png"> <title>Introductory tutorial to Julia</title> <div class=sidebar > <div class="container sidebar-sticky"> <div class=sidebar-about > <h1><a href="/Julia-Tutorials/">Julia Tutorials</a></h1> <p class=lead >Systems Biology Enabling Platform, AgResearch</p> </div> <nav class=sidebar-nav > <a class="sidebar-nav-item " href="/Julia-Tutorials/">Home</a> <a class="sidebar-nav-item active" href="/Julia-Tutorials/menu1/">Introduction</a> <a class="sidebar-nav-item " href="/Julia-Tutorials/menu2/">Hypothesis Testing</a> <a class="sidebar-nav-item " href="/Julia-Tutorials/menu3/">Machine Learning</a> </nav> <p>&copy; Josie Athens.</p> </div> </div> <div class="content container"> <div class=franklin-content ><div class=franklin-toc ><ol><li><a href="#introductory_tutorial_to_julia">Introductory tutorial to Julia</a><ol><li><a href="#ifelse">If/Else</a><li><a href="#functions">Functions</a><li><a href="#memoize_and_benchmarktools">Memoize and BenchmarkTools</a><li><a href="#arrays">Arrays</a></ol><li><a href="#data_frames">Data Frames</a><ol><li><a href="#data_manipulation">Data Manipulation</a><ol><li><a href="#import_from_csv">Import from CSV</a><li><a href="#import_from_rds">Import from rds</a><li><a href="#changing_names_of_variables">Changing names of variables</a><li><a href="#creating_factors">Creating Factors</a><li><a href="#transforming_to_a_binary_variable">Transforming to a binary variable</a><li><a href="#simple_numeric_transformations">Simple numeric transformations</a><li><a href="#centring">Centring</a></ol><li><a href="#indexing_and_subsets">Indexing and subsets</a><li><a href="#descriptive_statistics">Descriptive Statistics</a><ol><li><a href="#converting_the_data">Converting the data</a><li><a href="#missing_values">Missing values</a></ol><li><a href="#group_manipulations">Group manipulations</a><ol><li><a href="#split-apply-combine">Split-Apply-Combine</a></ol></ol><li><a href="#graphical_analysis">Graphical Analysis</a><ol><li><a href="#data">Data</a><li><a href="#distributions">Distributions</a><ol><li><a href="#histograms">Histograms</a><li><a href="#density_plots">Density Plots</a><li><a href="#qq-plots">QQ-Plots</a></ol><li><a href="#associations_between_continuous_variables">Associations Between Continuous Variables</a><ol><li><a href="#scatter_plots">Scatter Plots</a><li><a href="#corner_plots">Corner Plots</a><li><a href="#line_charts">Line Charts</a></ol><li><a href="#comparing_groups">Comparing Groups</a><ol><li><a href="#box-plots">Box-Plots</a><li><a href="#strip_charts_and_rain_clouds">Strip Charts and Rain Clouds</a></ol></ol></ol></div> <p><h1 id=introductory_tutorial_to_julia ><a href="#introductory_tutorial_to_julia" class=header-anchor >Introductory tutorial to Julia</a></h1> <p>This tutorial will lead you through the 101 of Julia. After it you will be able to create your own Julia functions and understand the key language features like Multiple Dispatch. In other words, you will be able to program in Julia.</p> <pre><code class="julia hljs"><span class=hljs-keyword >using</span> StatsKit
 <span class=hljs-keyword >using</span> DataFramesMeta
 <span class=hljs-keyword >using</span> Memoize
 <span class=hljs-keyword >using</span> BenchmarkTools
@@ -127,25 +127,25 @@ fibonacci(<span class=hljs-number >2</span>), fibonacci(<span class=hljs-number 
     <span class=hljs-keyword >end</span>
 <span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">fibonacci_mem (generic function with 1 method)</code></pre>
 <p>With the help of the famous <code>@benchmark</code> macro from the <code>BenchmarkTools</code> package you can directly compare the time and memory footprint of the two functions.</p>
-<pre><code class="julia hljs"><span class=hljs-meta >@benchmark</span> fibonacci(<span class=hljs-number >30</span>)</code></pre><pre><code class="plaintext hljs">BenchmarkTools.Trial: 1294 samples with 1 evaluation.
- Range (min … max):  3.856 ms … 3.913 ms  ┊ GC (min … max): 0.00% … 0.00%
- Time  (median):     3.862 ms             ┊ GC (median):    0.00%
- Time  (mean ± σ):   3.862 ms ± 3.160 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
+<pre><code class="julia hljs"><span class=hljs-meta >@benchmark</span> fibonacci(<span class=hljs-number >30</span>)</code></pre><pre><code class="plaintext hljs">BenchmarkTools.Trial: 1607 samples with 1 evaluation.
+ Range (min … max):  3.101 ms …  3.583 ms  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     3.108 ms              ┊ GC (median):    0.00%
+ Time  (mean ± σ):   3.109 ms ± 14.621 μs  ┊ GC (mean ± σ):  0.00% ± 0.00%
 
-                   ▁█▅▇▁▆ ▄▅▂▅ ▃                             
-  ▅▂▁▁▁▂▃▃▃▁▁▁▁▁▁▁▂█████████████▇█▆▄▇▄▄▄▃▃▂▃▃▃▂▃▂▃▂▁▁▂▁▂▃▂▂ ▄
-  3.86 ms        Histogram: frequency by time       3.87 ms &lt;
+  ▇▅▅▃ ▄███▆▅▄▃▂▁                                            ▁
+  ████▅████████████▇▆▇█▆█▇▄▅▄▄▁▅▅▇▅▅▅▆▅▇▅▅▄▅▁▁▇▇▁▁▄▆▄▅▅▇▅▅▁▅ █
+  3.1 ms       Histogram: log(frequency) by time     3.15 ms &lt;
 
  Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
 <p>Now, the benchmark of the memoize version:</p>
-<pre><code class="julia hljs"><span class=hljs-meta >@benchmark</span> fibonacci_mem(<span class=hljs-number >30</span>)</code></pre><pre><code class="plaintext hljs">BenchmarkTools.Trial: 10000 samples with 985 evaluations.
- Range (min … max):  54.213 ns … 104.467 ns  ┊ GC (min … max): 0.00% … 0.00%
- Time  (median):     57.056 ns               ┊ GC (median):    0.00%
- Time  (mean ± σ):   57.265 ns ±   2.250 ns  ┊ GC (mean ± σ):  0.00% ± 0.00%
+<pre><code class="julia hljs"><span class=hljs-meta >@benchmark</span> fibonacci_mem(<span class=hljs-number >30</span>)</code></pre><pre><code class="plaintext hljs">BenchmarkTools.Trial: 10000 samples with 973 evaluations.
+ Range (min … max):  72.559 ns … 125.489 ns  ┊ GC (min … max): 0.00% … 0.00%
+ Time  (median):     74.513 ns               ┊ GC (median):    0.00%
+ Time  (mean ± σ):   76.337 ns ±   3.260 ns  ┊ GC (mean ± σ):  0.00% ± 0.00%
 
-     ▄              █ ▅                                         
-  ▄▃▂█▄▃▂▂▂▂▂▂▁▂▃▅▇▃█▂█▃▃▅▂▂▂▂▂▂▁▂▂▂▂▂▂▂▂▂▂▃▃▄▄▂▄▂▃▂▂▂▂▂▂▂▂▂▂▂ ▃
-  54.2 ns         Histogram: frequency by time         63.6 ns &lt;
+          █▅▄                                                   
+  ▁▄▅▂▁▂▂████▆▇▃▃▁▁▁▁▁▁▁▁▁▁▂▂▃▁▁▁▄▅▂▂▁▂▂▁▂▂▁▁▁▂▃▂▂▁▁▂▅▄▁▁▁▁▁▂▂ ▂
+  72.6 ns         Histogram: frequency by time           84 ns &lt;
 
  Memory estimate: 0 bytes, allocs estimate: 0.</code></pre>
 <p>Wow, that was fast&#33;&#33; As you can see the memoization kicks in and we have about constant access time.</p>
@@ -232,13 +232,15 @@ fibonacci(<span class=hljs-number >2</span>), fibonacci(<span class=hljs-number 
 <h2 id=data_manipulation ><a href="#data_manipulation" class=header-anchor >Data Manipulation</a></h2>
 <h3 id=import_from_csv ><a href="#import_from_csv" class=header-anchor >Import from CSV</a></h3>
 <pre><code class="julia hljs"><span class=hljs-keyword >using</span> StatsKit
-<span class=hljs-keyword >using</span> DataFramesMeta
+<span class=hljs-keyword >using</span> DataFrameMacros
+<span class=hljs-keyword >using</span> Chain
 <span class=hljs-keyword >using</span> FreqTables
 <span class=hljs-keyword >using</span> PrettyTables
 <span class=hljs-keyword >using</span> RCall
 <span class=hljs-keyword >using</span> RData
 <span class=hljs-keyword >using</span> RDatasets
 <span class=hljs-keyword >using</span> ScientificTypes: schema
+include(<span class=hljs-string >&quot;pubh.jl&quot;</span>);
 
 wcgs2 = DataFrame(CSV.File(<span class=hljs-string >&quot;data/wcgs.csv&quot;</span>))
 wcgs2 |&gt; schema</code></pre><pre><code class="plaintext hljs">┌─────────┬──────────┬───────┐
@@ -406,22 +408,29 @@ wcgs.smoker = categorical(
 <p>We also, prefer units in the metric system. We will convert from inches to centimetres and from pounds to kg.</p>
 <pre><code class="julia hljs">wcgs.height = wcgs.height * <span class=hljs-number >2.54</span>
 wcgs.weight = wcgs.weight * <span class=hljs-number >0.4536</span>;</code></pre>
+<h3 id=centring ><a href="#centring" class=header-anchor >Centring</a></h3>
+<p>We can centre a variable by removings its mean. Let&#39;s centre height in <code>wcgs</code> as an example.</p>
+<pre><code class="julia hljs"><span class=hljs-meta >@transform</span>!(wcgs, :height_cent = <span class=hljs-meta >@bycol</span> :height .- mean(:height));
+
+<span class=hljs-meta >@chain</span> wcgs <span class=hljs-keyword >begin</span>
+	select(:height, :height_cent)
+	describe(:mean, :median, :std)
+<span class=hljs-keyword >end</span>
+
+wcgs.height_cent[<span class=hljs-number >1</span>:<span class=hljs-number >5</span>]</code></pre><pre><code class="plaintext hljs">LoadError: UndefVarError: `@transform!` not defined
+in expression starting at none:1
+</code></pre>
 <h2 id=indexing_and_subsets ><a href="#indexing_and_subsets" class=header-anchor >Indexing and subsets</a></h2>
 <p>Let’s said that we are only interested in subjects who are smokers. If that is the case, we can create a new data frame. We can use either, the <code>subset</code> function from <code>DataFramesMeta</code>.</p>
 <pre><code class="julia hljs"><span class=hljs-meta >@subset</span>(wcgs, :smoker .== <span class=hljs-string >&quot;Smoker&quot;</span>) |&gt; nrow
 
 smokers = <span class=hljs-meta >@subset</span>(wcgs, :smoker .== <span class=hljs-string >&quot;Smoker&quot;</span>)
-smokers[<span class=hljs-number >1</span>:<span class=hljs-number >5</span>, <span class=hljs-number >2</span>:<span class=hljs-number >6</span>]</code></pre><pre><code class="plaintext hljs">5×5 DataFrame
- Row │ age    height   weight   sbp    dbp
-     │ Int64  Float64  Float64  Int64  Int64
-─────┼───────────────────────────────────────
-   1 │    49   185.42  68.04      110     76
-   2 │    42   177.8   72.576     154     84
-   3 │    41   172.72  68.9472    124     78
-   4 │    59   177.8   68.04      144     86
-   5 │    43   182.88  86.184     146     76</code></pre>
+smokers[<span class=hljs-number >1</span>:<span class=hljs-number >5</span>, <span class=hljs-number >2</span>:<span class=hljs-number >6</span>]</code></pre><pre><code class="plaintext hljs">LoadError: UndefVarError: `@subset` not defined
+in expression starting at none:1
+</code></pre>
 <p>Let&#39;s check for the number of observations:</p>
-<pre><code class="julia hljs">smokers |&gt; nrow</code></pre><pre><code class="plaintext hljs">1494</code></pre>
+<pre><code class="julia hljs">smokers |&gt; nrow</code></pre><pre><code class="plaintext hljs">UndefVarError: `smokers` not defined
+</code></pre>
 <p>We can access one of those columns easily using <code>.colname</code>, this returns a vector that you can access like any Julia vector:</p>
 <pre><code class="julia hljs">wcgs.chd[<span class=hljs-number >1</span>:<span class=hljs-number >5</span>]</code></pre><pre><code class="plaintext hljs">5-element CategoricalArrays.CategoricalArray{String,1,UInt32}:
  &quot;No CHD&quot;
@@ -442,18 +451,26 @@ smokers[<span class=hljs-number >1</span>:<span class=hljs-number >5</span>, <sp
    3 │     0  Non-Smoker
    4 │    20  Smoker
    5 │    20  Smoker</code></pre>
+<p>Or the <code>@select</code> macro:</p>
+<pre><code class="julia hljs">first(
+	<span class=hljs-meta >@select</span>(wcgs, :ncigs, :smoker),
+	<span class=hljs-number >5</span>
+)</code></pre><pre><code class="plaintext hljs">LoadError: UndefVarError: `@select` not defined
+in expression starting at none:2
+</code></pre>
 <p>For negative indexing, we use <code>Not</code>:</p>
 <pre><code class="julia hljs"><span class=hljs-meta >@chain</span> smokers <span class=hljs-keyword >begin</span>
 	select(Not([:id, :type_chd, :ncigs, :beh_pat]))
 	size
-<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">(1494, 11)</code></pre>
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">UndefVarError: `smokers` not defined
+</code></pre>
 <blockquote>
 <p><strong>Note:</strong> In the case of negative indexing, a list of variables is given in vector format; the equivalent to <code>c</code>, the concatenate function in <code>R</code>.</p>
 </blockquote>
 <h2 id=descriptive_statistics ><a href="#descriptive_statistics" class=header-anchor >Descriptive Statistics</a></h2>
 <p><code>Statistics</code> offers a convenient <code>describe</code> function which you can use on a data frame to get an overview of the data:</p>
 <pre><code class="julia hljs"><span class=hljs-meta >@chain</span> kfm <span class=hljs-keyword >begin</span>
-    select(Not(<span class=hljs-number >1</span>, <span class=hljs-number >3</span>))
+  select(Not(<span class=hljs-number >1</span>, <span class=hljs-number >3</span>))
 	describe(:min, :max, :mean, :median, :std)
 <span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">5×6 DataFrame
  Row │ variable    min     max      mean       median   std
@@ -473,25 +490,6 @@ smokers[<span class=hljs-number >1</span>:<span class=hljs-number >5</span>, <sp
 <li><p><code>eltype</code>, <code>nunique</code>, <code>nmissing</code> can also be used</p>
 
 </ul>
-<h3 id=functions__2 ><a href="#functions__2" class=header-anchor >Functions</a></h3>
-<pre><code class="julia hljs"><span class=hljs-string >&quot;&quot;&quot;
-    rel_dis(x)
-
-Estimates the relative dispersion (coefficient of variation) of a vector.
-&quot;&quot;&quot;</span>
-rel_dis(x) = std(x) / mean(x)
-
-<span class=hljs-meta >@chain</span> kfm <span class=hljs-keyword >begin</span>
-	select(Not(<span class=hljs-number >1</span>, <span class=hljs-number >3</span>, <span class=hljs-number >5</span>))
-	describe(:mean, :median, :std, rel_dis =&gt; :cv)
-<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">4×5 DataFrame
- Row │ variable    mean       median   std       cv
-     │ Symbol      Float64    Float64  Float64   Float64
-─────┼─────────────────────────────────────────────────────
-   1 │ dl_milk       7.5044     7.66   1.51151   0.201417
-   2 │ weight        5.31874    5.352  0.548303  0.103089
-   3 │ mat_weight   59.96      58.0    8.38113   0.139779
-   4 │ mat_height  167.44     167.0    6.51892   0.0389329</code></pre>
 <blockquote>
 <p>For <strong><code>Not</code></strong> we define columns by number. If we want to use names, the names of the columuns go inside square brackets.</p>
 </blockquote>
@@ -622,18 +620,515 @@ describe(subdf_setosa, :mean, :median, :std, rel_dis =&gt; :cv)</code></pre><pre
   <span class=hljs-meta >@subset</span>(:Species .== <span class=hljs-string >&quot;setosa&quot;</span>)
   select(Not(:Species))
   describe(:mean, :median, :std, rel_dis =&gt; :cv)
-<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">4×5 DataFrame
- Row │ variable     mean     median   std       cv
-     │ Symbol       Float64  Float64  Float64   Float64
-─────┼────────────────────────────────────────────────────
-   1 │ SepalLength    5.006      5.0  0.35249   0.0704134
-   2 │ SepalWidth     3.428      3.4  0.379064  0.110579
-   3 │ PetalLength    1.462      1.5  0.173664  0.118785
-   4 │ PetalWidth     0.246      0.2  0.105386  0.428397</code></pre>
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">LoadError: UndefVarError: `@subset` not defined
+in expression starting at none:2
+</code></pre>
+ <h1 id=graphical_analysis ><a href="#graphical_analysis" class=header-anchor >Graphical Analysis</a></h1>
+<p>Loading packages:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >using</span> StatsKit
+<span class=hljs-keyword >using</span> DataFrameMacros
+<span class=hljs-keyword >using</span> Chain
+<span class=hljs-keyword >using</span> RData
+<span class=hljs-keyword >using</span> RCall
+<span class=hljs-keyword >using</span> ScientificTypes: schema</code></pre>
+<p>Plotting packages:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >using</span> AlgebraOfGraphics
+<span class=hljs-keyword >using</span> CairoMakie
+<span class=hljs-keyword >using</span> MakieThemes
+CairoMakie.activate!(type = <span class=hljs-string >&quot;svg&quot;</span>)
+AoG = AlgebraOfGraphics
+data = AoG.data
+set_theme!(ggthemr(:fresh))
+update_theme!(Axis = (width = <span class=hljs-number >400</span>, height = <span class=hljs-number >300</span>))</code></pre>
+<p>Package for corner plots:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >using</span> PairPlots</code></pre>
+<h2 id=data ><a href="#data" class=header-anchor >Data</a></h2>
+<p>The Western Collaborative Group Study &#40;WCGS&#41; is a well known prospective chohort study. Male participants aged 39 to 59 from 10 California companies were originally selected to study the relationship between behaviour pattern and the risk of coronary heart disease &#40;CHD&#41;.</p>
+<pre><code class="julia hljs">wcgs = load(<span class=hljs-string >&quot;data/wcgs.rds&quot;</span>)
+wcgs |&gt; schema</code></pre><pre><code class="plaintext hljs">┌──────────┬───────────────────────────────┬─────────────────────────────────────────────────┐
+│ names    │ scitypes                      │ types                                           │
+├──────────┼───────────────────────────────┼─────────────────────────────────────────────────┤
+│ id       │ Count                         │ Int32                                           │
+│ age      │ Count                         │ Int32                                           │
+│ height   │ Continuous                    │ Float64                                         │
+│ weight   │ Continuous                    │ Float64                                         │
+│ sbp      │ Count                         │ Int32                                           │
+│ dbp      │ Count                         │ Int32                                           │
+│ chol     │ Union{Missing, Count}         │ Union{Missing, Int32}                           │
+│ beh_pat  │ Multiclass{4}                 │ CategoricalValue{String, UInt8}                 │
+│ ncigs    │ Count                         │ Int32                                           │
+│ dib_pat  │ Multiclass{2}                 │ CategoricalValue{String, UInt8}                 │
+│ chd      │ Multiclass{2}                 │ CategoricalValue{String, UInt8}                 │
+│ type_chd │ Multiclass{4}                 │ CategoricalValue{String, UInt8}                 │
+│ time     │ Count                         │ Int32                                           │
+│ arcus    │ Union{Missing, Multiclass{2}} │ Union{Missing, CategoricalValue{String, UInt8}} │
+│ smoker   │ Multiclass{2}                 │ CategoricalValue{String, UInt8}                 │
+└──────────┴───────────────────────────────┴─────────────────────────────────────────────────┘
+</code></pre>
+<p>The <code>kfm</code> data frame was collected by Kim Fleischer Michaelsen and contains data for 50 infants of age approximately 2 months. They were weighed immediately before and after each breast feeding. and the measured intake of breast milk was registered along with various other data.</p>
+<pre><code class="julia hljs">kfm = load(<span class=hljs-string >&quot;data/kfm.rds&quot;</span>)
+kfm |&gt; schema</code></pre><pre><code class="plaintext hljs">┌────────────┬───────────────┬─────────────────────────────────┐
+│ names      │ scitypes      │ types                           │
+├────────────┼───────────────┼─────────────────────────────────┤
+│ no         │ Count         │ Int32                           │
+│ dl_milk    │ Continuous    │ Float64                         │
+│ sex        │ Multiclass{2} │ CategoricalValue{String, UInt8} │
+│ weight     │ Continuous    │ Float64                         │
+│ ml_suppl   │ Count         │ Int32                           │
+│ mat_weight │ Count         │ Int32                           │
+│ mat_height │ Count         │ Int32                           │
+└────────────┴───────────────┴─────────────────────────────────┘
+</code></pre>
+<p>Data on reported cases of influenza by age group in the 1957 pandemic in England and Wales.</p>
+<pre><code class="julia hljs">flu = DataFrame(CSV.File(<span class=hljs-string >&quot;data/fluraw.csv&quot;</span>))
+flu |&gt; schema</code></pre><pre><code class="plaintext hljs">┌───────┬────────────────┬───────┐
+│ names │ scitypes       │ types │
+├───────┼────────────────┼───────┤
+│ week  │ ScientificDate │ Date  │
+│ child │ Count          │ Int64 │
+│ young │ Count          │ Int64 │
+│ mid   │ Count          │ Int64 │
+│ old   │ Count          │ Int64 │
+└───────┴────────────────┴───────┘
+</code></pre>
+<p>Data on birth weights from newborns in a London Hospital.</p>
+<pre><code class="julia hljs">birth = load(<span class=hljs-string >&quot;data/birthwt.rds&quot;</span>)
+birth |&gt; schema</code></pre><pre><code class="plaintext hljs">┌───────┬───────────────┬─────────────────────────────────┐
+│ names │ scitypes      │ types                           │
+├───────┼───────────────┼─────────────────────────────────┤
+│ low   │ Multiclass{2} │ CategoricalValue{String, UInt8} │
+│ age   │ Count         │ Int32                           │
+│ lwt   │ Continuous    │ Float64                         │
+│ race  │ Multiclass{3} │ CategoricalValue{String, UInt8} │
+│ smoke │ Multiclass{2} │ CategoricalValue{String, UInt8} │
+│ ptl   │ Count         │ Int32                           │
+│ ht    │ Multiclass{2} │ CategoricalValue{String, UInt8} │
+│ ui    │ Multiclass{2} │ CategoricalValue{String, UInt8} │
+│ ftv   │ Count         │ Int32                           │
+│ bwt   │ Count         │ Int32                           │
+│ Race  │ Multiclass{2} │ CategoricalValue{String, UInt8} │
+└───────┴───────────────┴─────────────────────────────────┘
+</code></pre>
+<p>Data on the energy expenditure in groups of lean and obese womnen.</p>
+<pre><code class="julia hljs">energy = rcopy(<span class=hljs-string >R&quot;ISwR::energy&quot;</span>)
+energy |&gt; schema</code></pre><pre><code class="plaintext hljs">REvalError: Error in loadNamespace(x) : there is no package called ‘ISwR’
+Calls: loadNamespace -&gt; withRestarts -&gt; withOneRestart -&gt; doWithOneRestart
+</code></pre>
+<p>Fisher’s iris dataset on measurements for three species of iris.</p>
+<pre><code class="julia hljs">iris = rcopy(<span class=hljs-string >R&quot;datasets::iris&quot;</span>)
+iris |&gt; schema</code></pre><pre><code class="plaintext hljs">┌──────────────┬───────────────┬──────────────────────────────────┐
+│ names        │ scitypes      │ types                            │
+├──────────────┼───────────────┼──────────────────────────────────┤
+│ Sepal_Length │ Continuous    │ Float64                          │
+│ Sepal_Width  │ Continuous    │ Float64                          │
+│ Petal_Length │ Continuous    │ Float64                          │
+│ Petal_Width  │ Continuous    │ Float64                          │
+│ Species      │ Multiclass{3} │ CategoricalValue{String, UInt32} │
+└──────────────┴───────────────┴──────────────────────────────────┘
+</code></pre>
+<p>Data on air quality and weather conditions in New York, recorded May to September 1973.</p>
+<pre><code class="julia hljs">air = rcopy(<span class=hljs-string >R&quot;datasets::airquality&quot;</span>);
+
+air.Month = categorical(recode(
+    air.Month,
+    <span class=hljs-number >5</span> =&gt; <span class=hljs-string >&quot;May&quot;</span>,
+    <span class=hljs-number >6</span> =&gt; <span class=hljs-string >&quot;Jun&quot;</span>,
+    <span class=hljs-number >7</span> =&gt; <span class=hljs-string >&quot;Jul&quot;</span>,
+    <span class=hljs-number >8</span> =&gt; <span class=hljs-string >&quot;Aug&quot;</span>,
+    <span class=hljs-number >9</span> =&gt; <span class=hljs-string >&quot;Sep&quot;</span>
+), ordered=<span class=hljs-literal >true</span>);
+
+air |&gt; schema</code></pre><pre><code class="plaintext hljs">┌─────────┬───────────────────────┬──────────────────────────────────┐
+│ names   │ scitypes              │ types                            │
+├─────────┼───────────────────────┼──────────────────────────────────┤
+│ Ozone   │ Union{Missing, Count} │ Union{Missing, Int64}            │
+│ Solar_R │ Union{Missing, Count} │ Union{Missing, Int64}            │
+│ Wind    │ Continuous            │ Float64                          │
+│ Temp    │ Count                 │ Int64                            │
+│ Month   │ OrderedFactor{5}      │ CategoricalValue{String, UInt32} │
+│ Day     │ Count                 │ Int64                            │
+└─────────┴───────────────────────┴──────────────────────────────────┘
+</code></pre>
+<h2 id=distributions ><a href="#distributions" class=header-anchor >Distributions</a></h2>
+<h3 id=histograms ><a href="#histograms" class=header-anchor >Histograms</a></h3>
+<p>We use histograms to look at the distribution of continuous variables. Histograms make most sense for relatively large data &#40;≥ 100 observations&#41;. In this fist histogram, we show the density.</p>
+<pre><code class="julia hljs">data(birth) *
+mapping(:bwt =&gt; <span class=hljs-string >&quot;Birth weight (g)&quot;</span>) *
+histogram(bins=<span class=hljs-number >20</span>, normalization=:density) *
+visual(color=:pink) |&gt;
+draw</code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<p>In general, <code>AlgebraOfGraphics</code> uses the following syntax for constructing plots:</p>
+<p><code>data&#40;my_data&#41; *</code> <code>mapping&#40;:x, :y&#41; *</code> <code>plot_type&#40;key_args&#41; |&gt;</code> <code>draw</code></p>
+<p>Where:</p>
+<ul>
+<li><p><code>my_data</code> is the name of the data frame &#40;a DataFrame object&#41;.</p>
+
+<li><p><code>x</code> is the name of the column &#40;variable&#41; to be plotted on the <em>x</em>-axis.</p>
+
+<li><p><code>y</code> is the name of the column &#40;variable&#41; to be plotted on the <em>y</em>-axis.</p>
+
+<li><p><code>plot_type</code> is the kind of plot we want to construct. In many cases this is done with: <code>visual&#40;PlotType&#41;</code> &#40;see scatter plot examples&#41;.</p>
+
+</ul>
+<p>The default for histograms is to show the absolute frequency &#40;counts&#41;:</p>
+<pre><code class="julia hljs">data(wcgs) *
+mapping(:sbp =&gt; <span class=hljs-string >&quot;SBP (mm Hg)&quot;</span>) *
+histogram(bins=<span class=hljs-number >30</span>) *
+visual(color=:plum) |&gt;
+draw</code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<p>We can compare distributions using the density or the probability density function &#40;pdf&#41;, as shown here:</p>
+<pre><code class="julia hljs">data(wcgs) *
+mapping(
+	:sbp =&gt; <span class=hljs-string >&quot;SBP (mm Hg)&quot;</span>,
+	color=:chd =&gt; <span class=hljs-string >&quot;CHD&quot;</span>, dodge=:chd
+) *
+histogram(bins=<span class=hljs-number >30</span>, normalization=:pdf) |&gt;
+draw</code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<p>We have a better plot when we use <em>faceting</em>, i.e., plotting the distributions in two different panels:</p>
+<pre><code class="julia hljs">data(wcgs) *
+mapping(
+	:sbp =&gt; <span class=hljs-string >&quot;SBP (mm Hg)&quot;</span>,
+	layout=:chd =&gt; <span class=hljs-string >&quot;CHD&quot;</span>
+) *
+histogram(bins=<span class=hljs-number >30</span>, normalization=:pdf) |&gt;
+draw</code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<h3 id=density_plots ><a href="#density_plots" class=header-anchor >Density Plots</a></h3>
+<p>Another way to look at the distribution of a continuous variable is with density plots.</p>
+<pre><code class="julia hljs">data(wcgs) *
+mapping(
+	:sbp =&gt; <span class=hljs-string >&quot;SBP (mm Hg)&quot;</span>,
+	layout=:chd =&gt; <span class=hljs-string >&quot;CHD&quot;</span>
+) *
+AoG.density(datalimits=extrema) *
+visual(color=:plum1) |&gt;
+draw</code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<blockquote>
+<p><strong>Note:</strong> Function <code>density</code> is shared with other packages, hence, we explictly tell <code>Julia</code> to use the one from <code>AlgebraOfGraphics</code>.</p>
+</blockquote>
+<p>Diastolic blood pressure &#40;DBP&#41; is skewed to the right &#40;see the QQ-Plot&#41;. In the following example, we log-transform DBP.</p>
+<pre><code class="julia hljs">data(wcgs) *
+mapping(
+	:dbp =&gt; log =&gt; <span class=hljs-string >&quot;log (DBP)&quot;</span>,
+	color=:chd =&gt; <span class=hljs-string >&quot;CHD&quot;</span>, dodge=:chd
+) *
+AoG.density(datalimits=extrema) |&gt;
+draw</code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<p>We have missing values in <code>chol</code>, thus we need to drop them before constructing a density plot or else, we would have an error.</p>
+<pre><code class="julia hljs">data(wcgs |&gt; dropmissing) *
+mapping(
+	:chol =&gt; <span class=hljs-string >&quot;Cholesterol (mg/dl)&quot;</span>,
+	color=:chd =&gt; <span class=hljs-string >&quot;CHD&quot;</span>, dodge=:chd
+) *
+AoG.density(datalimits=extrema) |&gt;
+draw</code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<h3 id=qq-plots ><a href="#qq-plots" class=header-anchor >QQ-Plots</a></h3>
+<p>The best way to determine if a continuous variable is normally distributed or not is with quantile-quantile plots &#40;QQ-plots&#41;. We plot the quantiles of our variable of interest against quantiles from the standard normal distribution &#40;which has a mean μ &#61; 0 and a standard deviation σ &#61; 1&#41;. This type of QQ-plots against the normal distribution are known as QQ-normal plots. If the variable is normally distributed, then a linear relationship will be observed.</p>
+<p>By default, <code>QQNorm</code> uses the name of the variable as title for the <em>x</em>-axis, whih is wrong&#33; We define the titles of the plot in <code>draw</code>:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >let</span>
+    plt = data(birth) *
+    mapping(:bwt) *
+    visual(QQNorm, qqline=:fitrobust, markersize=<span class=hljs-number >5</span>, color=:firebrick)
+
+    draw(
+        plt, axis=(
+        xlabel=<span class=hljs-string >&quot;Normal quantiles&quot;</span>,
+        ylabel=<span class=hljs-string >&quot;Birth weight (g)&quot;</span>)
+    )
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<p>Right-skewed variables, show an upper right curve in the QQ-plot:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >let</span>
+    plt = data(wcgs) * mapping(:dbp) *
+    visual(
+        QQNorm, qqline=:fitrobust,
+        markersize=<span class=hljs-number >5</span>, color=:forestgreen
+    )
+
+    draw(
+        plt, axis=(xlabel=<span class=hljs-string >&quot;Normal quantiles&quot;</span>,
+        ylabel=<span class=hljs-string >&quot;DBP (mm Hg)&quot;</span>)
+    )
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<p>The next two plots, shows the use of log scales.</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >let</span>
+    plt = data(wcgs) * mapping(:dbp =&gt; log10) *
+    visual(QQNorm, qqline=:fitrobust, markersize=<span class=hljs-number >5</span>)
+
+    draw(
+        plt, axis=(xlabel=<span class=hljs-string >&quot;Normal quantiles&quot;</span>,
+        ylabel=<span class=hljs-string >&quot;DBP (mm Hg)&quot;</span>, yscale=log10,
+        yminorticksvisible = <span class=hljs-literal >true</span>, yminorgridvisible = <span class=hljs-literal >true</span>,
+        yminorticks = IntervalsBetween(<span class=hljs-number >5</span>))
+    )
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<p>An alternative to log-scales, is to log-transform the variable, in this case, the scale of the axis needs to also be adjusted.</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >let</span>
+    plt = data(wcgs) * mapping(:dbp =&gt; log10) *
+    visual(QQNorm, qqline=:fitrobust, markersize=<span class=hljs-number >5</span>)
+
+    draw(
+        plt, axis=(xlabel=<span class=hljs-string >&quot;Normal quantiles&quot;</span>,
+        ylabel=<span class=hljs-string >&quot;log (DBP)&quot;</span>, yscale=Makie.pseudolog10)
+    )
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<h2 id=associations_between_continuous_variables ><a href="#associations_between_continuous_variables" class=header-anchor >Associations Between Continuous Variables</a></h2>
+<h3 id=scatter_plots ><a href="#scatter_plots" class=header-anchor >Scatter Plots</a></h3>
+<p>We use scatter plots to look at the relationship between two continuous variables. By default, the dependent variable &#40;response&#41; is plotted on the <em>y</em>-axis while the independent variable &#40;explanatory&#41; is plotted on the <em>x</em>-axis.</p>
+<p>From the <code>kfm</code> dataset, let’s see if there is a relationship between the weight of the mother and the breast-milk intake of the child.</p>
+<pre><code class="julia hljs">data(kfm) *
+mapping(
+	:mat_weight =&gt; <span class=hljs-string >&quot;Maternal weight (kg)&quot;</span>,
+  :dl_milk =&gt; <span class=hljs-string >&quot;Breast-milk intake (dl/day)&quot;</span>,
+  color = :sex =&gt; <span class=hljs-string >&quot;Sex&quot;</span>
+) *
+visual(Scatter, markersize=<span class=hljs-number >5</span>) |&gt;
+draw</code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<p>We can extend plots by adding new <em>layers</em>. In the following example, we use two layers: one for the scatter plot and a second to add a line representing a linear fit.</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >let</span>
+    layers = visual(Scatter, markersize=<span class=hljs-number >5</span>) + linear()
+    data(kfm) *
+    mapping(
+        :mat_weight =&gt; <span class=hljs-string >&quot;Maternal weight (kg)&quot;</span>,
+        :dl_milk =&gt; <span class=hljs-string >&quot;Breast-milk intake (dl/day)&quot;</span>
+    ) *
+    layers * mapping(color=:sex =&gt; <span class=hljs-string >&quot;Sex&quot;</span>) |&gt;
+    draw
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<p>In the next plot, instead of showing the linear fit, we show trend with a smoother:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >let</span>
+	layers = visual(Scatter, markersize=<span class=hljs-number >5</span>, color=:firebrick) + smooth()
+	data(kfm) *
+	mapping(
+		:mat_weight =&gt; <span class=hljs-string >&quot;Maternal weight (kg)&quot;</span>,
+    	:dl_milk =&gt; <span class=hljs-string >&quot;Breast-milk intake (dl/day)&quot;</span>
+	) *
+	layers |&gt;
+	draw
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<p>In the next plot, we use different line colours and different symbols &#40;by sex&#41;:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >let</span>
+	layers = visual(Scatter, markersize=<span class=hljs-number >5</span>) + linear()
+	data(kfm) *
+	mapping(
+		:mat_weight =&gt; <span class=hljs-string >&quot;Maternal weight (kg)&quot;</span>,
+    	:dl_milk =&gt; <span class=hljs-string >&quot;Breast-milk intake (dl/day)&quot;</span>
+	) *
+	layers * mapping(color=:sex, marker=:sex) |&gt;
+	draw
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<h3 id=corner_plots ><a href="#corner_plots" class=header-anchor >Corner Plots</a></h3>
+<p>When we are working with more than two continuous variables and we want to look at potential correlations between them, we can construct a single plot, with all two-variable combinations displayed in diffeerent panels. These are known as scatter plot matrices, <em>pair plots</em> or <em>corner plots</em>.</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >let</span>
+	nms = names(iris, <span class=hljs-number >1</span>:<span class=hljs-number >4</span>)
+	p = select(iris, nms .=&gt; replace.(nms, <span class=hljs-string >&quot;_&quot;</span> =&gt; <span class=hljs-string >&quot; &quot;</span>))
+	pairplot(p)
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">Figure()</code></pre>
+<p>The defaullt for <code>pairplot</code> is to plot a countour plot to show the relationship between variables &#40;see above figure&#41;. We have flexibility, for example, we can plot the traditional scatter plot:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >let</span>
+	nms = names(iris, <span class=hljs-number >1</span>:<span class=hljs-number >4</span>)
+	p = select(iris, nms .=&gt; replace.(nms, <span class=hljs-string >&quot;_&quot;</span> =&gt; <span class=hljs-string >&quot; &quot;</span>))
+	pairplot(p =&gt; (
+		PairPlots.Scatter(color=:firebrick, markersize=<span class=hljs-number >5</span>),
+		PairPlots.MarginDensity(),
+		)
+	)
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">Figure()</code></pre>
+<p>The <code>airquality</code> dataset contains some environmental variables associated with pollution measure as ozone concentrations. Let&#39;s try to find which of those environmental variables has a stronger correlation with ozone.</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >let</span>
+	air2 = air |&gt; dropmissing
+	nms = names(air2, <span class=hljs-number >1</span>:<span class=hljs-number >4</span>)
+	p = select(air2, nms)
+	pairplot(p,
+		labels = <span class=hljs-built_in >Dict</span>(
+			:Temp =&gt; <span class=hljs-string >&quot;Temp (°F)&quot;</span>,
+			:Solar_R =&gt; <span class=hljs-string >&quot;Radiation (Å)&quot;</span>,
+			:Wind =&gt; <span class=hljs-string >&quot;Wind (mph)&quot;</span>,
+			:Ozone =&gt; <span class=hljs-string >&quot;Ozone (ppb)&quot;</span>,
+		)
+	)
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">Figure()</code></pre>
+<p>And now, without the contour:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >let</span>
+	air2 = air |&gt; dropmissing
+	nms = names(air2, <span class=hljs-number >1</span>:<span class=hljs-number >4</span>)
+	p = select(air2, nms)
+	pairplot(
+		p =&gt; (
+		PairPlots.Scatter(color=:firebrick, markersize=<span class=hljs-number >5</span>),
+		PairPlots.MarginDensity(),
+		),
+		labels = <span class=hljs-built_in >Dict</span>(
+			:Temp =&gt; <span class=hljs-string >&quot;Temp (°F)&quot;</span>,
+			:Solar_R =&gt; <span class=hljs-string >&quot;Radiation (Å)&quot;</span>,
+			:Wind =&gt; <span class=hljs-string >&quot;Wind (mph)&quot;</span>,
+			:Ozone =&gt; <span class=hljs-string >&quot;Ozone (ppb)&quot;</span>,
+		)
+	)
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">Figure()</code></pre>
+<p>Temperature has a positive correlation with ozone, while wind has a negative one. Let&#39;s take a further look to the latter one:</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >let</span>
+	d = data(air |&gt; dropmissing) * mapping(:Wind, :Ozone)
+	p1 = d * visual(Scatter, markersize=<span class=hljs-number >5</span>) * mapping(color=:Month)
+	p2 = d * smooth()
+	draw(
+        p1 + p2,
+        axis=(
+            xlabel=<span class=hljs-string >&quot;Wind (mph)&quot;</span>,
+            ylabel=<span class=hljs-string >&quot;Ozone (ppb)&quot;</span>
+        )
+    )
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<h3 id=line_charts ><a href="#line_charts" class=header-anchor >Line Charts</a></h3>
+<p>In this example, our dataset is in <em>wide</em> format.</p>
+<pre><code class="julia hljs"><span class=hljs-keyword >let</span>
+    labels = [<span class=hljs-string >&quot;Child&quot;</span> <span class=hljs-string >&quot;Young&quot;</span> <span class=hljs-string >&quot;Mid&quot;</span> <span class=hljs-string >&quot;Old&quot;</span>]
+    plt = data(flu) *
+    mapping(
+        :week =&gt; <span class=hljs-string >&quot;Date&quot;</span>,
+        [:child, :young, :mid, :old],
+        color=dims(<span class=hljs-number >1</span>) =&gt; renamer(labels) =&gt; <span class=hljs-string >&quot;Age group&quot;</span>
+    ) *
+    visual(Lines)
+    draw(
+        plt,
+        axis=(xlabel=<span class=hljs-string >&quot;Date&quot;</span>, ylabel=<span class=hljs-string >&quot;Number of cases&quot;</span>)
+    )
+<span class=hljs-keyword >end</span></code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<p>Reshaping <em>wide</em> to <em>long</em> data:</p>
+<pre><code class="julia hljs">flu_melt = stack(flu, Not(:week));
+first(flu_melt, <span class=hljs-number >5</span>)</code></pre><pre><code class="plaintext hljs">5×3 DataFrame
+ Row │ week        variable  value
+     │ Date        String    Int64
+─────┼─────────────────────────────
+   1 │ 1957-08-25  child         0
+   2 │ 1957-09-01  child         0
+   3 │ 1957-09-08  child         0
+   4 │ 1957-09-15  child        23
+   5 │ 1957-09-22  child        63</code></pre>
+<p>In <em>long</em> format, the construct of the the plot is easier.</p>
+<pre><code class="julia hljs">data(flu_melt) *
+mapping(
+	:week =&gt; <span class=hljs-string >&quot;Date&quot;</span>,
+    :value =&gt; <span class=hljs-string >&quot;Number of cases&quot;</span>,
+    color=:variable =&gt; <span class=hljs-string >&quot;Age group&quot;</span>
+) *
+visual(ScatterLines, markersize=<span class=hljs-number >7</span>) |&gt;
+draw</code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<h2 id=comparing_groups ><a href="#comparing_groups" class=header-anchor >Comparing Groups</a></h2>
+<h3 id=box-plots ><a href="#box-plots" class=header-anchor >Box-Plots</a></h3>
+<p>When we are comparing continuous variables, between two or more groups, box plots are the best option, particularly if the number of observations in the groups is relatively large &#40;n ≥ 30&#41;.</p>
+<pre><code class="julia hljs">data(wcgs |&gt; dropmissing) *
+mapping(
+	:chd =&gt; <span class=hljs-string >&quot;CHD&quot;</span>,
+    :chol =&gt; <span class=hljs-string >&quot;Cholesterol (mg/dl)&quot;</span>
+) *
+visual(BoxPlot, color=:plum3) |&gt;
+draw</code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<p>In the previous figure the presence of an outlier is clear. If we would like to remove that outlier, we would need to declare that in the report. For demonstration purposes, if we do not want to show the outlier in the plot, we have the option to <em>filter</em> the data using the <code>@subset</code> command.</p>
+<pre><code class="julia hljs">data(<span class=hljs-meta >@subset</span>(wcgs |&gt; dropmissing, :chol.&lt;<span class=hljs-number >500</span>) ) *
+mapping(
+	:chd =&gt; <span class=hljs-string >&quot;CHD&quot;</span>,
+    :chol =&gt; <span class=hljs-string >&quot;Cholesterol (mg/dl)&quot;</span>,
+    color=:chd =&gt; <span class=hljs-string >&quot;CHD&quot;</span>
+) *
+visual(BoxPlot) |&gt;
+draw</code></pre><pre><code class="plaintext hljs">LoadError: UndefVarError: `@subset` not defined
+in expression starting at none:1
+</code></pre>
+<p>We can compare distributions between groups &#40;levels&#41; of one categorical variable, stratified by groups of a second categorical variable.</p>
+<pre><code class="julia hljs">data(birth) *
+mapping(
+	:race =&gt; <span class=hljs-string >&quot;Ethnicity&quot;</span>,
+    :bwt =&gt; <span class=hljs-string >&quot;Birth weight (g)&quot;</span>,
+    color=:smoke =&gt; <span class=hljs-string >&quot;Smoking status&quot;</span>,
+    dodge = :smoke
+) *
+visual(BoxPlot) |&gt;
+draw</code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<p>In the previous case, we used <code>dodge</code> and different colours. We can also use faceting:</p>
+<pre><code class="julia hljs">data(birth) *
+mapping(
+	:Race =&gt; <span class=hljs-string >&quot;&quot;</span>,
+    :bwt =&gt; <span class=hljs-string >&quot;Birth weight (g)&quot;</span>,
+    color=:Race =&gt; <span class=hljs-string >&quot;Ethnicity&quot;</span>,
+    layout = :smoke
+) *
+visual(BoxPlot) |&gt;
+draw</code></pre><pre><code class="plaintext hljs">FigureGrid()</code></pre>
+<h3 id=strip_charts_and_rain_clouds ><a href="#strip_charts_and_rain_clouds" class=header-anchor >Strip Charts and Rain Clouds</a></h3>
+<p>When we want to compare groups and the number of observations is relatively small &#40;<em>n</em> &lt; 30&#41;, strip charts are superior than box-plots as we can show all observations.</p>
+<pre><code class="julia hljs">data(energy) *
+mapping(
+	:stature =&gt; <span class=hljs-string >&quot;Stature&quot;</span>,
+    :expend =&gt; <span class=hljs-string >&quot;Energy expenditure (MJ)&quot;</span>
+) *
+visual(
+    RainClouds, clouds=<span class=hljs-literal >nothing</span>,
+    plot_boxplots=<span class=hljs-literal >false</span>, markersize=<span class=hljs-number >7</span>
+) |&gt;
+draw</code></pre><pre><code class="plaintext hljs">UndefVarError: `energy` not defined
+</code></pre>
+<p>Umm, not perfect. In the previous plot, dots are plotted to the right side of the corresponding thick. An alternative is to use <em>rain clouds</em>: we show the distribution on the left side &#40;e.g., a violin plot&#41; and the observations on the right side &#40;i.e., a strip chart&#41;.</p>
+<pre><code class="julia hljs">data(energy) *
+mapping(
+	:stature =&gt; <span class=hljs-string >&quot;Stature&quot;</span>,
+    :expend =&gt; <span class=hljs-string >&quot;Energy expenditure (MJ)&quot;</span>
+) *
+visual(
+    RainClouds, clouds=violin,
+    plot_boxplots=<span class=hljs-literal >false</span>, markersize=<span class=hljs-number >7</span>
+) |&gt;
+draw</code></pre><pre><code class="plaintext hljs">UndefVarError: `energy` not defined
+</code></pre>
+<p>We can also call <code>R</code> and use a function from the <code>pubh</code> package.</p>
+<pre><code class="julia hljs">RCall.ijulia_setdevice(<span class=hljs-built_in >MIME</span>(<span class=hljs-string >&quot;image/svg+xml&quot;</span>); width=<span class=hljs-number >7</span>, height=<span class=hljs-number >5</span>)
+<span class=hljs-string >R&quot;&quot;&quot;
+require(&quot;pubh&quot;, quietly=TRUE)
+theme_set(sjPlot::theme_sjplot2(base_size = 14))
+energy = <span class=hljs-variable >$energy</span>
+print(
+    energy %&gt;%
+    strip_error(expend ~ stature, size=2) %&gt;%
+    gf_labs(
+        y = &quot;Energy expenditure (MJ)&quot;,
+        x = &quot;Stature&quot;
+    )
+)
+&quot;&quot;&quot;</span>;</code></pre><pre><code class="plaintext hljs">UndefVarError: `energy` not defined
+</code></pre>
+<p>With <code>R</code> it is also possible to add a significant line&#33;</p>
+<pre><code class="julia hljs"><span class=hljs-string >R&quot;&quot;&quot;
+print(
+    energy %&gt;%
+    strip_error(expend ~ stature, size=2) %&gt;%
+    gf_labs(
+        y = &quot;Energy expenditure (MJ)&quot;,
+        x = &quot;Stature&quot;
+    ) %&gt;%
+    gf_star(x1=1, x2=2, y1=13.3, y2=13.4, y3=13.5)
+)
+&quot;&quot;&quot;</span>;</code></pre><pre><code class="plaintext hljs">REvalError: Error in energy %&gt;% strip_error(expend ~ stature, size = 2) %&gt;% gf_labs(y = &quot;Energy expenditure (MJ)&quot;,  : 
+  could not find function &quot;%&gt;%&quot;
+Calls: print
+</code></pre>
+<p>Let&#39;s check at the effect of smoking status of mothers on the birth weights of their babies, by ethnicity:</p>
+<pre><code class="julia hljs"><span class=hljs-string >R&quot;&quot;&quot;
+birth = <span class=hljs-variable >$birth</span>
+print(
+    birth %&gt;%
+    strip_error(bwt ~ smoke, pch = ~Race, col = ~Race) %&gt;%
+    gf_labs(
+        x = &quot;Smoking status&quot;,
+        y = &quot;Birth weight (g)&quot;
+    )
+)
+&quot;&quot;&quot;</span>;</code></pre><pre><code class="plaintext hljs">REvalError: Error in birth %&gt;% strip_error(bwt ~ smoke, pch = ~Race, col = ~Race) %&gt;%  : 
+  could not find function &quot;%&gt;%&quot;
+Calls: print
+</code></pre>
 </p>
 <div class=page-foot >
     <div class=copyright >
-        &copy; Josie Athens. Last modified: July 12, 2023.
+        &copy; Josie Athens. Last modified: July 13, 2023.
     Website built with <a href="https://github.com/tlienart/Franklin.jl">Franklin.jl</a>, <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a> and the <a href="https://julialang.org">Julia programming language</a>.
     </div>
 </div>

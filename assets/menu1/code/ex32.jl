@@ -1,2 +1,3 @@
 # This file was generated, do not modify it. # hide
-@benchmark fibonacci(30)
+flu_melt = stack(flu, Not(:week));
+first(flu_melt, 5)

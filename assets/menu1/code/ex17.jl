@@ -1,5 +1,8 @@
 # This file was generated, do not modify it. # hide
-@chain kfm begin
-    select(Not(1, 3))
-	describe(:min, :max, :mean, :median, :std)
-end
+data(wcgs |> dropmissing) *
+mapping(
+	:chol => "Cholesterol (mg/dl)",
+	color=:chd => "CHD", dodge=:chd
+) *
+AoG.density(datalimits=extrema) |>
+draw

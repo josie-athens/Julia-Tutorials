@@ -1,4 +1,10 @@
 # This file was generated, do not modify it. # hide
-gdf = groupby(iris, :Species)
-subdf_setosa = gdf[1]
-describe(subdf_setosa, :mean, :median, :std, rel_dis => :cv)
+let
+	nms = names(iris, 1:4)
+	p = select(iris, nms .=> replace.(nms, "_" => " "))
+	pairplot(p => (
+		PairPlots.Scatter(color=:firebrick, markersize=5),
+		PairPlots.MarginDensity(),
+		)
+	)
+end

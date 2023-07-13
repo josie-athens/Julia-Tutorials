@@ -1,5 +1,9 @@
-2×2 Named Matrix{Int64}
-chd ╲ dib_pat │    A     B
-──────────────┼───────────
-CHD           │  177    78
-No CHD        │ 1406  1479
+┌───────┬────────────────┬───────┐
+│ names │ scitypes       │ types │
+├───────┼────────────────┼───────┤
+│ week  │ ScientificDate │ Date  │
+│ child │ Count          │ Int64 │
+│ young │ Count          │ Int64 │
+│ mid   │ Count          │ Int64 │
+│ old   │ Count          │ Int64 │
+└───────┴────────────────┴───────┘

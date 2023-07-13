@@ -1,8 +1,15 @@
 # This file was generated, do not modify it. # hide
-@memoize function fibonacci_mem(n)
-  if n <= 2
-      return 1
-    else
-      return fibonacci_mem(n - 1) + fibonacci_mem(n - 2)
-    end
+let
+    labels = ["Child" "Young" "Mid" "Old"]
+    plt = data(flu) *
+    mapping(
+        :week => "Date",
+        [:child, :young, :mid, :old],
+        color=dims(1) => renamer(labels) => "Age group"
+    ) *
+    visual(Lines)
+    draw(
+        plt,
+        axis=(xlabel="Date", ylabel="Number of cases")
+    )
 end
