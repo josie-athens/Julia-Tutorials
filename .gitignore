@@ -1,4 +1,6 @@
-__site/
+/.quarto/
+.Rproj.user
+.Rhistory
 .DS_Store
-node_modules/
-package-lock.json
+.DS_Store _book
+Rplots.pdf
