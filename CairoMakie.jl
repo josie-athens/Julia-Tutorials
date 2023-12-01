@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.30
+# v0.19.32
 
 using Markdown
 using InteractiveUtils
@@ -177,7 +177,8 @@ mapping(
 	:sbp => "SBP (mm Hg)", 
 	layout=:chd => "CHD"
 ) *
-histogram(bins=30, normalization=:pdf) |>
+histogram(bins=30, normalization=:pdf) *
+visual(color=:plum3) |>
 draw
 
 # ╔═╡ aa7b20a0-cf2f-4f56-b51c-2047cb2dd161

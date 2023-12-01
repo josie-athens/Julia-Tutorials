@@ -2,7 +2,7 @@
 Julia functions
 =#
 
-hint(text) = Markdown.MD(Markdown.Admonition("hint", "Answer", [text]))
+hint(text) = Markdown.MD(Markdown.Admonition("hint", "Hint", [text]))
 
 head(df) = first(df, 5)
 
@@ -189,7 +189,7 @@ Returns:
 - Vectors of the outcome variable, for each level of the group variable.
 """
 vec_group = function (df, outcome, group)
-    gps = DF.groupby(df, group)
+    gps = DataFrames.groupby(df, group)
     y = map(keys(gps)) do key
         collect(skipmissing(gps[key][!, outcome]))
     end

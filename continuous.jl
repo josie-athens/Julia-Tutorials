@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.30
+# v0.19.32
 
 using Markdown
 using InteractiveUtils
@@ -9,9 +9,9 @@ using PlutoUI; PlutoUI.TableOfContents(aside=true, title="📚 Contents")
 
 # ╔═╡ 45a17582-72ed-4b60-9ab7-0e3caf91e2c8
 begin
-	using StatsKit, AnovaGLM, Effects, MultipleTesting
-	using DataFrameMacros, Chain, MLJ
-	using RCall, TexTables
+	using StatsBase, Distributions, HypothesisTests
+	using AnovaGLM, Effects, MultipleTesting
+	using DataFrames, Tidier, TexTables, RCall, MLJ
 	using MLJ: schema
 end
 
@@ -33,7 +33,7 @@ md"""
 !!! note \"Josie Athens\"
 
 	- Systems Biology Enabling Platform, **AgRresearch Ltd**
-	- 30 August 2023
+	- 1 December 2023
 """
 
 # ╔═╡ 953e1df5-0f62-4832-b7c0-47c216ac95a5
@@ -43,11 +43,11 @@ md"""
 [Return to Main Menu](index.html)
 """
 
-# ╔═╡ 86ffc0f1-b781-492f-b518-d09187088b40
-@rimport pubh
-
 # ╔═╡ f682fce2-327c-4e7c-b712-ceb99ef9df5c
-@rimport readr
+begin
+	@rimport readr
+	@rimport pubh
+end
 
 # ╔═╡ 98a1299b-282f-4a2e-a656-4416d7f61377
 md"""
@@ -100,7 +100,7 @@ r3.(ci_mean(bernard.temp0))
 md"What about the 95% CI around the mean temperature after 36 hr of treatment?"
 
 # ╔═╡ aa8bb4b0-5c26-4d5f-858d-c00e234cd162
-r3.(ci_mean(@subset(bernard, !ismissing(:temp10)).temp10))
+r3.(ci_mean(@filter(bernard, !ismissing(temp10)).temp10))
 
 # ╔═╡ abec6086-b66d-45aa-bed1-305b5b5c695f
 md"""
@@ -140,7 +140,7 @@ md"""
 
 # ╔═╡ c7cf1d8c-bc0e-4032-b935-a9c6ea9298d6
 md"""
-!!! important
+!!! note
 
 	There are deviations from normality in baseline temperature. Lower temperatures are particularly very unlikely to come from a normal distribution.
 
@@ -160,8 +160,9 @@ md"""
 """
 
 # ╔═╡ 3b506761-587c-4853-bf12-d605ea889e82
- placebo = @chain @subset(bernard, :treat .== "Placebo") begin
-	 select(:temp0, :temp10)
+ placebo = @chain bernard begin
+	 @filter(treat == "Placebo")
+	 @select(temp0, temp10)
  end;
 
 # ╔═╡ dd31202f-4c60-4aba-a6bb-1e2972830718
@@ -188,8 +189,10 @@ First, we calculate the difference in temperatures.
 
 # ╔═╡ d54f8e2c-7c1f-44df-89a8-01bfb2711f26
 begin
-	bern = @select(bernard, :temp0, :temp10, :treat)
-	@transform!(bern, :temp_change = :temp10 - :temp0)
+	bern = @chain bernard begin
+		@select(temp0, temp10, treat)
+		@mutate(temp_change = temp10 - temp0)
+	end
 	dropmissing!(bern)
 	bern |> head
 end
@@ -201,15 +204,12 @@ One of the assumptions is that the distribution of `temp_change` is normal for e
 First, we perform a standard descriptive analysis on `temp_change`.
 """
 
-# ╔═╡ 0a49603f-d9b9-47dd-82ec-7a23c9e25c93
-summarize_by(bern, :treat, :temp_change)
-
 # ╔═╡ 46246b07-f620-4683-aa9c-59082cdd246a
 pubh.estat(@formula(temp_change ~ treat), data=bern) |> rcopy
 
 # ╔═╡ 80245239-d03a-46b6-9543-ce0efed87a7f
 md"""
-!!! warning \"Exercise\"
+!!! note \"Exercise\"
 
 	Construct a QQ-plot of `temp_change` from subjects by treatment group, against the standard normal distribution to check for the normality assumption.
 """
@@ -249,8 +249,8 @@ md"We perform a variance test with `VarianceFTest`."
 
 # ╔═╡ d631b4b5-790d-4f96-b1bb-e9f4574d3d3a
 VarianceFTest(
-  	@subset(bern, :treat.=="Ibuprofen").temp_change,
-  	@subset(bern, :treat.=="Placebo").temp_change
+  	@filter(bern, treat == "Ibuprofen").temp_change,
+  	@filter(bern, treat == "Placebo").temp_change
 ) |> pvalue |> r3
 
 # ╔═╡ d5b02686-1780-4181-b6d1-fd99ee4b4402
@@ -303,42 +303,42 @@ energy = rcopy(R"ISwR::energy"); energy |> schema
 
 # ╔═╡ f659cb9f-25df-4230-88a1-a2513a2b3132
 md"""
-!!! warning \"Exercise\"
+!!! note \"Exercise\"
 
 	Calculate descriptive statistics for variable `expend` by `stature` from the `energy` dataset.
 """
 
 # ╔═╡ 19b6a4f8-313c-4484-ba53-2be2e8246011
 md"""
-```julia
-summarize_by(energy, :stature, :expend)
-```
-""" |> hint
-
-# ╔═╡ f30fe277-55f8-4ce4-a379-c14028221ed6
-summarize_by(energy, :stature, :expend)
+!!! hint
+	```julia
+	pubh.estat(@formula(expend~stature), data=energy) |> rcopy
+	```
+"""
 
 # ╔═╡ 30709ba4-bd51-4a54-b00a-083b53263373
 pubh.estat(@formula(expend~stature), data=energy) |> rcopy
 
 # ╔═╡ ddad013c-f146-451d-b4bb-d7c468154cdf
 md"""
-!!! tip \"Question\"
+!!! warning \"Question\"
 
 	What are your general observations from the descriptive analysis?
 """
 
 # ╔═╡ d0404fcd-6b09-4910-a40e-2534b1388505
 md"""
-On average, obese women have more energy expenditure than lean woman, but we do not know if that difference is significant.
-""" |> hint
+!!! hint
+
+	On average, obese women have more energy expenditure than lean woman, but we do not know if that difference is significant.
+"""
 
 # ╔═╡ 30d44015-5bde-4549-a31c-7dd2774e22fe
 md"Given that our samples are relatively small (less than 30 observations per group), the best way to graphically compare distributions is by strip charts."
 
 # ╔═╡ 99f33bab-5ccd-459d-a5a3-7b75554e7074
 md"""
-!!! warning \"Exercise\"
+!!! note \"Exercise\"
 
 	Construct a strip chart comparing the energy expenditure by stature.
 """
@@ -447,18 +447,12 @@ md"""
 # ╔═╡ d36891cc-0ebe-4251-b927-581f24312539
 md"""
 ```julia
-@transform!(
-  hodgkin,
-  :ratio = :CD4 / :CD8
-);
+hodgkin.ratio = hodgkin.CD4 ./ hodgkin.CD8;
 ```
 """ |> hint
 
 # ╔═╡ d2f46f92-838f-4c75-9a49-b57d73f76b9d
-@transform!(
-  hodgkin,
-  :ratio = :CD4 / :CD8
-);
+hodgkin.ratio = hodgkin.CD4 ./ hodgkin.CD8;
 
 # ╔═╡ 66a2377d-83d7-44b2-8955-50a82b150d41
 md"""
@@ -470,12 +464,12 @@ md"""
 # ╔═╡ 3c52c5b3-d397-48f9-8520-54aeadc30817
 md"""
 ```julia
-summarize_by(hodgkin, :Group, :ratio)
+pubh.estat(@formula(ratio ~ Group), data=hodgkin) |> rcopy
 ```
 """ |> hint
 
-# ╔═╡ 6f1532f9-c624-4b5a-8a93-554e2134b37c
-summarize_by(hodgkin, :Group, :ratio)
+# ╔═╡ 4c27fcdf-e6bd-4fa5-bef9-36f8f0e4957a
+pubh.estat(@formula(ratio ~ Group), data=hodgkin) |> rcopy
 
 # ╔═╡ d179dfdb-455c-4afe-bdde-a5b9eb314ccb
 md"Let's compare the distributions of the ratios with a QQ-Plot:"
@@ -483,8 +477,8 @@ md"Let's compare the distributions of the ratios with a QQ-Plot:"
 # ╔═╡ 786d9da2-aa32-432f-8bf8-886b328f10b5
 let
   	hodg = DataFrame(
-    	x = @subset(hodgkin, :Group == "Hodgkin").ratio,
-    	y = @subset(hodgkin, :Group == "Non-Hodgkin").ratio
+    	x = @filter(hodgkin, Group == "Hodgkin").ratio,
+    	y = @filter(hodgkin, Group == "Non-Hodgkin").ratio
   	)
   
   	data(hodg) *
@@ -577,8 +571,8 @@ smokew = readr.read_rds("data/smokew.rds") |> rcopy; smokew |> schema
 # ╔═╡ f04892f9-cef4-4168-aa55-51eac5096a3e
 md"We can start with descriptive statistics."
 
-# ╔═╡ f723f7f5-9477-4b71-8327-7eb264f103cb
-summarize_by(smokew, :smoking, :bweight)
+# ╔═╡ 18f11e0b-e6e2-499b-ba01-e35f4b8ef62d
+pubh.estat(@formula(bweight ~ smoking), data=smokew) |> rcopy
 
 # ╔═╡ 072b0791-daac-4eb5-ac51-5bc74b45973c
 md"Given the number of observations per group, we use a strip chart to compare the four groups graphically."
@@ -769,10 +763,10 @@ begin
 	dropmissing!(air)
 	air.Month = recode(
     	air.Month,
-    	5 => "May",
+   		5 => "May",
     	6 => "Jun",
     	7 => "Jul",
-	    8 => "Aug",
+    	8 => "Aug",
     	9 => "Sep"
 	)
 	coerce!(air, :Month => Multiclass)
@@ -790,12 +784,12 @@ md"""
 # ╔═╡ 11e86b74-9e4a-4e0d-a228-e1f054faf55c
 md"""
 ```julia
-summarize_by(air, :Month, :Ozone)
+pubh.estat(@formula(Ozone ~ Month), data = air) |> rcopy
 ```
 """ |> hint
 
 # ╔═╡ 36a963d5-b437-4682-a6d6-4fe68d0099d7
-summarize_by(air, :Month, :Ozone)
+pubh.estat(@formula(Ozone ~ Month), data = air) |> rcopy
 
 # ╔═╡ a76e3ed8-2d46-47d4-9c9f-ffc7319defcf
 md"""
@@ -942,12 +936,12 @@ md"""
 # ╔═╡ 52dd9fb8-c692-414d-81a8-ef9c9489eb77
 md"""
 ```julia
-summarize_by(fent, :group, :pain)
+pubh.estat(@formula(pain ~ group), data=fent) |> rcopy
 ```
 """ |> hint
 
 # ╔═╡ e7fb28d9-e4dc-46e1-9220-25e0a07a54dc
-summarize_by(fent, :group, :pain)
+pubh.estat(@formula(pain ~ group), data=fent) |> rcopy
 
 # ╔═╡ 10e33689-61c6-474e-9d82-fa342f105425
 md"""
@@ -992,15 +986,16 @@ end
 
 # ╔═╡ ffa17295-5587-40a9-8433-aade6069aa26
 md"""
-!!! tip \"Question\"
+!!! warning \"Question\"
 
 	What is your main concern regarding your descriptive analysis?
 """
 
 # ╔═╡ 352cfd84-01f3-408a-a01e-0ccde2556d71
 md"""
-Dispersion of pain reduction is greater in the Untreated group than in the other two groups. The sample size is relatively small for the control limit theorem to compensate.
-""" |> hint
+!!! hint
+	Dispersion of pain reduction is greater in the Untreated group than in the other two groups. The sample size is relatively small for the control limit theorem to compensate.
+"""
 
 # ╔═╡ d0197886-a129-4812-a7fd-020f9df476cd
 md"We are going to perform the non-parametric, Kruskal-Wallis test, to test if the differences in pain reduction between groups are statistically significant or not."
@@ -1023,40 +1018,49 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 AlgebraOfGraphics = "cbdf2221-f076-402e-a563-3d30da359d67"
 AnovaGLM = "0a47a8e3-ec57-451e-bddb-e0be9d22772b"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
-Chain = "8be319e6-bccf-4806-a6f7-6fae938471bc"
-DataFrameMacros = "75880514-38bc-4a95-a458-c2aea5a3a702"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Effects = "8f03c58b-bd97-4933-a826-f71b64d2cca2"
+HypothesisTests = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
 MLJ = "add582a8-e3ab-11e8-2d5e-e98b27df1bc7"
 MakieThemes = "e296ed71-da82-5faf-88ab-0034a9761098"
 MultipleTesting = "f8716d33-7c4a-5097-896f-ce0ecbd3ef6b"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 RCall = "6f49c342-dc21-5d91-9882-a32aef131414"
-StatsKit = "2cb19f9e-ec4d-5c53-8573-a4542a68d3f0"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 TexTables = "ebf5ac4f-3ec1-555f-9ac9-3d72ed88c471"
+Tidier = "f0413319-3358-4bb0-8e7c-0c83523a93bd"
 
 [compat]
 AlgebraOfGraphics = "~0.6.16"
 AnovaGLM = "~0.2.2"
 CairoMakie = "~0.10.7"
-Chain = "~0.5.0"
-DataFrameMacros = "~0.4.1"
+DataFrames = "~1.6.1"
+Distributions = "~0.25.103"
 Effects = "~1.0.2"
+HypothesisTests = "~0.11.0"
 MLJ = "~0.20.0"
 MakieThemes = "~0.1.0"
 MultipleTesting = "~0.6.0"
 PlutoUI = "~0.7.52"
 RCall = "~0.13.15"
-StatsKit = "~0.3.1"
+StatsBase = "~0.33.21"
 TexTables = "~0.2.7"
+Tidier = "~1.0.1"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.9.3"
+julia_version = "1.9.4"
 manifest_format = "2.0"
-project_hash = "d28d4daa9613abac1c61b83540330d5143163fbd"
+project_hash = "878c1f0b098d46b07f5a6a3e566aad8c8f4a3122"
+
+[[deps.ANSIColoredPrinters]]
+git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
+uuid = "a4c015fc-c6ff-483c-b24f-f7ea428134e9"
+version = "0.0.1"
 
 [[deps.ARFFFiles]]
 deps = ["CategoricalArrays", "Dates", "Parsers", "Tables"]
@@ -1133,18 +1137,6 @@ version = "2.3.0"
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
 version = "1.1.1"
 
-[[deps.Arpack]]
-deps = ["Arpack_jll", "Libdl", "LinearAlgebra", "Logging"]
-git-tree-sha1 = "9b9b347613394885fd1c8c7729bfc60528faa436"
-uuid = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
-version = "0.5.4"
-
-[[deps.Arpack_jll]]
-deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "OpenBLAS_jll", "Pkg"]
-git-tree-sha1 = "5ba6c757e8feccf03a1554dfaf3e26b3cfc7fd5e"
-uuid = "68821587-b530-5797-8361-c406ea357684"
-version = "3.5.1+1"
-
 [[deps.ArrayInterface]]
 deps = ["Adapt", "LinearAlgebra", "Requires", "SparseArrays", "SuiteSparse"]
 git-tree-sha1 = "f83ec24f76d4c8f525099b2ac475fc098138ec31"
@@ -1166,18 +1158,6 @@ version = "7.4.11"
     GPUArraysCore = "46192b85-c4d5-4398-a991-12ede77f4527"
     StaticArraysCore = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
     Tracker = "9f7883ad-71c0-57eb-9f7f-b5c9e6d3789c"
-
-[[deps.Arrow]]
-deps = ["ArrowTypes", "BitIntegers", "CodecLz4", "CodecZstd", "ConcurrentUtilities", "DataAPI", "Dates", "EnumX", "LoggingExtras", "Mmap", "PooledArrays", "SentinelArrays", "Tables", "TimeZones", "TranscodingStreams", "UUIDs"]
-git-tree-sha1 = "954666e252835c4cf8819ce4ffaf31073c1b7233"
-uuid = "69666777-d1a9-59fb-9406-91d4454c9d45"
-version = "2.6.2"
-
-[[deps.ArrowTypes]]
-deps = ["Sockets", "UUIDs"]
-git-tree-sha1 = "8c37bfdf1b689c6677bbfc8986968fe641f6a299"
-uuid = "31f734f8-188a-4ce0-8406-c8a06bd891cd"
-version = "2.2.2"
 
 [[deps.Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
@@ -1234,28 +1214,10 @@ git-tree-sha1 = "aebf55e6d7795e02ca500a689d326ac979aaf89e"
 uuid = "9718e550-a3fa-408a-8086-8db961cd8217"
 version = "0.1.1"
 
-[[deps.BenchmarkTools]]
-deps = ["JSON", "Logging", "Printf", "Profile", "Statistics", "UUIDs"]
-git-tree-sha1 = "d9a9701b899b30332bbcb3e1679c41cce81fb0e8"
-uuid = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
-version = "1.3.2"
-
 [[deps.BitFlags]]
 git-tree-sha1 = "43b1a4a8f797c1cddadf60499a8a077d4af2cd2d"
 uuid = "d1d4a3ce-64b1-5f1a-9ba4-7e7e69966f35"
 version = "0.1.7"
-
-[[deps.BitIntegers]]
-deps = ["Random"]
-git-tree-sha1 = "abb894fb55122b4604af0d460d3018e687a60963"
-uuid = "c3b6d118-76ef-56ca-8cc7-ebb389d030a1"
-version = "0.3.0"
-
-[[deps.Bootstrap]]
-deps = ["DataFrames", "Distributions", "Random", "Statistics", "StatsBase", "StatsModels"]
-git-tree-sha1 = "fb4bdaa6c24fea362cc54965c3f645f7cfac659f"
-uuid = "e28b5b4c-05e8-5b66-bc03-6f0c0a0a06e0"
-version = "2.3.3"
 
 [[deps.Bzip2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1349,34 +1311,16 @@ git-tree-sha1 = "e30f2f4e20f7f186dc36529910beaedc60cfa644"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 version = "1.16.0"
 
-[[deps.Clustering]]
-deps = ["Distances", "LinearAlgebra", "NearestNeighbors", "Printf", "Random", "SparseArrays", "Statistics", "StatsBase"]
-git-tree-sha1 = "42fe66dbc8f1d09a44aa87f18d26926d06a35f84"
-uuid = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
-version = "0.15.3"
-
-[[deps.CodecBzip2]]
-deps = ["Bzip2_jll", "Libdl", "TranscodingStreams"]
-git-tree-sha1 = "2e62a725210ce3c3c2e1a3080190e7ca491f18d7"
-uuid = "523fee87-0ab8-5b00-afb7-3ecf72e48cfd"
-version = "0.7.2"
-
-[[deps.CodecLz4]]
-deps = ["Lz4_jll", "TranscodingStreams"]
-git-tree-sha1 = "59fe0cb37784288d6b9f1baebddbf75457395d40"
-uuid = "5ba52731-8f18-5e0d-9241-30f10d1ec561"
-version = "0.4.0"
+[[deps.Cleaner]]
+deps = ["Tables"]
+git-tree-sha1 = "f0ebda9a8284c10ec10df406f669edca4c69892f"
+uuid = "caabdcdb-0ab6-47cf-9f62-08858e44f38f"
+version = "0.5.0"
 
 [[deps.CodecZlib]]
 deps = ["TranscodingStreams", "Zlib_jll"]
 git-tree-sha1 = "02aa26a4cf76381be7f66e020a3eddeb27b0a092"
 uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
-version = "0.7.2"
-
-[[deps.CodecZstd]]
-deps = ["CEnum", "TranscodingStreams", "Zstd_jll"]
-git-tree-sha1 = "849470b337d0fa8449c21061de922386f32949d9"
-uuid = "6b39b394-51ab-5f42-8807-6242bab2b4c2"
 version = "0.7.2"
 
 [[deps.ColorBrewer]]
@@ -1500,11 +1444,11 @@ git-tree-sha1 = "8da84edb865b0b5b0100c0666a9bc9a0b71c553c"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.15.0"
 
-[[deps.DataFrameMacros]]
-deps = ["DataFrames", "MacroTools"]
-git-tree-sha1 = "5275530d05af21f7778e3ef8f167fb493999eea1"
-uuid = "75880514-38bc-4a95-a458-c2aea5a3a702"
-version = "0.4.1"
+[[deps.DataDeps]]
+deps = ["HTTP", "Libdl", "Reexport", "SHA", "p7zip_jll"]
+git-tree-sha1 = "6e8d74545d34528c30ccd3fa0f3c00f8ed49584c"
+uuid = "124859b0-ceae-595e-8997-d05f6a7a8dfe"
+version = "0.7.11"
 
 [[deps.DataFrames]]
 deps = ["Compat", "DataAPI", "DataStructures", "Future", "InlineStrings", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrecompileTools", "PrettyTables", "Printf", "REPL", "Random", "Reexport", "SentinelArrays", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
@@ -1581,24 +1525,32 @@ deps = ["Random", "Serialization", "Sockets"]
 uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
-deps = ["FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "e76a3281de2719d7c81ed62c6ea7057380c87b1d"
+deps = ["FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns"]
+git-tree-sha1 = "a6c00f894f24460379cb7136633cef54ac9f6f4a"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.98"
+version = "0.25.103"
 
     [deps.Distributions.extensions]
     DistributionsChainRulesCoreExt = "ChainRulesCore"
     DistributionsDensityInterfaceExt = "DensityInterface"
+    DistributionsTestExt = "Test"
 
     [deps.Distributions.weakdeps]
     ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
     DensityInterface = "b429d917-457f-4dbc-8f4c-0cc954292b1d"
+    Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
 git-tree-sha1 = "2fb1e02f2b635d0845df5d7c167fec4dd739b00d"
 uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.9.3"
+
+[[deps.Documenter]]
+deps = ["ANSIColoredPrinters", "Base64", "Dates", "DocStringExtensions", "IOCapture", "InteractiveUtils", "JSON", "LibGit2", "Logging", "Markdown", "REPL", "Test", "Unicode"]
+git-tree-sha1 = "39fd748a73dce4c05a9655475e437170d8fb1b67"
+uuid = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+version = "0.27.25"
 
 [[deps.Downloads]]
 deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
@@ -1656,11 +1608,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "4558ab818dcceaab612d1bb8c19cee87eda2b83c"
 uuid = "2e619515-83b5-522b-bb60-26c02a35a201"
 version = "2.5.0+0"
-
-[[deps.ExprTools]]
-git-tree-sha1 = "c1d06d129da9f55715c6c212866f5b1bddc5fa00"
-uuid = "e2ba6199-217a-4e67-a87a-7c52f15ade04"
-version = "0.1.9"
 
 [[deps.Extents]]
 git-tree-sha1 = "5e1e4c53fa39afe63a7d356e30452249365fba99"
@@ -2044,9 +1991,9 @@ version = "0.21.4"
 
 [[deps.JSON3]]
 deps = ["Dates", "Mmap", "Parsers", "PrecompileTools", "StructTypes", "UUIDs"]
-git-tree-sha1 = "5b62d93f2582b09e469b3099d839c2d2ebf5066d"
+git-tree-sha1 = "95220473901735a0f4df9d1ca5b171b568b2daa3"
 uuid = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
-version = "1.13.1"
+version = "1.13.2"
 
 [[deps.JpegTurbo]]
 deps = ["CEnum", "FileIO", "ImageCore", "JpegTurbo_jll", "TOML"]
@@ -2149,12 +2096,12 @@ version = "0.1.0"
 [[deps.LibCURL]]
 deps = ["LibCURL_jll", "MozillaCACerts_jll"]
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
-version = "0.6.3"
+version = "0.6.4"
 
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
-version = "7.84.0+0"
+version = "8.4.0+0"
 
 [[deps.LibGit2]]
 deps = ["Base64", "NetworkOptions", "Printf", "SHA"]
@@ -2163,7 +2110,7 @@ uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
 [[deps.LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
 uuid = "29816b5a-b9ab-546f-933c-edad1886dfa8"
-version = "1.10.2+0"
+version = "1.11.0+1"
 
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
@@ -2256,12 +2203,6 @@ deps = ["Dates", "Logging"]
 git-tree-sha1 = "cedb76b37bc5a6c702ade66be44f831fa23c681e"
 uuid = "e6f89c97-d47a-5376-807f-9c37f3926c36"
 version = "1.0.0"
-
-[[deps.Lz4_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "5d494bc6e85c4c9b626ee0cab05daa4085486ab1"
-uuid = "5ced341a-0733-55b8-9ab6-a4889d929147"
-version = "1.9.3+0"
 
 [[deps.MIMEs]]
 git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
@@ -2376,22 +2317,16 @@ version = "0.4.2"
 deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
+[[deps.MarketData]]
+deps = ["CSV", "Dates", "HTTP", "JSON3", "Random", "Reexport", "TimeSeries"]
+git-tree-sha1 = "715536b6af6292883128e22857c83291e30fea25"
+uuid = "945b72a4-3b13-509d-9b46-1525bb5c06de"
+version = "0.13.12"
+
 [[deps.Match]]
 git-tree-sha1 = "1d9bc5c1a6e7ee24effb93f175c9342f9154d97f"
 uuid = "7eb4fadd-790c-5f42-8a69-bfa0b872bfbf"
 version = "1.2.0"
-
-[[deps.MathOptInterface]]
-deps = ["BenchmarkTools", "CodecBzip2", "CodecZlib", "DataStructures", "ForwardDiff", "JSON", "LinearAlgebra", "MutableArithmetics", "NaNMath", "OrderedCollections", "PrecompileTools", "Printf", "SparseArrays", "SpecialFunctions", "Test", "Unicode"]
-git-tree-sha1 = "5c5cd501ae1d76d3ccd7c7e6b4325a15dde7f31c"
-uuid = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
-version = "1.18.0"
-
-[[deps.MathProgBase]]
-deps = ["LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "9abbe463a1e9fc507f12a69e7f29346c2cdc472c"
-uuid = "fdba3010-5040-5b88-9595-932c9decdf73"
-version = "0.7.8"
 
 [[deps.MathTeXEngine]]
 deps = ["AbstractTrees", "Automa", "DataStructures", "FreeTypeAbstraction", "GeometryBasics", "LaTeXStrings", "REPL", "RelocatableFolders", "Test", "UnicodeFun"]
@@ -2422,20 +2357,8 @@ git-tree-sha1 = "f66bdc5de519e8f8ae43bdc598782d35a25b1272"
 uuid = "e1d29d7a-bbdc-5cf2-9ac0-f12de2c33e28"
 version = "1.1.0"
 
-[[deps.MixedModels]]
-deps = ["Arrow", "DataAPI", "Distributions", "GLM", "JSON3", "LazyArtifacts", "LinearAlgebra", "Markdown", "NLopt", "PooledArrays", "ProgressMeter", "Random", "SnoopPrecompile", "SparseArrays", "StaticArrays", "Statistics", "StatsAPI", "StatsBase", "StatsFuns", "StatsModels", "StructTypes", "Tables"]
-git-tree-sha1 = "fa0816c673c5da589ab8c7bbbd0b0f358ddca53b"
-uuid = "ff71e718-51f3-5ec2-a782-8ffcbfa3c316"
-version = "4.8.2"
-
 [[deps.Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
-
-[[deps.Mocking]]
-deps = ["Compat", "ExprTools"]
-git-tree-sha1 = "4cc0c5a83933648b615c36c2b956d94fda70641e"
-uuid = "78c3b35d-d492-501b-9361-3d52fe80e533"
-version = "0.7.7"
 
 [[deps.Mods]]
 git-tree-sha1 = "61be59e4daffff43a8cec04b5e0dc773cbb5db3a"
@@ -2463,35 +2386,11 @@ git-tree-sha1 = "8d852646862c96e226367ad10c8af56099b4047e"
 uuid = "3b2b4ff1-bcff-5658-a3ee-dbcf1ce5ac09"
 version = "0.4.4"
 
-[[deps.MultivariateStats]]
-deps = ["Arpack", "LinearAlgebra", "SparseArrays", "Statistics", "StatsAPI", "StatsBase"]
-git-tree-sha1 = "68bf5103e002c44adfd71fea6bd770b3f0586843"
-uuid = "6f286f6a-111f-5878-ab1e-185364afe411"
-version = "0.10.2"
-
-[[deps.MutableArithmetics]]
-deps = ["LinearAlgebra", "SparseArrays", "Test"]
-git-tree-sha1 = "964cb1a7069723727025ae295408747a0b36a854"
-uuid = "d8a4904e-b15c-11e9-3269-09a3773c0cb0"
-version = "1.3.0"
-
 [[deps.NLSolversBase]]
 deps = ["DiffResults", "Distributed", "FiniteDiff", "ForwardDiff"]
 git-tree-sha1 = "a0b464d183da839699f4c79e7606d9d186ec172c"
 uuid = "d41bc354-129a-5804-8e4c-c37616107c6c"
 version = "7.8.3"
-
-[[deps.NLopt]]
-deps = ["MathOptInterface", "MathProgBase", "NLopt_jll"]
-git-tree-sha1 = "5a7e32c569200a8a03c3d55d286254b0321cd262"
-uuid = "76087f3c-5699-56af-9a33-bf431cd00edd"
-version = "0.6.5"
-
-[[deps.NLopt_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "9b1f15a08f9d00cdb2761dcfa6f453f5d0d6f973"
-uuid = "079eb43e-fd8e-5478-9966-2cf3e3edb778"
-version = "2.7.1+0"
 
 [[deps.NNlib]]
 deps = ["Adapt", "Atomix", "ChainRulesCore", "GPUArraysCore", "KernelAbstractions", "LinearAlgebra", "Pkg", "Random", "Requires", "Statistics"]
@@ -2522,12 +2421,6 @@ deps = ["PrettyPrint"]
 git-tree-sha1 = "1a0fa0e9613f46c9b8c11eee38ebb4f590013c5e"
 uuid = "71a1bf82-56d0-4bbc-8a3c-48b961074391"
 version = "0.1.5"
-
-[[deps.NearestNeighbors]]
-deps = ["Distances", "StaticArrays"]
-git-tree-sha1 = "2c3726ceb3388917602169bed973dbc97f1b51a8"
-uuid = "b8a86587-4115-5ab1-83bc-aa920d37bbce"
-version = "0.4.13"
 
 [[deps.Netpbm]]
 deps = ["FileIO", "ImageCore", "ImageMetadata"]
@@ -2648,6 +2541,12 @@ git-tree-sha1 = "0fac6313486baae819364c52b4f483450a9d793f"
 uuid = "5432bcbf-9aad-5242-b902-cca2824c8663"
 version = "0.5.12"
 
+[[deps.PalmerPenguins]]
+deps = ["CSV", "DataDeps"]
+git-tree-sha1 = "e7c581b0e29f7d35f47927d65d4965b413c10d90"
+uuid = "8b842266-38fa-440a-9b57-31493939ab85"
+version = "0.1.4"
+
 [[deps.Pango_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "FriBidi_jll", "Glib_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "84a314e3926ba9ec66ac097e3635e270986b0f10"
@@ -2711,12 +2610,16 @@ deps = ["LinearAlgebra", "RecipesBase"]
 git-tree-sha1 = "3aa2bb4982e575acd7583f01531f241af077b163"
 uuid = "f27b6e38-b328-58d1-80ce-0feddd5e7a45"
 version = "3.2.13"
-weakdeps = ["ChainRulesCore", "MakieCore", "MutableArithmetics"]
 
     [deps.Polynomials.extensions]
     PolynomialsChainRulesCoreExt = "ChainRulesCore"
     PolynomialsMakieCoreExt = "MakieCore"
     PolynomialsMutableArithmeticsExt = "MutableArithmetics"
+
+    [deps.Polynomials.weakdeps]
+    ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+    MakieCore = "20f20a25-4f0e-4fdf-b5d1-57303727442b"
+    MutableArithmetics = "d8a4904e-b15c-11e9-3269-09a3773c0cb0"
 
 [[deps.PooledArrays]]
 deps = ["DataAPI", "Future"]
@@ -2767,10 +2670,6 @@ version = "0.5.4"
 [[deps.Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
-
-[[deps.Profile]]
-deps = ["Printf"]
-uuid = "9abbd945-dff8-562f-b5e8-e1ebf5ef1b79"
 
 [[deps.ProgressMeter]]
 deps = ["Distributed", "Printf"]
@@ -2862,19 +2761,21 @@ version = "0.4.0+0"
 
 [[deps.Roots]]
 deps = ["ChainRulesCore", "CommonSolve", "Printf", "Setfield"]
-git-tree-sha1 = "de432823e8aab4dd1a985be4be768f95acf152d4"
+git-tree-sha1 = "0f1d92463a020321983d04c110f476c274bafe2e"
 uuid = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
-version = "2.0.17"
+version = "2.0.22"
 
     [deps.Roots.extensions]
     RootsForwardDiffExt = "ForwardDiff"
     RootsIntervalRootFindingExt = "IntervalRootFinding"
     RootsSymPyExt = "SymPy"
+    RootsSymPyPythonCallExt = "SymPyPythonCall"
 
     [deps.Roots.weakdeps]
     ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
     IntervalRootFinding = "d2bf35a9-74e0-55ec-b149-d360ff49b807"
     SymPy = "24249f21-da20-56a4-8eb1-6a02cf4ae2e6"
+    SymPyPythonCall = "bc8888f7-b21e-4b7c-a06a-5d9c9496438c"
 
 [[deps.RoundingEmulator]]
 git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
@@ -3007,12 +2908,6 @@ git-tree-sha1 = "2da10356e31327c7096832eb9cd86307a50b1eb6"
 uuid = "45858cf5-a6b0-47a3-bbea-62219f50df47"
 version = "0.1.3"
 
-[[deps.SnoopPrecompile]]
-deps = ["Preferences"]
-git-tree-sha1 = "e760a70afdcd461cf01a575947738d359234665c"
-uuid = "66db9d55-30c0-4569-8b51-7e840670fc0c"
-version = "1.0.3"
-
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
 
@@ -3132,12 +3027,6 @@ version = "1.3.0"
     ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
     InverseFunctions = "3587e190-3f89-42d0-90ee-14403ec27112"
 
-[[deps.StatsKit]]
-deps = ["Bootstrap", "CSV", "CategoricalArrays", "Clustering", "DataFrames", "Distances", "Distributions", "GLM", "HypothesisTests", "KernelDensity", "Loess", "MixedModels", "MultivariateStats", "Reexport", "ShiftedArrays", "Statistics", "StatsBase", "TimeSeries"]
-git-tree-sha1 = "9888fa88a0ea16dd397af86d906fee56f4d1dd06"
-uuid = "2cb19f9e-ec4d-5c53-8573-a4542a68d3f0"
-version = "0.3.1"
-
 [[deps.StatsModels]]
 deps = ["DataAPI", "DataStructures", "LinearAlgebra", "Printf", "REPL", "ShiftedArrays", "SparseArrays", "StatsBase", "StatsFuns", "Tables"]
 git-tree-sha1 = "a5e15f27abd2692ccb61a99e0854dfb7d48017db"
@@ -3208,6 +3097,41 @@ git-tree-sha1 = "b1adb560810b2cd88e505f50e02b245730447149"
 uuid = "ebf5ac4f-3ec1-555f-9ac9-3d72ed88c471"
 version = "0.2.7"
 
+[[deps.Tidier]]
+deps = ["Reexport", "TidierCats", "TidierData", "TidierDates", "TidierPlots", "TidierStrings"]
+git-tree-sha1 = "c7a6c4db043a4d27a4150a3ea07b03d3a9a158ca"
+uuid = "f0413319-3358-4bb0-8e7c-0c83523a93bd"
+version = "1.0.1"
+
+[[deps.TidierCats]]
+deps = ["CategoricalArrays", "DataFrames", "Reexport", "Statistics"]
+git-tree-sha1 = "c4660f2c0ffd733ec243ea0a5447bd3bfae40c6d"
+uuid = "79ddc9fe-4dbf-4a56-a832-df41fb326d23"
+version = "0.1.1"
+
+[[deps.TidierData]]
+deps = ["Chain", "Cleaner", "DataFrames", "MacroTools", "Reexport", "ShiftedArrays", "Statistics"]
+git-tree-sha1 = "a4a83e2f5083ee6b18e0f01c99b4483b4f7978a2"
+uuid = "fe2206b3-d496-4ee9-a338-6a095c4ece80"
+version = "0.10.0"
+
+[[deps.TidierDates]]
+deps = ["Dates", "Documenter", "Reexport"]
+git-tree-sha1 = "ba1e0e3e7c99cdccb7c8d9d568e413283323716f"
+uuid = "20186a3f-b5d3-468e-823e-77aae96fe2d8"
+version = "0.1.0"
+
+[[deps.TidierPlots]]
+deps = ["AlgebraOfGraphics", "CairoMakie", "DataFrames", "Makie", "MarketData", "PalmerPenguins", "Reexport"]
+git-tree-sha1 = "1e2f273690efe000786b142bbe83b431fceb29f1"
+uuid = "337ecbd1-5042-4e2a-ae6f-ca776f97570a"
+version = "0.1.0"
+
+[[deps.TidierStrings]]
+git-tree-sha1 = "1e704fbaf9f4d651ed9c59b4b6a6c325c0f09558"
+uuid = "248e6834-d0f8-40ef-8fbb-8e711d883e9c"
+version = "0.1.0"
+
 [[deps.TiffImages]]
 deps = ["ColorTypes", "DataStructures", "DocStringExtensions", "FileIO", "FixedPointNumbers", "IndirectArrays", "Inflate", "Mmap", "OffsetArrays", "PkgVersion", "ProgressMeter", "UUIDs"]
 git-tree-sha1 = "8621f5c499a8aa4aa970b1ae381aae0ef1576966"
@@ -3219,12 +3143,6 @@ deps = ["Dates", "DelimitedFiles", "DocStringExtensions", "RecipesBase", "Reexpo
 git-tree-sha1 = "8b9288d84da88ea44693ca8cf9c236da1778f274"
 uuid = "9e3dc215-6440-5c97-bce1-76c03772f85e"
 version = "0.23.2"
-
-[[deps.TimeZones]]
-deps = ["Dates", "Downloads", "InlineStrings", "LazyArtifacts", "Mocking", "Printf", "RecipesBase", "Scratch", "Unicode"]
-git-tree-sha1 = "cdaa0c2a4449724aded839550eca7d7240bb6938"
-uuid = "f269a46b-ccf7-5d73-abea-4c690281aa53"
-version = "1.10.0"
 
 [[deps.TranscodingStreams]]
 deps = ["Random", "Test"]
@@ -3393,12 +3311,6 @@ deps = ["Libdl"]
 uuid = "83775a58-1f1d-513f-b197-d71354ab007a"
 version = "1.2.13+0"
 
-[[deps.Zstd_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "49ce682769cd5de6c72dcf1b94ed7790cd08974c"
-uuid = "3161d3a3-bdf6-5164-811a-617609db77b4"
-version = "1.5.5+0"
-
 [[deps.isoband_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "51b5eeb3f98367157a7a12a1fb0aa5328946c03c"
@@ -3449,7 +3361,7 @@ version = "1.3.7+1"
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
-version = "1.48.0+0"
+version = "1.52.0+1"
 
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -3476,7 +3388,6 @@ version = "3.5.0+0"
 # ╠═45a17582-72ed-4b60-9ab7-0e3caf91e2c8
 # ╠═3929273b-4572-486e-93d0-a84cdab67391
 # ╠═36e844c2-a33e-454f-bf6e-995c660dfb94
-# ╠═86ffc0f1-b781-492f-b518-d09187088b40
 # ╠═f682fce2-327c-4e7c-b712-ceb99ef9df5c
 # ╟─98a1299b-282f-4a2e-a656-4416d7f61377
 # ╟─416cdc5a-917d-4960-9bfc-c36de90c40f0
@@ -3503,7 +3414,6 @@ version = "3.5.0+0"
 # ╟─27c36c66-69d1-47f3-b9ee-1c55c69eaab8
 # ╠═d54f8e2c-7c1f-44df-89a8-01bfb2711f26
 # ╟─6d2a66ef-4c57-43b4-979c-ab510b3bac7c
-# ╠═0a49603f-d9b9-47dd-82ec-7a23c9e25c93
 # ╠═46246b07-f620-4683-aa9c-59082cdd246a
 # ╟─80245239-d03a-46b6-9543-ce0efed87a7f
 # ╟─58f87d23-7dcc-403d-8c6e-ffe4b5dfdf40
@@ -3520,8 +3430,7 @@ version = "3.5.0+0"
 # ╠═e133ad57-7908-4e49-a6c6-bde30d1e82e6
 # ╟─f659cb9f-25df-4230-88a1-a2513a2b3132
 # ╟─19b6a4f8-313c-4484-ba53-2be2e8246011
-# ╟─f30fe277-55f8-4ce4-a379-c14028221ed6
-# ╠═30709ba4-bd51-4a54-b00a-083b53263373
+# ╟─30709ba4-bd51-4a54-b00a-083b53263373
 # ╟─ddad013c-f146-451d-b4bb-d7c468154cdf
 # ╟─d0404fcd-6b09-4910-a40e-2534b1388505
 # ╟─30d44015-5bde-4549-a31c-7dd2774e22fe
@@ -3543,7 +3452,7 @@ version = "3.5.0+0"
 # ╟─d2f46f92-838f-4c75-9a49-b57d73f76b9d
 # ╟─66a2377d-83d7-44b2-8955-50a82b150d41
 # ╟─3c52c5b3-d397-48f9-8520-54aeadc30817
-# ╟─6f1532f9-c624-4b5a-8a93-554e2134b37c
+# ╟─4c27fcdf-e6bd-4fa5-bef9-36f8f0e4957a
 # ╟─d179dfdb-455c-4afe-bdde-a5b9eb314ccb
 # ╠═786d9da2-aa32-432f-8bf8-886b328f10b5
 # ╟─10a24fb2-81f0-4ee2-9ba6-c4005f90b1e8
@@ -3561,7 +3470,7 @@ version = "3.5.0+0"
 # ╟─796a1050-53fb-491e-8446-b1e2a1100be7
 # ╠═0471593f-c67c-4aa9-8415-7267b7e68b5a
 # ╟─f04892f9-cef4-4168-aa55-51eac5096a3e
-# ╠═f723f7f5-9477-4b71-8327-7eb264f103cb
+# ╠═18f11e0b-e6e2-499b-ba01-e35f4b8ef62d
 # ╟─072b0791-daac-4eb5-ac51-5bc74b45973c
 # ╠═5265094a-6358-4b13-9093-f0623a3e91c8
 # ╟─4db1ac27-d967-4fd3-9cc0-d9383dac645a
@@ -3599,7 +3508,7 @@ version = "3.5.0+0"
 # ╠═6d3cd456-e289-499d-a338-509f37222dd4
 # ╟─38c7fa4a-1ffc-49ec-b7d3-00ef3a536918
 # ╟─11e86b74-9e4a-4e0d-a228-e1f054faf55c
-# ╠═36a963d5-b437-4682-a6d6-4fe68d0099d7
+# ╟─36a963d5-b437-4682-a6d6-4fe68d0099d7
 # ╟─a76e3ed8-2d46-47d4-9c9f-ffc7319defcf
 # ╟─13e9cf09-4f25-46c3-a1a9-8b3200045607
 # ╟─40fdede1-b7b9-4e3c-864c-1dddedb60b22
