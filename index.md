@@ -1,14 +1,7 @@
-# Julia Tutorials
-
-## Josie Athens
-
-<img src="AgLogo.png" alt="AgResearch" style="width: 500px;"/>
-
-
-
-![](https://julialang.org/assets/infra/logo.svg)
+<img src="title.png" alt="title" style="zoom:70%" />
 
 # Contents
+- [Preface](Preface.html)
 
 ## Basics
 
