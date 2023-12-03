@@ -9,9 +9,9 @@ using PlutoUI; PlutoUI.TableOfContents(aside=true, title="📚 Contents")
 
 # ╔═╡ c6b40625-1d14-4437-bb10-9cba6952e055
 begin
-	using StatsBase, Distributions, HypothesisTests, CategoricalArrays
+	using StatsBase, Distributions, HypothesisTests
 	using AnovaGLM, Effects, DataFrames, CSV
-	using Tidier, TexTables
+	using DataFrameMacros, TexTables, CategoricalArrays
 	using RCall, MLJ
 	using MLJ: schema
 end
@@ -24,9 +24,6 @@ begin
 	set_theme!(ggthemr(:light))
 	update_theme!(Axis = (width = 400, height = 300))
 end
-
-# ╔═╡ 09d37c62-93f7-4d2d-b125-a68f23470e2d
-include("pubh.jl");
 
 # ╔═╡ 149b7f4a-2e59-11ee-3c2c-5fc77d22513f
 md"""
@@ -43,19 +40,29 @@ md"""
 ## [📖 Main Menu](index.html)
 """
 
+# ╔═╡ 09d37c62-93f7-4d2d-b125-a68f23470e2d
+# ╠═╡ disabled = true
+#=╠═╡
+include("pubh.jl");
+  ╠═╡ =#
+
 # ╔═╡ f777331b-9004-4c85-ae31-85cb3bb19344
 # ╠═╡ show_logs = false
+# ╠═╡ disabled = true
+#=╠═╡
 R"""
 require("pubh", quietly=TRUE)
 require("sjlabelled", quietly=TRUE)
 require("readr", quietly=TRUE)
 """;
+  ╠═╡ =#
 
 # ╔═╡ f2b765df-d1de-4212-a6ab-d50976563e5b
 begin
 	@rimport readr
 	@rimport pubh
 	@rimport epitools
+	import GLM.@formula
 end
 
 # ╔═╡ bf1a3c2c-602f-43fc-a27a-c7b1b632eab7
@@ -135,7 +142,7 @@ cancer.etoh = recode(
 	"80-119" => "40+", "120+" => "40+"
 );
 ```
-""" |> hint
+"""
 
 # ╔═╡ 84879c4b-a7ad-4517-a37d-be207765fa37
 cancer.etoh = recode(
@@ -150,14 +157,6 @@ tabulate(cancer, :etoh)
 md"""
 We would like to report *measures of association* for epidemiological studies. The function `contingency` from the pubh package, allows us to do that.
 """
-
-# ╔═╡ e26a3376-aac7-4c3f-a7e6-21e4cb5aa8e6
-# ╠═╡ disabled = true
-#=╠═╡
-R"""
-contingency(status ~ etoh, data=$cancer, method="case.control")
-""" |> rcopy
-  ╠═╡ =#
 
 # ╔═╡ 37d7cc47-f29e-4785-adef-6ddcc6964917
 # ╠═╡ disabled = true
@@ -253,7 +252,7 @@ Yes! The raw OR was 5.85 when we control for age the actual effect of alcohol is
 md"Let's take have a deeper look at the number of cases per exposure group (`etoh`), stratified by age and then, in particular, in the first age group."
 
 # ╔═╡ 99e7e721-07cb-4e1b-98db-e1d08bdb0ed4
-tabulate(@subset(cancer, :age == "25-34"), :etoh, :status)
+tabulate(@filter(cancer, :age == "25-34"), :etoh, :status)
 
 # ╔═╡ dd6711ac-2f1d-4e3a-8026-bbcc94adb4f6
 md"""
@@ -380,14 +379,22 @@ tabulate(breast2, :Weight, :Biopsy)
 md"With `odds_trend` we can calculate the odds ratio per each group against the reference (underweight)."
 
 # ╔═╡ e1dccca9-b52e-434b-bceb-f95e913c0ac0
+# ╠═╡ disabled = true
+#=╠═╡
 R"""
 breast_df = odds_trend(Biopsy ~ Weight, data = breast2, method = "wald")$df
 """;
+  ╠═╡ =#
 
 # ╔═╡ 9597f543-4ba2-4323-a5c3-ad48eccb96e4
+# ╠═╡ disabled = true
+#=╠═╡
 @rget breast_df
+  ╠═╡ =#
 
 # ╔═╡ 63eaf614-e1e9-4cc6-85bf-a2a873e27690
+# ╠═╡ disabled = true
+#=╠═╡
 let
 	plt = data(breast_df |> dropmissing) *
 	mapping(
@@ -401,6 +408,7 @@ let
 	)
 	draw(plt, axis=(; xticklabelrotation=pi/6))
 end
+  ╠═╡ =#
 
 # ╔═╡ d4195226-d21e-41d7-955c-f5072bbe188a
 md"""
@@ -440,9 +448,11 @@ AnovaGLM = "0a47a8e3-ec57-451e-bddb-e0be9d22772b"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
+DataFrameMacros = "75880514-38bc-4a95-a458-c2aea5a3a702"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Effects = "8f03c58b-bd97-4933-a826-f71b64d2cca2"
+GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
 HypothesisTests = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
 MLJ = "add582a8-e3ab-11e8-2d5e-e98b27df1bc7"
 MakieThemes = "e296ed71-da82-5faf-88ab-0034a9761098"
@@ -450,7 +460,6 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 RCall = "6f49c342-dc21-5d91-9882-a32aef131414"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 TexTables = "ebf5ac4f-3ec1-555f-9ac9-3d72ed88c471"
-Tidier = "f0413319-3358-4bb0-8e7c-0c83523a93bd"
 
 [compat]
 AlgebraOfGraphics = "~0.6.16"
@@ -458,9 +467,11 @@ AnovaGLM = "~0.2.2"
 CSV = "~0.10.11"
 CairoMakie = "~0.10.7"
 CategoricalArrays = "~0.10.8"
+DataFrameMacros = "~0.4.1"
 DataFrames = "~1.6.1"
 Distributions = "~0.25.102"
 Effects = "~1.0.2"
+GLM = "~1.8.3"
 HypothesisTests = "~0.11.0"
 MLJ = "~0.20.0"
 MakieThemes = "~0.1.0"
@@ -468,7 +479,6 @@ PlutoUI = "~0.7.52"
 RCall = "~0.13.15"
 StatsBase = "~0.33.21"
 TexTables = "~0.2.7"
-Tidier = "~1.0.1"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -477,12 +487,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.9.4"
 manifest_format = "2.0"
-project_hash = "8de46bd902bec312a8e7e0b81e8169c4be3c5d56"
-
-[[deps.ANSIColoredPrinters]]
-git-tree-sha1 = "574baf8110975760d391c710b6341da1afa48d8c"
-uuid = "a4c015fc-c6ff-483c-b24f-f7ea428134e9"
-version = "0.0.1"
+project_hash = "f2958d085e47691aa45684aaa0908c23878e6b66"
 
 [[deps.ARFFFiles]]
 deps = ["CategoricalArrays", "Dates", "Parsers", "Tables"]
@@ -702,13 +707,18 @@ deps = ["DataAPI", "Future", "Missings", "Printf", "Requires", "Statistics", "Un
 git-tree-sha1 = "1568b28f91293458345dabba6a5ea3f183250a61"
 uuid = "324d7699-5711-5eae-9e2f-1d82baa6b597"
 version = "0.10.8"
-weakdeps = ["JSON", "RecipesBase", "SentinelArrays", "StructTypes"]
 
     [deps.CategoricalArrays.extensions]
     CategoricalArraysJSONExt = "JSON"
     CategoricalArraysRecipesBaseExt = "RecipesBase"
     CategoricalArraysSentinelArraysExt = "SentinelArrays"
     CategoricalArraysStructTypesExt = "StructTypes"
+
+    [deps.CategoricalArrays.weakdeps]
+    JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+    RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+    SentinelArrays = "91c51154-3ec4-41a3-a24f-3f23e20d615c"
+    StructTypes = "856f2bd8-1eba-4b0a-8007-ebc267875bd4"
 
 [[deps.CategoricalDistributions]]
 deps = ["CategoricalArrays", "Distributions", "Missings", "OrderedCollections", "Random", "ScientificTypes"]
@@ -722,22 +732,11 @@ version = "0.1.13"
     [deps.CategoricalDistributions.weakdeps]
     UnicodePlots = "b8865327-cd53-5732-bb35-84acbb429228"
 
-[[deps.Chain]]
-git-tree-sha1 = "8c4920235f6c561e401dfe569beb8b924adad003"
-uuid = "8be319e6-bccf-4806-a6f7-6fae938471bc"
-version = "0.5.0"
-
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra", "SparseArrays"]
 git-tree-sha1 = "e30f2f4e20f7f186dc36529910beaedc60cfa644"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 version = "1.16.0"
-
-[[deps.Cleaner]]
-deps = ["Tables"]
-git-tree-sha1 = "f0ebda9a8284c10ec10df406f669edca4c69892f"
-uuid = "caabdcdb-0ab6-47cf-9f62-08858e44f38f"
-version = "0.5.0"
 
 [[deps.CodecZlib]]
 deps = ["TranscodingStreams", "Zlib_jll"]
@@ -866,11 +865,11 @@ git-tree-sha1 = "8da84edb865b0b5b0100c0666a9bc9a0b71c553c"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 version = "1.15.0"
 
-[[deps.DataDeps]]
-deps = ["HTTP", "Libdl", "Reexport", "SHA", "p7zip_jll"]
-git-tree-sha1 = "6e8d74545d34528c30ccd3fa0f3c00f8ed49584c"
-uuid = "124859b0-ceae-595e-8997-d05f6a7a8dfe"
-version = "0.7.11"
+[[deps.DataFrameMacros]]
+deps = ["DataFrames", "MacroTools"]
+git-tree-sha1 = "5275530d05af21f7778e3ef8f167fb493999eea1"
+uuid = "75880514-38bc-4a95-a458-c2aea5a3a702"
+version = "0.4.1"
 
 [[deps.DataFrames]]
 deps = ["Compat", "DataAPI", "DataStructures", "Future", "InlineStrings", "InvertedIndices", "IteratorInterfaceExtensions", "LinearAlgebra", "Markdown", "Missings", "PooledArrays", "PrecompileTools", "PrettyTables", "Printf", "REPL", "Random", "Reexport", "SentinelArrays", "SortingAlgorithms", "Statistics", "TableTraits", "Tables", "Unicode"]
@@ -965,12 +964,6 @@ deps = ["LibGit2"]
 git-tree-sha1 = "2fb1e02f2b635d0845df5d7c167fec4dd739b00d"
 uuid = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 version = "0.9.3"
-
-[[deps.Documenter]]
-deps = ["ANSIColoredPrinters", "Base64", "Dates", "DocStringExtensions", "IOCapture", "InteractiveUtils", "JSON", "LibGit2", "Logging", "Markdown", "REPL", "Test", "Unicode"]
-git-tree-sha1 = "39fd748a73dce4c05a9655475e437170d8fb1b67"
-uuid = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-version = "0.27.25"
 
 [[deps.Downloads]]
 deps = ["ArgTools", "FileWatching", "LibCURL", "NetworkOptions"]
@@ -1409,12 +1402,6 @@ git-tree-sha1 = "31e996f0a15c7b280ba9f76636b3ff9e2ae58c9a"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 version = "0.21.4"
 
-[[deps.JSON3]]
-deps = ["Dates", "Mmap", "Parsers", "PrecompileTools", "StructTypes", "UUIDs"]
-git-tree-sha1 = "95220473901735a0f4df9d1ca5b171b568b2daa3"
-uuid = "0f8b85d8-7281-11e9-16c2-39a750bddbf1"
-version = "1.13.2"
-
 [[deps.JpegTurbo]]
 deps = ["CEnum", "FileIO", "ImageCore", "JpegTurbo_jll", "TOML"]
 git-tree-sha1 = "327713faef2a3e5c80f96bf38d1fa26f7a6ae29e"
@@ -1731,12 +1718,6 @@ version = "0.4.2"
 deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
-[[deps.MarketData]]
-deps = ["CSV", "Dates", "HTTP", "JSON3", "Random", "Reexport", "TimeSeries"]
-git-tree-sha1 = "715536b6af6292883128e22857c83291e30fea25"
-uuid = "945b72a4-3b13-509d-9b46-1525bb5c06de"
-version = "0.13.12"
-
 [[deps.Match]]
 git-tree-sha1 = "1d9bc5c1a6e7ee24effb93f175c9342f9154d97f"
 uuid = "7eb4fadd-790c-5f42-8a69-bfa0b872bfbf"
@@ -1948,12 +1929,6 @@ deps = ["OffsetArrays"]
 git-tree-sha1 = "0fac6313486baae819364c52b4f483450a9d793f"
 uuid = "5432bcbf-9aad-5242-b902-cca2824c8663"
 version = "0.5.12"
-
-[[deps.PalmerPenguins]]
-deps = ["CSV", "DataDeps"]
-git-tree-sha1 = "e7c581b0e29f7d35f47927d65d4965b413c10d90"
-uuid = "8b842266-38fa-440a-9b57-31493939ab85"
-version = "0.1.4"
 
 [[deps.Pango_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "FriBidi_jll", "Glib_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl", "Pkg"]
@@ -2452,12 +2427,6 @@ git-tree-sha1 = "521a0e828e98bb69042fec1809c1b5a680eb7389"
 uuid = "09ab397b-f2b6-538f-b94a-2f83cf4a842a"
 version = "0.6.15"
 
-[[deps.StructTypes]]
-deps = ["Dates", "UUIDs"]
-git-tree-sha1 = "ca4bccb03acf9faaf4137a9abc1881ed1841aa70"
-uuid = "856f2bd8-1eba-4b0a-8007-ebc267875bd4"
-version = "1.10.0"
-
 [[deps.SuiteSparse]]
 deps = ["Libdl", "LinearAlgebra", "Serialization", "SparseArrays"]
 uuid = "4607b0f0-06f3-5cda-b6b1-a6196a1729e9"
@@ -2505,52 +2474,11 @@ git-tree-sha1 = "b1adb560810b2cd88e505f50e02b245730447149"
 uuid = "ebf5ac4f-3ec1-555f-9ac9-3d72ed88c471"
 version = "0.2.7"
 
-[[deps.Tidier]]
-deps = ["Reexport", "TidierCats", "TidierData", "TidierDates", "TidierPlots", "TidierStrings"]
-git-tree-sha1 = "c7a6c4db043a4d27a4150a3ea07b03d3a9a158ca"
-uuid = "f0413319-3358-4bb0-8e7c-0c83523a93bd"
-version = "1.0.1"
-
-[[deps.TidierCats]]
-deps = ["CategoricalArrays", "DataFrames", "Reexport", "Statistics"]
-git-tree-sha1 = "c4660f2c0ffd733ec243ea0a5447bd3bfae40c6d"
-uuid = "79ddc9fe-4dbf-4a56-a832-df41fb326d23"
-version = "0.1.1"
-
-[[deps.TidierData]]
-deps = ["Chain", "Cleaner", "DataFrames", "MacroTools", "Reexport", "ShiftedArrays", "Statistics"]
-git-tree-sha1 = "a4a83e2f5083ee6b18e0f01c99b4483b4f7978a2"
-uuid = "fe2206b3-d496-4ee9-a338-6a095c4ece80"
-version = "0.10.0"
-
-[[deps.TidierDates]]
-deps = ["Dates", "Documenter", "Reexport"]
-git-tree-sha1 = "ba1e0e3e7c99cdccb7c8d9d568e413283323716f"
-uuid = "20186a3f-b5d3-468e-823e-77aae96fe2d8"
-version = "0.1.0"
-
-[[deps.TidierPlots]]
-deps = ["AlgebraOfGraphics", "CairoMakie", "DataFrames", "Makie", "MarketData", "PalmerPenguins", "Reexport"]
-git-tree-sha1 = "1e2f273690efe000786b142bbe83b431fceb29f1"
-uuid = "337ecbd1-5042-4e2a-ae6f-ca776f97570a"
-version = "0.1.0"
-
-[[deps.TidierStrings]]
-git-tree-sha1 = "1e704fbaf9f4d651ed9c59b4b6a6c325c0f09558"
-uuid = "248e6834-d0f8-40ef-8fbb-8e711d883e9c"
-version = "0.1.0"
-
 [[deps.TiffImages]]
 deps = ["ColorTypes", "DataStructures", "DocStringExtensions", "FileIO", "FixedPointNumbers", "IndirectArrays", "Inflate", "Mmap", "OffsetArrays", "PkgVersion", "ProgressMeter", "UUIDs"]
 git-tree-sha1 = "8621f5c499a8aa4aa970b1ae381aae0ef1576966"
 uuid = "731e570b-9d59-4bfa-96dc-6df516fadf69"
 version = "0.6.4"
-
-[[deps.TimeSeries]]
-deps = ["Dates", "DelimitedFiles", "DocStringExtensions", "RecipesBase", "Reexport", "Statistics", "Tables"]
-git-tree-sha1 = "8b9288d84da88ea44693ca8cf9c236da1778f274"
-uuid = "9e3dc215-6440-5c97-bce1-76c03772f85e"
-version = "0.23.2"
 
 [[deps.TranscodingStreams]]
 deps = ["Random", "Test"]
@@ -2817,7 +2745,6 @@ version = "3.5.0+0"
 # ╟─84879c4b-a7ad-4517-a37d-be207765fa37
 # ╠═eb9a78bf-ac8d-4f59-a4fc-f870aa55558a
 # ╟─83154f66-447e-48a2-b68d-50af9eecd239
-# ╠═e26a3376-aac7-4c3f-a7e6-21e4cb5aa8e6
 # ╠═37d7cc47-f29e-4785-adef-6ddcc6964917
 # ╟─786c4347-c094-4afc-8a98-3b8d5b649312
 # ╟─9edd0836-2ca4-45af-b717-45833a8ad0ae
