@@ -38,9 +38,7 @@ md"""
 
 # ╔═╡ 953e1df5-0f62-4832-b7c0-47c216ac95a5
 md"""
-## 📖 Main Menu
-
-[Return to Main Menu](index.html)
+## [📖 Main Menu](index.html)
 """
 
 # ╔═╡ f682fce2-327c-4e7c-b712-ceb99ef9df5c
