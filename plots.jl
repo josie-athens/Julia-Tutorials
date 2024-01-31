@@ -4,465 +4,410 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ de61a84a-8117-45b2-bf76-3466210af414
+# ╔═╡ e6495531-6e35-410f-a901-b6f0702cdd68
 using PlutoUI; PlutoUI.TableOfContents(aside=true, title="📚 Contents")
 
-# ╔═╡ 0264f77f-69ef-45d8-b6ca-37c3037f62b8
+# ╔═╡ a4297957-cd14-45b3-b977-ddf612e866e8
 begin
 	using StatsBase, DataFrames, DataFrameMacros, MLJ
 	using RCall, CategoricalArrays, CSV
 	using MLJ: schema
 end
 
-# ╔═╡ 91766885-46eb-48da-8268-61c10e81a625
-begin
-	using Gadfly, Compose, ColorSchemes, Distributions
-	set_default_plot_size(15cm, 12cm)
-end
+# ╔═╡ ce0be6b6-558a-4deb-8ef1-4c3405298a80
+using PlutoPlotly
 
-# ╔═╡ 7e314e22-a017-40ce-9a3b-6c60ef58d613
+# ╔═╡ b70d632a-ee34-449b-84c0-73ed2f2762cd
 begin
 	include("pubh.jl")
 	@rimport readr
 	@rimport pubh
-	import GLM.@formula
+	using GLM
 end
 
-# ╔═╡ c4194c6c-ad99-11ee-2cac-e971a64ae700
+# ╔═╡ 09f00ae0-bfbb-11ee-0e78-8323f9572c2e
 md"""
 # Graphical Analysis
 
 !!! note \"Josie Athens\"
 
 	- Systems Biology Enabling Platform, **AgResearch Ltd**
-	- 23 January 2024
+	- 31 January 2024
 """
 
-# ╔═╡ fa3d6b3e-c220-4faf-bf6d-0f2ba40f2a32
+# ╔═╡ bd52d18c-13f7-42fa-9472-7487cb8967f1
 md"""
 ## [📖 Main Menu](index.html)
 """
 
-# ╔═╡ d26ea522-7f5b-4a0b-bc64-43a031618761
+# ╔═╡ e7b9cae1-63e7-44d8-8717-c18dbd26def5
 md"""
 # Data
 
 The Western Collaborative Group Study (WCGS) is a well known prospective cohort study. Male participants aged 39 to 59 from 10 California companies were originally selected to study the relationship between behaviour pattern and the risk of coronary heart disease (CHD).
 """
 
-# ╔═╡ fe0365e4-e2ab-4885-9b49-76adeb13a3cf
+# ╔═╡ 61d2f27e-00a3-463a-91ce-35108aef6044
 wcgs = readr.read_rds("data/wcgs.rds") |> rcopy; wcgs |> schema
 
-# ╔═╡ 10da0038-be7d-4ea0-902d-9c00d099b5d4
+# ╔═╡ 004a90cd-9d6f-4e3c-8da0-2ca0e80071fe
 md"""
 The `kfm` data frame was collected by Kim Fleischer Michaelsen and contains data for 50 infants of age approximately 2 months. They were weighed immediately before and after each breast feeding. and the measured intake of breast milk was registered along with various other data.
 """
 
-# ╔═╡ 3671a6e9-669c-40a2-92c4-c4b7230711e8
+# ╔═╡ acf88edb-4ad2-4638-97db-3d12a47a6100
 kfm = readr.read_rds("data/kfm.rds") |> rcopy; kfm |> schema
 
-# ╔═╡ 28cde657-5f83-431f-a8f5-ad321a46fc93
+# ╔═╡ 21978fda-b811-40e8-872f-ec6a29281a57
 md"""
 Data on reported cases of influenza by age group in the 1957 pandemic in England and Wales.
 """
 
-# ╔═╡ 1250bb55-7c71-4a94-95bb-1ae19414c5b9
+# ╔═╡ add9285e-6ada-4dc9-bba9-877faf8ba1ec
 flu = DataFrame(CSV.File("data/fluraw.csv")); flu|> schema
 
-# ╔═╡ 304ca0fb-9bda-4e25-8c97-8df4bcf527cf
+# ╔═╡ 373b4997-f722-4143-b15e-59c9671cf015
 md"""
 Data on birth weights from newborns in a London Hospital.
 """
 
-# ╔═╡ 998e9220-55f5-40bf-8424-854feb4e292b
+# ╔═╡ b9323edc-4eb7-4370-93b8-2bfaf5905cfa
 birth = readr.read_rds("data/birthwt.rds") |> rcopy; birth |> schema
 
-# ╔═╡ 999b6169-3867-4a9e-bf0d-26245b6fb38a
+# ╔═╡ 7a454f9f-0cb3-4d9e-983a-3ac822e7e565
 md"""
 Data on the energy expenditure in groups of lean and obese women.
 """
 
-# ╔═╡ 2106dac6-0003-41f2-9099-b25f2bf052ac
+# ╔═╡ b0db8b0e-f362-4c94-a214-34068230d2fa
 energy = rcopy(R"ISwR::energy"); energy |> schema
 
-# ╔═╡ 442308d3-4b6d-42c5-89ee-cc04018a5c5d
-md"""
-Fisher's iris dataset on measurements for three species of iris.
-"""
-
-# ╔═╡ 974b8dd8-d2e2-49ac-be8d-e50c57118664
-iris = rcopy(R"datasets::iris"); iris |> schema
-
-# ╔═╡ ec8634a6-30dd-4381-ac2f-47615b2b67c5
-md"""
-Data on air quality and weather conditions in New York, recorded May to September 1973.
-"""
-
-# ╔═╡ ccc6967c-7e1c-49a9-8fc0-7b4d7b768d2e
+# ╔═╡ 367239b5-a16f-46d3-b1dd-cf61e50b9180
 md"""
 # Distributions
 
 ## Histograms
 """
 
-# ╔═╡ e7ec823e-b98a-4295-908c-228cd023bac9
+# ╔═╡ 54fca320-fa54-439e-b878-d7bb80648f63
+# ╠═╡ show_logs = false
 plot(
 	birth,
-	x = :bwt, Guide.xlabel("Birth weight (g)"),
-	Guide.ylabel("Density"),
-	Geom.histogram(bincount=30, density=true)
+	x=:bwt, kind="histogram",
+	nbinsx=30, histnorm="density",
+	marker_color="indianred", opacity=0.7,
+	Layout(
+		xaxis_title = "Birth weight (g)",
+		yaxis_title = "Density"
+	)
 )
 
-# ╔═╡ 696a4954-000a-4a47-861b-1af3e8dedfff
+# ╔═╡ eac86c7e-100e-48f0-8dc1-9ff98ae8ba14
 md"""
 The default for histograms is to show the absolute frequency (counts):
 """
 
-# ╔═╡ 007907f9-970d-4efb-b075-48e027ec7b07
+# ╔═╡ ef1e484c-821f-4f9e-a42b-d8691531e4ea
 plot(
 	wcgs,
-	x = :sbp, 
-	Geom.histogram(bincount=30),
-	Guide.xlabel("SBP (mm Hg)"),
-	Guide.ylabel("Counts"),
-	Coord.cartesian(xmin=80, ymax=700)
-)
-
-# ╔═╡ d1ac4dd3-87e5-4c9a-b754-6e59bafa460b
-md"""
-We can compare distributions using the density and using a grid, as shown here:
-"""
-
-# ╔═╡ 93d1f99a-7819-45e6-b6a8-1113b91d6bf8
-plot(
-	wcgs,
-	x = :sbp, xgroup = :chd,
-	Geom.subplot_grid(Geom.histogram(bincount=30, density=true)),
-	Guide.xlabel("SBP (mm Hg)"),
-	Guide.ylabel("Density")
-)
-
-# ╔═╡ 107bb1d6-2b35-4f67-96dd-3e8d5b15f568
-md"""
-## Density Plots
-
-Another way to look at the distribution of a continuous variable is with density plots.
-"""
-
-# ╔═╡ ce220be7-7d29-408a-a39a-d082efb34af9
-plot(
-	wcgs,
-	x = :sbp, color = :chd,
-	Geom.density,
-	Guide.xlabel("SBP (mm Hg)"),
-	Guide.ylabel("Density"),
-	Guide.colorkey(title="CHD"),
-	style(line_width=1mm),
-	Coord.cartesian(xmin=80)
-)
-
-# ╔═╡ 941c5f6c-a9a9-48c4-903f-9ba5c3857486
-md"""
-!!! tip
-
-	We have missing values in `chol`, thus we need to drop them before constructing a density plot or else, we would have an error.
-"""
-
-# ╔═╡ 71691eae-cd33-4634-824f-f3bf1ff04cfd
-plot(
-	@subset(wcgs, !ismissing(:chol)),
-	x = :chol, color = :chd,
-	Geom.density,
-	Guide.xlabel("Cholesterol (mg/dl)"),
-	Guide.ylabel("Density"),
-	Guide.colorkey(title="CHD"),
-	style(line_width=1mm),
-	Coord.cartesian(ymax=0.011)
-)
-
-# ╔═╡ 69153a44-73a9-4325-98d8-3369437adf02
-md"""
-## QQ-Plots
-
-The best way to determine if a continuous variable is normally distributed or not is with quantile-quantile plots (QQ-plots). We plot the quantiles of our variable of interest against quantiles from the standard normal distribution (which has a mean 
- and a standard deviation 
-). This type of QQ-plots against the normal distribution are known as QQ-normal plots. If the variable is normally distributed, then a linear relationship will be observed.
-"""
-
-# ╔═╡ d1e6e60b-be3b-47a8-b1f8-347c09382ced
-qq_plot(birth.bwt, ylab = "Birth weight (g)")
-
-# ╔═╡ bc97d6ef-24a5-4884-b266-e7f1547b421c
-md"""
-Right-skewed variables, show an upper right curve in the QQ-plot:
-"""
-
-# ╔═╡ 48406c22-ec54-4a12-bf59-d40f19f67ba6
-qq_plot(wcgs.dbp, ylab = "DBP (mm Hg)")
-
-# ╔═╡ 5d1b2bd5-0131-4dd5-ab66-31c09c8b99a4
-qq_plot(log.(wcgs.dbp), ylab = "log (DBP)")
-
-# ╔═╡ 307ec3bf-457d-4a99-8709-b7f38897e46f
-md"""
-The following, is an example of using a semi-log scale.
-"""
-
-# ╔═╡ 758093aa-d160-4e86-8381-1f0046b12803
-plot(
-	wcgs,
-	x=fit.([Normal], [wcgs.dbp]), y=:dbp,
-	Stat.qq,
-	Guide.xlabel("Theoretical quantiles"),
-	Guide.ylabel("DBP (mm Hg)"),
-	Scale.y_log10
+	x=:sbp, kind="histogram",
+	nbinsx=20,
+	marker_color="plum", opacity=0.7,
+	Layout(
+		xaxis_title = "SBP (mm Hg)",
+		yaxis_title = "Frequency"
 	)
+)
 
-# ╔═╡ 8f381487-b64e-4b96-8f10-d0bb0bd75bc1
+# ╔═╡ 04357a3a-ece8-4500-802e-818e4cfbca6c
+md"""
+We can compare distributions using the density or the probability density function (pdf), as shown here:
+"""
+
+# ╔═╡ de0a9656-b983-47d5-988b-207fa612fa77
+plot(
+	wcgs,
+	x=:sbp, kind="histogram",
+	nbinsx=20, histnorm="probability density",
+	color=:chd, opacity=0.7,
+	labels=Dict(
+		:sbp => "SBP (mm Hg)",
+		:chd => "CHD event"
+	),
+	Layout(
+		yaxis_title = "PDF",
+		barmode="stack"
+	)
+)
+
+# ╔═╡ 86c3410e-abca-4cd9-8ce3-aa5c3211fe8f
+md"""
+We have a better plot when we use *faceting*, i.e., plotting the distributions in two different panels:
+"""
+
+# ╔═╡ 3f97834b-49e1-4ec2-9ac2-64b0bf2b61d1
+plot(
+	wcgs,
+	x=:sbp, kind="histogram",
+	nbinsx=20, histnorm="probability density",
+	facet_col=:chd, opacity=0.7,
+	labels=Dict(
+		:sbp => "SBP (mm Hg)",
+		:chd => "CHD event"
+	),
+	Layout(
+		yaxis_title = "PDF",
+		showlegend=false
+	)
+)
+
+# ╔═╡ 24daa2fc-7e35-4967-9c27-7b448f0e9c50
+md"""
+## Box Plots
+
+Example of a variable with a normal distribution:
+"""
+
+# ╔═╡ 1d0af760-479b-4a9c-a10f-4dd99887eca3
+plot(
+	birth,
+	y=:bwt, kind="box", opacity=0.7,
+	marker_color="lightseagreen",
+	name="",
+	Layout(
+		yaxis_title = "Birth weight (g)"
+	)
+)
+
+# ╔═╡ 0f305c86-9fd2-4d93-a26d-56d322249e85
+md"""
+Example of a right-skewed variable:
+"""
+
+# ╔═╡ 1d6479cc-e777-4efe-9591-33b2fbc88f80
+plot(
+	wcgs,
+	y=:dbp, kind="box", name="",
+	marker_color="lightseagreen",
+	Layout(
+		yaxis_title = "DBP (mmHg)"
+	)
+)
+
+# ╔═╡ 4865f4a6-ae6f-429f-b017-c30a300b2259
 md"""
 # Associations Between Continuous Variables
 
 ## Scatter Plots
 
-We use scatter plots to look at the relationship between two continuous variables. By default, the dependent variable (response) is plotted on the 
-$y$-axis while the independent variable (explanatory) is plotted on the 
-$x$-axis.
+We use scatter plots to look at the relationship between two continuous variables. By default, the dependent variable (response) is plotted on the $x$-axis while the independent variable (explanatory) is plotted on the $y$-axis.
 
 From the `kfm` dataset, let’s see if there is a relationship between the weight of the mother and the breast-milk intake of the child.
 """
 
-# ╔═╡ 03f41d6d-efe5-49c1-86e7-d683b3327737
+# ╔═╡ 060c3bb0-454e-4fbb-87fd-3518f7393958
 plot(
 	kfm,
-	x = :mat_weight, y = :dl_milk, color = :sex,
-	Guide.xlabel("Maternal weight (kg)"),
-	Guide.ylabel("Breast milk intake (dl/day) ")
+	x=:mat_weight, y=:dl_milk, color=:sex,
+	mode="markers",
+	Layout(
+		xaxis_title = "Maternal weight (kg)",
+		yaxis_title = "Breast-milk intake (dl/day)"
+	)
 )
 
-# ╔═╡ 45098f24-39bd-4c02-8dfd-338cb00d5bb8
-md"""
-!!! note
-
-	We can extend plots by adding new layers. In the following example, we use two layers: one for the scatter plot and a second to add a line representing a linear fit.
-"""
-
-# ╔═╡ d5be1bf5-1177-4602-8f39-0e16e307d0f3
+# ╔═╡ 002c3396-229b-43c6-878a-7c4730868ec1
 plot(
 	kfm,
-	x = :mat_weight, y = :dl_milk, color = :sex,
-	Geom.point, 
-	layer(Stat.smooth(method=:lm), Geom.line, Geom.ribbon),
-	Guide.xlabel("Maternal weight (kg)"),
-	Guide.ylabel("Breast milk intake (dl/day) ")
+	x=:mat_weight, y=:dl_milk, color=:sex,
+	mode="markers",
+	Layout(
+		xaxis_title = "Maternal weight (kg)",
+		yaxis_title = "Breast-milk intake (dl/day)"
+	),
+	smooth=true
 )
 
-# ╔═╡ 548ea04b-cc9c-4695-b670-2b84aeae8272
-md"""
-Plotting the linear relationship without the band of confidence intervals:
-"""
+# ╔═╡ bd6b724e-8ce1-41f8-9076-484d239a2da2
+model = lm(@formula(dl_milk ~ mat_weight * sex), kfm)
 
-# ╔═╡ ef1279b5-3dcc-4b2b-99fe-016ac1e0d3c2
+# ╔═╡ 2e635d35-05a3-46b4-bc28-d530be1a4533
+kfm.fit = GLM.predict(model);
+
+# ╔═╡ 528e36b5-33b1-493b-8cc3-293e04fbca6b
 plot(
 	kfm,
-	x = :mat_weight, y = :dl_milk, color = :sex,
-	Geom.point, Geom.smooth(method = :lm),
-	Guide.xlabel("Maternal weight (kg)"),
-	Guide.ylabel("Breast milk intake (dl/day) ")
+	x=:mat_weight, y=:fit, color=:sex,
+	Layout(
+		xaxis_title = "Maternal weight (kg)",
+		yaxis_title = "Breast-milk intake (dl/day)"
+	)
 )
 
-# ╔═╡ 01c0cefd-5462-4951-a381-74144e98b399
-md"""
-In the next plot, instead of showing the linear fit, we add a loess trend with a smoother:
-"""
+# ╔═╡ 8c72d56b-413a-42ef-a032-2e980b76b990
+let
+	p1 = plot(;
+		x=kfm.mat_weight, y=kfm.dl_milk, color=:sex,
+		mode="markers",
+	)
+	
+	p2 = plot(;
+		x=kfm.mat_weight, y=kfm.fit, color=:sex,
+	)
+	
+	layout = Layout(;
+		xaxis_title = "Maternal weight (kg)",
+		yaxis_title = "Breast-milk intake (dl/day)"
+	)
 
-# ╔═╡ b51a32b5-d325-42da-9740-62c7707d2773
-plot(
-	kfm,
-	x = :mat_weight, y = :dl_milk, xgroup = :sex,
-	Geom.subplot_grid(Geom.point, Geom.smooth(smoothing=0.9)),
-	Guide.xlabel("Maternal weight (kg)"),
-	Guide.ylabel("Breast milk intake (dl/day) ")
-)
+	plot([p1, p2], layout)
+end
 
-# ╔═╡ 94218173-d39d-49c6-8df9-4c23128cac8d
-md"""
-In the next plot, we use different line colours and different symbols (by sex):
-"""
-
-# ╔═╡ 672b8d1f-2f93-474c-a1a9-6645274452b0
-plot(
-	kfm,
-	x = :mat_weight, y = :dl_milk, color = :sex, shape = :sex,
-	Geom.point, Geom.smooth(method = :lm),
-	Guide.xlabel("Maternal weight (kg)"),
-	Guide.ylabel("Breast milk intake (dl/day) ")
-)
-
-# ╔═╡ 7f75495f-b18d-4d03-acc8-d740ca23265b
-md"""
-The following is a more complex, on which we play with different sizes, and conditions.
-"""
-
-# ╔═╡ 42dc3130-97e0-4e72-8865-cd0dab8f2b54
-begin
-	download("https://raw.githubusercontent.com/mwaskom/seaborn-data/master/mpg.csv", "mpg.csv")
-	mpg = DataFrame(CSV.File("mpg.csv"))
-end;
-
-# ╔═╡ 08fc723e-08b0-4182-8d5e-99fc59a9e044
-plot(
-    mpg,
-    x = :horsepower,
-    y = :mpg,
-    color = :origin,
-    size = :weight,
-    alpha = [0.5],
-    Geom.point,
-    Scale.color_discrete_manual("#5377C9", "#DF8A56", "#82CA70"),
-    Scale.size_area(
-        minvalue = minimum(mpg.weight),
-        maxvalue = maximum(mpg.weight)
-    ),
-    Theme(
-        background_color = "white",
-        default_color = "black",
-    ),
-)
-
-# ╔═╡ b2e1636a-2ee8-4ad3-912b-9826677fb4d4
+# ╔═╡ 4616f50e-13e9-44d3-ba0f-18deac14b27d
 md"""
 ## Line Charts
 
-In this example, our dataset is in *wide* format. We start by *reshaping* the data from `wide` to `long` format:
+In this example, our dataset is in wide format.
 """
 
-# ╔═╡ 6b652ffe-4383-4409-ad3b-7d7eb84050dd
+# ╔═╡ 0b930239-fcd9-429a-a699-ab0128b3752f
 flu_melt = stack(flu, Not(:week)); flu_melt |> head
 
-# ╔═╡ f20f07a8-e852-476b-be26-db49e904be2e
+# ╔═╡ 5ee2a2d1-314e-4033-85e8-e4c2089d4f06
 plot(
 	flu_melt,
-	x = :week, y = :value, color = :variable,
-	Geom.point, Geom.path,
-	Guide.xlabel("Date"),
-	Guide.ylabel("Number of cases"),
-	Guide.colorkey("Age group")
+	x=:week, y=:value, color=:variable,
+	labels=Dict(
+		:week => "Date",
+		:value => "Number of cases",
+		:variable => "Age group"
+	)
 )
 
-# ╔═╡ 48d4867d-5a96-4f37-947e-13fe403c6d80
+# ╔═╡ b6d1b95b-ad97-4913-9f3f-5c2168f709d5
 md"""
 # Comparing Groups
 
-## Box-Plots
+## Box Plots
 
-When we are comparing continuous variables, between two or more groups, box plots are the best option, particularly if the number of observations in the groups is relatively large $(\geq 30)$.
+When we are comparing continuous variables, between two or more groups, box plots are the best option, particularly if the number of observations in the groups is relatively large (≥ 30).
 """
 
-# ╔═╡ dacba88d-c008-45dc-b39a-cf9965d96430
+# ╔═╡ af2a3509-0dc4-4155-ab4e-482cc88559f6
 plot(
-	@subset(wcgs, !ismissing(:chol)),
-	x = :chd, y = :chol,
-	Geom.boxplot,
-	Guide.xlabel("Coronary Heart Disease"),
-	Guide.ylabel("Cholesterol (mg/dl)")
+	wcgs |> dropmissing,
+	x=:chd, y=:chol,
+	labels=Dict(
+		:chd => "CHD event",
+    	:chol => "Cholesterol (mg/dl)"
+	),
+	kind="box"
 )
 
-# ╔═╡ 9bd259b9-3982-44b7-8fd3-584efef65aa6
+# ╔═╡ fd23ab44-6e9d-4201-90d7-eccae1f5e310
 md"""
-In the previous figure the presence of an outlier is clear. If we would like to remove that outlier, we would need to declare that in the report. For demonstration purposes, if we do not want to show the outlier in the plot, we have the option to filter the data using the `@subset` command.
+In the previous plot the presence of an outlier is clear. If we would like to remove that outlier, we would need to declare that in the report. For demonstration purposes, if we do not want to show the outlier in the plot, we have the option to filter the data using the `@subset` command.
 """
 
-# ╔═╡ bbf4c808-2698-47d7-aa8b-a0dff46b504a
+# ╔═╡ d921f2a7-0ebd-4419-9fc7-93a56693fbea
 plot(
-	@subset(wcgs |> dropmissing, :chol .< 500),
-	x = :chd, y = :chol,
-	Geom.boxplot,
-	Guide.xlabel("Coronary Heart Disease"),
-	Guide.ylabel("Cholesterol (mg/dl)"),
-	Theme(default_color="MidnightBlue")
+	@subset(wcgs |> dropmissing, :chol.<500),
+	x=:chd, y=:chol,
+	labels=Dict(
+		:chd => "CHD event",
+    	:chol => "Cholesterol (mg/dl)"
+	),
+	kind="box"
 )
 
-# ╔═╡ 8c4b739c-810b-465c-883a-213e8825c9b8
-plot(
-	birth,
-	x = :race, y = :bwt, color = :smoke,
-	Geom.boxplot,
-	Guide.xlabel(""),
-	Guide.ylabel("Birth weight (g)"),
-	Guide.colorkey("")
-)
-
-# ╔═╡ ddc4f1f6-2bd5-4328-8f34-57e7d3fafb27
+# ╔═╡ e495b8b1-793d-4001-b94c-81f939091f62
 plot(
 	birth,
-	x = :Race, y = :bwt, color=:Race, xgroup = :smoke,
-	Geom.subplot_grid(Geom.boxplot),
-	Guide.xlabel(""),
-	Guide.ylabel("Birth weight (g)"),
-	Guide.colorkey("")
+	x=:race, y=:bwt, color=:smoke,
+	labels=Dict(
+		:race => "Ethnicity",
+    	:bwt => "Birth weight (g)",
+    	:smoke => "Smoking status"
+	),
+	kind="box", Layout(boxmode="group")
 )
 
-# ╔═╡ feb50242-4391-4a13-9540-73b635a0c8c0
+# ╔═╡ 1e29656f-84e6-4331-928d-1cb1ef7e9e38
+plot(
+	sort(wcgs, :beh_pat),
+	x=:beh_pat, y=:sbp, color=:chd,
+	labels=Dict(
+		:beh_pat => "Behaviour Pattern",
+    	:sbp => "SBP (mm Hg)",
+    	:chd => "CHD event"
+	),
+	kind="box", Layout(boxmode="group")
+)
+
+# ╔═╡ e55dadfa-34d4-4efc-8fff-1c739553013c
+plot(
+	sort(wcgs, :beh_pat),
+	x=:beh_pat, y=:sbp, color=:chd,
+	labels=Dict(
+		:beh_pat => "Behaviour Pattern",
+    	:sbp => "SBP (mm Hg)",
+    	:chd => "CHD event"
+	),
+	kind="violin", Layout(violinmode="group")
+)
+
+# ╔═╡ 8a4d97fc-9121-4308-8ed6-a0e9cf4c7a0a
+md"""
+!!! note
+
+	We first *sorted* levels on `beh_pat`, so its levels are displayed in the right order.
+"""
+
+# ╔═╡ e3df1a41-b690-40de-b60b-a6b50450af47
 md"""
 ## Strip Charts
 
-When we want to compare groups and the number of observations is relatively small $(n<30)$, strip charts are superior than box-plots as we can show all observations. 
+When we want to compare groups and the number of observations is relatively small 
+(n < 30), strip charts are superior than box-plots as we can show all observations.
 """
 
-# ╔═╡ e7ef76fc-e844-405c-9ea4-dc486449a055
+# ╔═╡ 44770281-b1b8-43e0-a189-94eaacf7ef98
 plot(
 	energy,
-	x = :stature, y = :expend,
-	Geom.beeswarm,
-	Guide.xlabel("Stature"),
-	Guide.ylabel("Energy expenditure (MJ)"),
-	Theme(default_color="IndianRed")
+	x=:stature, y=:expend, marker_color="#eb98b5",
+	labels=Dict(
+		:stature => "Stature", 
+    	:expend => "Energy expenditure (MJ)"
+	),
+	kind="box", boxpoints="all"
 )
 
-# ╔═╡ 8d9562a6-8628-431b-be31-a836c85c62c1
-md"""
-We can use function `gen_bst_df` to generate a data frame with 95% CI around the mean, and use those values to plot error bars.
-"""
-
-# ╔═╡ 94063ef3-7c58-49df-8ec7-7927fcb19b4c
-energy_bst = pubh.gen_bst_df(@formula(expend ~ stature), data=energy) |> rcopy
-
-# ╔═╡ eb1787f7-d6f2-41ba-bf97-4e5ae467092c
-strip_error(
-	:stature, :expend,
-	energy, energy_bst,
-	xlab = "Stature",
-	ylab = "Energy expenditure (MJ)"
-)
-
-# ╔═╡ 16630287-c6d6-4fc8-b686-cbf06e1d5c1b
-md"""
-## Violin Plots
-
-Violin plots are an alternative to box-plots.
-"""
-
-# ╔═╡ 427dac45-d8ec-4a09-ac2d-7b02ef794c06
+# ╔═╡ 02432655-148c-4451-ace2-db30684e3e87
 plot(
 	kfm,
-	x = :sex, y = :dl_milk,
-	Geom.violin,
-	Guide.xlabel(""),
-	Guide.ylabel("Breast milk intake (dl/day) "),
-	Theme(default_color="Plum")
+	x=:sex, y=:dl_milk, marker_color="#330C73",
+	labels=Dict(
+		:sex => "",
+    	:dl_milk => "Breast-milk intake (dl/day)"
+	),
+	kind="box", boxpoints="all"
 )
 
-# ╔═╡ 9ad79dc8-1453-4c39-ae88-abe905e1e7fd
+# ╔═╡ 3e59bb44-9b40-4a6d-9fb1-f91a89c6f8c3
 plot(
-	wcgs,
-	x = :beh_pat, y = :sbp, color = :beh_pat, xgroup=:chd,
-	Geom.subplot_grid(Geom.violin),
-	Guide.xlabel("Coronary Heart Disease status"),
-	Guide.ylabel("SBP (mmHg)"),
-	Guide.colorkey("Behaviour \n Pattern")
+	birth,
+	x=:race, y=:bwt, color=:low,
+	labels=Dict(
+		:race => "Ethnicity of Mother",
+  	:bwt => "Birth weight (g)",
+  	:low => "Low birth weight?"	
+	),
+	kind="box", boxpoints="all",
+	marker=attr(size=2),
+	Layout(boxmode="group")
 )
 
-# ╔═╡ e9a10401-f775-4745-b88e-b424459f4a0d
+# ╔═╡ ef2f7e98-0534-4c2e-9dd9-02178097baf0
 md"""
 ## Bar Charts
 
@@ -470,80 +415,101 @@ Bar charts or bar plots are used, most of the time, to display information from 
 
 ### Frequency
 
-To construct the plot, first we need to calculate frequencies by group, for this, we use `@combine` with `groupby`:
+For categorical variables, we can plot the counts.
 """
 
-# ╔═╡ 09de889f-76af-4481-893c-2f002cde2885
-@combine(groupby(birth, [:race, :low]), :count = @nrow)
-
-# ╔═╡ 07c2d457-56fe-498f-9238-7ab215cf5f78
-md"""
-Now that we understand, how to generate the data frame with the table of frequencies, we can make the plot in one command.
-"""
-
-# ╔═╡ bdd96bf4-8e70-4f08-a497-2d5ae8a04591
+# ╔═╡ c5e7172e-6fa7-4702-b436-5846d436d05e
 plot(
-	@combine(groupby(birth, [:race, :low]), :count = @nrow),
-	x = :race, y = :count, color = :low,
-	Geom.bar(position=:dodge),
-	Guide.xlabel(""),
-	Guide.colorkey(title="Low birth weight?", pos=[0.4w, -0.3h])
+	birth,
+	x=:race, color=:low,
+	labels=Dict(
+		:race => "Ethnicity of Mother",
+    	:low => "Low birth weight?"
+	),
+	kind="histogram", histfunc="count",
+	Layout(yaxis_title="Frequency")
 )
 
-# ╔═╡ 5da4da12-ccc6-4d9c-81a1-f338b39be0ae
+# ╔═╡ 1048bd97-b881-40d2-acd5-d9b5851b3327
 md"""
-### Expectation
+## Expectation
 
-For continuous variables, we can plot the expected (mean) values with 95% confidence intervals around the mean.
+For continuous variables, we can plot the expected (mean) values.
 """
 
-# ╔═╡ 438d0cc9-8624-4d8d-8dbd-ea97d3dad21a
-pubh.gen_bst_df(@formula(dl_milk ~ sex), data=kfm) |> rcopy
-
-# ╔═╡ aeef5146-4b45-4a39-a5b4-d925e059587d
+# ╔═╡ f7848856-b67c-4ce7-98ec-a984596cc360
 plot(
-	pubh.gen_bst_df(@formula(dl_milk ~ sex), data=kfm) |> rcopy,
-	x = :sex, y = :dl_milk, ymin = :LowerCI, ymax = :UpperCI,
-	Scale.x_discrete(levels=["Boy", "Girl"]),
-	Geom.errorbar, Stat.dodge, Geom.bar(position = :dodge),
-	Guide.xlabel(""),
-	Guide.ylabel("Breast-milk intake (dl/day)")
+	birth,
+	x=:race, y=:bwt, color=:low,
+	labels=Dict(
+		:race => "Ethnicity of Mother",
+		:bwt => "Birth weight (g)",
+    	:low => "Low birth weight?"
+	),
+	kind="histogram", histfunc="avg"
 )
 
-# ╔═╡ 33578ffc-32d4-4d83-906d-b303decfa075
-let
-	fn1(x, u=mean(x), s=std(x)) = (bwt=u, ymin=u-s, ymax=u+s)
-	df = combine(groupby(birth, [:smoke, :Race]), :bwt=>fn1=>AsTable)
-end
+# ╔═╡ b54dfbdb-f679-4f26-b02e-33a4ae1f086a
+kfm_bst = pubh.gen_bst_df(@formula(dl_milk ~ sex), data=kfm) |> rcopy
 
-# ╔═╡ 8d7b9f8a-8ff2-435c-a661-a6f9629d1c84
-let
-	fn1(x, u=mean(x), s=std(x)) = (bwt=u, ymin=u-s, ymax=u+s)
-	df = combine(groupby(birth, [:smoke, :Race]), :bwt=>fn1=>AsTable)
-	plot(
-		df,
-		x = :Race, y = :bwt, color = :smoke, ymin = :ymin, ymax = :ymax,
-		Scale.x_discrete(levels=["White", "Non-white"]),
-		Geom.errorbar, Stat.dodge, Geom.bar(position = :dodge),
-		Guide.xlabel(""),
-		Guide.ylabel("Birth weight (g)"),
-		Guide.colorkey(title="", pos=[0.8w, -0.4h])
+# ╔═╡ 042c45c7-fa41-4bda-9b94-313aac8c86d2
+@transform!(
+	kfm_bst,
+	:err = :UpperCI - :LowerCI
+)
+
+# ╔═╡ 06b6a2a4-51c1-4ccf-a09b-cc16f490ce74
+plot(
+	kfm_bst,
+	x=:sex, y=:dl_milk, marker_color="midnightblue", opacity=0.5,
+	labels=Dict(
+		:sex => "Sex",
+		:dl_milk => "Breast-milk intake (dl/day)"
+	),
+	kind="bar", 
+	error_y=attr(
+		type="data",
+		array = :err
 	)
+)
+
+# ╔═╡ ce42f077-320b-46d3-8a73-2fb54e8888ff
+begin
+	fn1(x, u=mean(x), s=std(x)) = (bwt=u, ymin=u-s, ymax=u+s)
+	birth_bst = combine(groupby(birth, [:smoke, :Race]), :bwt=>fn1=>AsTable)
 end
+
+# ╔═╡ a7110ce4-be72-451e-8de8-5253a0145e11
+@transform!(
+	birth_bst,
+	:err = :ymax - :ymin
+)
+
+# ╔═╡ a77e4f61-f03f-4ec9-9f8d-f70e89867866
+plot(
+	birth_bst,
+	x=:Race, y=:bwt, color=:smoke,
+	labels=Dict(
+		:bwt => "Birth weight (g)",
+		:smoke => "Smoking status"
+	),
+	kind="bar", 
+	error_y=attr(
+		type="data",
+		array = :err
+	)
+)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
-ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
-Compose = "a81c6b42-2e10-5240-aca2-a61377ecd94b"
 DataFrameMacros = "75880514-38bc-4a95-a458-c2aea5a3a702"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
-Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
-Gadfly = "c91e804a-d5a3-530f-b6f0-dfbca275c004"
 MLJ = "add582a8-e3ab-11e8-2d5e-e98b27df1bc7"
+PlutoPlotly = "8e989ff0-3d88-8e9f-f020-2b208a939ff0"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 RCall = "6f49c342-dc21-5d91-9882-a32aef131414"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
@@ -551,17 +517,14 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 [compat]
 CSV = "~0.10.12"
 CategoricalArrays = "~0.10.8"
-ColorSchemes = "~3.24.0"
-Compose = "~0.9.5"
 DataFrameMacros = "~0.4.1"
 DataFrames = "~1.6.1"
-Distributions = "~0.25.106"
 GLM = "~1.9.0"
-Gadfly = "~1.4.0"
-MLJ = "~0.20.0"
-PlutoUI = "~0.7.54"
-RCall = "~0.13.18"
-StatsBase = "~0.33.21"
+MLJ = "~0.20.2"
+PlutoPlotly = "~0.4.4"
+PlutoUI = "~0.7.55"
+RCall = "~0.14.0"
+StatsBase = "~0.34.2"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -570,24 +533,13 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.0"
 manifest_format = "2.0"
-project_hash = "936248844495fb376830adfcf3c538891baae4d6"
+project_hash = "d45ff48827688c813ff0341340391def01b6aff9"
 
 [[deps.ARFFFiles]]
 deps = ["CategoricalArrays", "Dates", "Parsers", "Tables"]
 git-tree-sha1 = "e8c8e0a2be6eb4f56b1672e46004463033daa409"
 uuid = "da404889-ca92-49ff-9e8b-0aa6b4d38dc8"
 version = "1.4.1"
-
-[[deps.AbstractFFTs]]
-deps = ["LinearAlgebra"]
-git-tree-sha1 = "d92ad398961a3ed262d8bf04a1a2b8340f915fef"
-uuid = "621f4979-c628-5d54-868e-fcf4e3e8185c"
-version = "1.5.0"
-weakdeps = ["ChainRulesCore", "Test"]
-
-    [deps.AbstractFFTs.extensions]
-    AbstractFFTsChainRulesCoreExt = "ChainRulesCore"
-    AbstractFFTsTestExt = "Test"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -597,9 +549,9 @@ version = "1.2.3"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra", "Requires"]
-git-tree-sha1 = "cde29ddf7e5726c9fb511f340244ea3481267608"
+git-tree-sha1 = "0fb305e0253fd4e833d486914367a2ee2c2e78d0"
 uuid = "79e6a3ab-5dfb-504d-930d-738a2a938a0e"
-version = "3.7.2"
+version = "4.0.1"
 weakdeps = ["StaticArrays"]
 
     [deps.Adapt.extensions]
@@ -623,17 +575,11 @@ git-tree-sha1 = "c06a868224ecba914baa6942988e2f2aade419be"
 uuid = "a9b6321e-bd34-4604-b9c9-b65b8de01458"
 version = "0.1.0"
 
-[[deps.AxisAlgorithms]]
-deps = ["LinearAlgebra", "Random", "SparseArrays", "WoodburyMatrices"]
-git-tree-sha1 = "01b8ccb13d68535d73d2b0c23e39bd23155fb712"
-uuid = "13072b0f-2c55-5437-9ae7-d433b7a33950"
-version = "1.1.0"
-
 [[deps.BangBang]]
 deps = ["Compat", "ConstructionBase", "InitialValues", "LinearAlgebra", "Requires", "Setfield", "Tables"]
-git-tree-sha1 = "e28912ce94077686443433c2800104b061a827ed"
+git-tree-sha1 = "7aa7ad1682f3d5754e3491bb59b8103cae28e3a3"
 uuid = "198e06fe-97b7-11e9-32a5-e1d131e6ad66"
-version = "0.3.39"
+version = "0.3.40"
 
     [deps.BangBang.extensions]
     BangBangChainRulesCoreExt = "ChainRulesCore"
@@ -651,6 +597,11 @@ version = "0.3.39"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+
+[[deps.BaseDirs]]
+git-tree-sha1 = "4b41ad09c2307d5f24e36cd6f92eb41b218af22c"
+uuid = "18cc8868-cbac-4acf-b575-c8ff214dc66f"
+version = "1.2.1"
 
 [[deps.Baselet]]
 git-tree-sha1 = "aebf55e6d7795e02ca500a689d326ac979aaf89e"
@@ -699,9 +650,9 @@ version = "0.10.8"
 
 [[deps.CategoricalDistributions]]
 deps = ["CategoricalArrays", "Distributions", "Missings", "OrderedCollections", "Random", "ScientificTypes"]
-git-tree-sha1 = "3124343a1b0c9a2f5fdc1d9bcc633ba11735a4c4"
+git-tree-sha1 = "6d4569d555704cdf91b3417c0667769a4a7cbaa2"
 uuid = "af321ab8-2d2e-40a6-b165-3d674595d28e"
-version = "0.1.13"
+version = "0.1.14"
 
     [deps.CategoricalDistributions.extensions]
     UnivariateFiniteDisplayExt = "UnicodePlots"
@@ -711,9 +662,9 @@ version = "0.1.13"
 
 [[deps.ChainRulesCore]]
 deps = ["Compat", "LinearAlgebra"]
-git-tree-sha1 = "2118cb2765f8197b08e5958cdd17c165427425ee"
+git-tree-sha1 = "1287e3872d646eed95198457873249bd9f0caed2"
 uuid = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
-version = "1.19.0"
+version = "1.20.1"
 weakdeps = ["SparseArrays"]
 
     [deps.ChainRulesCore.extensions]
@@ -721,9 +672,9 @@ weakdeps = ["SparseArrays"]
 
 [[deps.CodecZlib]]
 deps = ["TranscodingStreams", "Zlib_jll"]
-git-tree-sha1 = "cd67fc487743b2f0fd4380d4cbd3a24660d0eec8"
+git-tree-sha1 = "59939d8a997469ee05c4b4944560a820f9ba0d73"
 uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
-version = "0.7.3"
+version = "0.7.4"
 
 [[deps.ColorSchemes]]
 deps = ["ColorTypes", "ColorVectorSpace", "Colors", "FixedPointNumbers", "PrecompileTools", "Random"]
@@ -759,10 +710,10 @@ uuid = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
 version = "1.0.2"
 
 [[deps.Compat]]
-deps = ["UUIDs"]
-git-tree-sha1 = "886826d76ea9e72b35fcd000e535588f7b60f21d"
+deps = ["TOML", "UUIDs"]
+git-tree-sha1 = "75bd5b6fc5089df449b5d35fa501c846c9b6549b"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "4.10.1"
+version = "4.12.0"
 weakdeps = ["Dates", "LinearAlgebra"]
 
     [deps.Compat.extensions]
@@ -772,12 +723,6 @@ weakdeps = ["Dates", "LinearAlgebra"]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
 version = "1.0.5+1"
-
-[[deps.Compose]]
-deps = ["Base64", "Colors", "DataStructures", "Dates", "IterTools", "JSON", "LinearAlgebra", "Measures", "Printf", "Random", "Requires", "Statistics", "UUIDs"]
-git-tree-sha1 = "bf6570a34c850f99407b494757f5d7ad233a7257"
-uuid = "a81c6b42-2e10-5240-aca2-a61377ecd94b"
-version = "0.9.5"
 
 [[deps.CompositionsBase]]
 git-tree-sha1 = "802bb88cd69dfd1509f6670416bd4434015693ad"
@@ -827,26 +772,15 @@ git-tree-sha1 = "25cc3803f1030ab855e383129dcd3dc294e322cc"
 uuid = "6add18c4-b38d-439d-96f6-d6bc489c04c5"
 version = "0.1.3"
 
-[[deps.Contour]]
-git-tree-sha1 = "d05d9e7b7aedff4e5b51a029dced05cfb6125781"
-uuid = "d38c429a-6771-53c6-b99e-75d170b6e991"
-version = "0.6.2"
-
-[[deps.CoupledFields]]
-deps = ["LinearAlgebra", "Statistics", "StatsBase"]
-git-tree-sha1 = "6c9671364c68c1158ac2524ac881536195b7e7bc"
-uuid = "7ad07ef1-bdf2-5661-9d2b-286fd4296dac"
-version = "0.2.0"
-
 [[deps.Crayons]]
 git-tree-sha1 = "249fe38abf76d48563e2f4556bebd215aa317e15"
 uuid = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
 version = "4.1.1"
 
 [[deps.DataAPI]]
-git-tree-sha1 = "8da84edb865b0b5b0100c0666a9bc9a0b71c553c"
+git-tree-sha1 = "abe83f3a2f1b857aac70ef8b269080af17764bbe"
 uuid = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
-version = "1.15.0"
+version = "1.16.0"
 
 [[deps.DataFrameMacros]]
 deps = ["DataFrames", "MacroTools"]
@@ -903,9 +837,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns"]
-git-tree-sha1 = "a4532d110ce91bd744b99280193a317310960c46"
+git-tree-sha1 = "7c302d7a5fec5214eb8a5a4c466dcf7a51fcf169"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.106"
+version = "0.25.107"
 
     [deps.Distributions.extensions]
     DistributionsChainRulesCoreExt = "ChainRulesCore"
@@ -945,18 +879,6 @@ deps = ["Test"]
 git-tree-sha1 = "dcb08a0d93ec0b1cdc4af184b26b591e9695423a"
 uuid = "460bff9d-24e4-43bc-9d9f-a8973cb893f4"
 version = "0.1.10"
-
-[[deps.FFTW]]
-deps = ["AbstractFFTs", "FFTW_jll", "LinearAlgebra", "MKL_jll", "Preferences", "Reexport"]
-git-tree-sha1 = "ec22cbbcd01cba8f41eecd7d44aac1f23ee985e3"
-uuid = "7a1cc6ca-52ef-59f5-83cd-3a7055c09341"
-version = "1.7.2"
-
-[[deps.FFTW_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "c6033cc3892d0ef5bb9cd29b7f2f0331ea5184ea"
-uuid = "f5851436-0d7a-5f13-b9de-f02708fd171a"
-version = "3.3.10+0"
 
 [[deps.FLoops]]
 deps = ["BangBang", "Compat", "FLoopsBase", "InitialValues", "JuliaVariables", "MLStyle", "Serialization", "Setfield", "Transducers"]
@@ -1009,32 +931,15 @@ version = "1.9.0"
 
 [[deps.GPUArraysCore]]
 deps = ["Adapt"]
-git-tree-sha1 = "2d6ca471a6c7b536127afccfa7564b5b39227fe0"
+git-tree-sha1 = "ec632f177c0d990e64d955ccc1b8c04c485a0950"
 uuid = "46192b85-c4d5-4398-a991-12ede77f4527"
-version = "0.1.5"
-
-[[deps.Gadfly]]
-deps = ["Base64", "CategoricalArrays", "Colors", "Compose", "Contour", "CoupledFields", "DataAPI", "DataStructures", "Dates", "Distributions", "DocStringExtensions", "Hexagons", "IndirectArrays", "IterTools", "JSON", "Juno", "KernelDensity", "LinearAlgebra", "Loess", "Measures", "Printf", "REPL", "Random", "Requires", "Showoff", "Statistics"]
-git-tree-sha1 = "d546e18920e28505e9856e1dfc36cff066907c71"
-uuid = "c91e804a-d5a3-530f-b6f0-dfbca275c004"
-version = "1.4.0"
-
-[[deps.Grisu]]
-git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
-uuid = "42e2da0e-8278-4e71-bc24-59509adca0fe"
-version = "1.0.2"
+version = "0.1.6"
 
 [[deps.HTTP]]
 deps = ["Base64", "CodecZlib", "ConcurrentUtilities", "Dates", "ExceptionUnwrapping", "Logging", "LoggingExtras", "MbedTLS", "NetworkOptions", "OpenSSL", "Random", "SimpleBufferStream", "Sockets", "URIs", "UUIDs"]
 git-tree-sha1 = "abbbb9ec3afd783a7cbd82ef01dcd088ea051398"
 uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 version = "1.10.1"
-
-[[deps.Hexagons]]
-deps = ["Test"]
-git-tree-sha1 = "de4a6f9e7c4710ced6838ca906f81905f7385fd6"
-uuid = "a1b4810d-1bce-5fbd-ac56-80944d57a21f"
-version = "0.2.0"
 
 [[deps.HypergeometricFunctions]]
 deps = ["DualNumbers", "LinearAlgebra", "OpenLibm_jll", "SpecialFunctions"]
@@ -1044,9 +949,9 @@ version = "0.3.23"
 
 [[deps.Hyperscript]]
 deps = ["Test"]
-git-tree-sha1 = "8d511d5b81240fc8e6802386302675bdf47737b9"
+git-tree-sha1 = "179267cfa5e712760cd43dcae385d7ea90cc25a4"
 uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
-version = "0.0.4"
+version = "0.0.5"
 
 [[deps.HypertextLiteral]]
 deps = ["Tricks"]
@@ -1056,14 +961,9 @@ version = "0.9.5"
 
 [[deps.IOCapture]]
 deps = ["Logging", "Random"]
-git-tree-sha1 = "d75853a0bdbfb1ac815478bacd89cd27b550ace6"
+git-tree-sha1 = "8b72179abc660bfab5e28472e019392b97d0985c"
 uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
-version = "0.2.3"
-
-[[deps.IndirectArrays]]
-git-tree-sha1 = "012e604e1c7458645cb8b436f8fba789a51b257f"
-uuid = "9b13fd28-a010-5f03-acff-a1bbcff69959"
-version = "1.0.0"
+version = "0.2.4"
 
 [[deps.InitialValues]]
 git-tree-sha1 = "4da0f88e9a39111c2fa3add390ab15f3a44f3ca3"
@@ -1076,27 +976,9 @@ git-tree-sha1 = "9cc2baf75c6d09f9da536ddf58eb2f29dedaf461"
 uuid = "842dd82b-1e85-43dc-bf29-5d0ee9dffc48"
 version = "1.4.0"
 
-[[deps.IntelOpenMP_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "5fdf2fe6724d8caabf43b557b84ce53f3b7e2f6b"
-uuid = "1d5cc7b8-4909-519e-a0f8-d0f5ad9712d0"
-version = "2024.0.2+0"
-
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
-
-[[deps.Interpolations]]
-deps = ["Adapt", "AxisAlgorithms", "ChainRulesCore", "LinearAlgebra", "OffsetArrays", "Random", "Ratios", "Requires", "SharedArrays", "SparseArrays", "StaticArrays", "WoodburyMatrices"]
-git-tree-sha1 = "88a101217d7cb38a7b481ccd50d21876e1d1b0e0"
-uuid = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
-version = "0.15.1"
-
-    [deps.Interpolations.extensions]
-    InterpolationsUnitfulExt = "Unitful"
-
-    [deps.Interpolations.weakdeps]
-    Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
 [[deps.InvertedIndices]]
 git-tree-sha1 = "0dc7b50b8d436461be01300fd8cd45aa0274b038"
@@ -1108,16 +990,11 @@ git-tree-sha1 = "630b497eafcc20001bba38a4651b327dcfc491d2"
 uuid = "92d709cd-6900-40b7-9082-c6be49f344b6"
 version = "0.2.2"
 
-[[deps.IterTools]]
-git-tree-sha1 = "42d5f897009e7ff2cf88db414a389e5ed1bdd023"
-uuid = "c8e1da08-722c-5040-9ed9-7db0dc04731e"
-version = "1.10.0"
-
 [[deps.IterationControl]]
 deps = ["EarlyStopping", "InteractiveUtils"]
-git-tree-sha1 = "d7df9a6fdd82a8cfdfe93a94fcce35515be634da"
+git-tree-sha1 = "e663925ebc3d93c1150a7570d114f9ea2f664726"
 uuid = "b3c1a2ee-3fec-4384-bf48-272ea71de57c"
-version = "0.5.3"
+version = "0.5.4"
 
 [[deps.IteratorInterfaceExtensions]]
 git-tree-sha1 = "a3f24677c21f5bbe9d2a714f95dcd58337fb2856"
@@ -1142,29 +1019,17 @@ git-tree-sha1 = "49fb3cb53362ddadb4415e9b73926d6b40709e70"
 uuid = "b14d175d-62b4-44ba-8fb7-3064adc8c3ec"
 version = "0.2.4"
 
-[[deps.Juno]]
-deps = ["Base64", "Logging", "Media", "Profile"]
-git-tree-sha1 = "07cb43290a840908a771552911a6274bc6c072c7"
-uuid = "e5e0dc1b-0480-54bc-9374-aad01c23163d"
-version = "0.8.4"
-
 [[deps.KernelAbstractions]]
 deps = ["Adapt", "Atomix", "InteractiveUtils", "LinearAlgebra", "MacroTools", "PrecompileTools", "Requires", "SparseArrays", "StaticArrays", "UUIDs", "UnsafeAtomics", "UnsafeAtomicsLLVM"]
-git-tree-sha1 = "653e0824fc9ab55b3beec67a6dbbe514a65fb954"
+git-tree-sha1 = "4e0cb2f5aad44dcfdc91088e85dee4ecb22c791c"
 uuid = "63c18a36-062a-441e-b654-da1e3ab1ce7c"
-version = "0.9.15"
+version = "0.9.16"
 
     [deps.KernelAbstractions.extensions]
     EnzymeExt = "EnzymeCore"
 
     [deps.KernelAbstractions.weakdeps]
     EnzymeCore = "f151be2c-9106-41f4-ab19-57ee4f262869"
-
-[[deps.KernelDensity]]
-deps = ["Distributions", "DocStringExtensions", "FFTW", "Interpolations", "StatsBase"]
-git-tree-sha1 = "fee018a29b60733876eb557804b5b109dd3dd8a7"
-uuid = "5ab0869b-81aa-558d-bb23-cbf5423bbe9b"
-version = "0.6.8"
 
 [[deps.LLVM]]
 deps = ["CEnum", "LLVMExtra_jll", "Libdl", "Preferences", "Printf", "Requires", "Unicode"]
@@ -1236,12 +1101,6 @@ uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
 deps = ["Libdl", "OpenBLAS_jll", "libblastrampoline_jll"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
-[[deps.Loess]]
-deps = ["Distances", "LinearAlgebra", "Statistics", "StatsAPI"]
-git-tree-sha1 = "a113a8be4c6d0c64e217b472fb6e61c760eb4022"
-uuid = "4345ca2d-374a-55d4-8d30-97f9976e7612"
-version = "0.6.3"
-
 [[deps.LogExpFunctions]]
 deps = ["DocStringExtensions", "IrrationalConstants", "LinearAlgebra"]
 git-tree-sha1 = "7d6dd4e9212aebaeed356de34ccf262a3cd415aa"
@@ -1272,29 +1131,29 @@ git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
 uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
 version = "0.1.4"
 
-[[deps.MKL_jll]]
-deps = ["Artifacts", "IntelOpenMP_jll", "JLLWrappers", "LazyArtifacts", "Libdl"]
-git-tree-sha1 = "72dc3cf284559eb8f53aa593fe62cb33f83ed0c0"
-uuid = "856f044c-d86e-5d09-b602-aeab76dc8ba7"
-version = "2024.0.0+0"
-
 [[deps.MLFlowClient]]
 deps = ["Dates", "FilePathsBase", "HTTP", "JSON", "ShowCases", "URIs", "UUIDs"]
-git-tree-sha1 = "32cee10a6527476bef0c6484ff4c60c2cead5d3e"
+git-tree-sha1 = "ea8a8dea5d252489d930763e5d6af4795930e0e2"
 uuid = "64a0f543-368b-4a9a-827a-e71edb2a0b83"
-version = "0.4.4"
+version = "0.4.5"
 
 [[deps.MLJ]]
-deps = ["CategoricalArrays", "ComputationalResources", "Distributed", "Distributions", "LinearAlgebra", "MLJBase", "MLJEnsembles", "MLJFlow", "MLJIteration", "MLJModels", "MLJTuning", "OpenML", "Pkg", "ProgressMeter", "Random", "Reexport", "ScientificTypes", "StatisticalMeasures", "Statistics", "StatsBase", "Tables"]
-git-tree-sha1 = "58d17a367ee211ade6e53f83a9cc5adf9d26f833"
+deps = ["CategoricalArrays", "ComputationalResources", "Distributed", "Distributions", "LinearAlgebra", "MLJBalancing", "MLJBase", "MLJEnsembles", "MLJFlow", "MLJIteration", "MLJModels", "MLJTuning", "OpenML", "Pkg", "ProgressMeter", "Random", "Reexport", "ScientificTypes", "StatisticalMeasures", "Statistics", "StatsBase", "Tables"]
+git-tree-sha1 = "981196c41a23cbc1befbad190558b1f0ebb97910"
 uuid = "add582a8-e3ab-11e8-2d5e-e98b27df1bc7"
-version = "0.20.0"
+version = "0.20.2"
+
+[[deps.MLJBalancing]]
+deps = ["MLJBase", "MLJModelInterface", "MLUtils", "OrderedCollections", "Random", "StatsBase"]
+git-tree-sha1 = "f02e28f9f3c54a138db12a97a5d823e5e572c2d6"
+uuid = "45f359ea-796d-4f51-95a5-deb1a414c586"
+version = "0.1.4"
 
 [[deps.MLJBase]]
-deps = ["CategoricalArrays", "CategoricalDistributions", "ComputationalResources", "Dates", "DelimitedFiles", "Distributed", "Distributions", "InteractiveUtils", "InvertedIndices", "LearnAPI", "LinearAlgebra", "MLJModelInterface", "Missings", "OrderedCollections", "Parameters", "PrettyTables", "ProgressMeter", "Random", "Reexport", "ScientificTypes", "Serialization", "StatisticalMeasuresBase", "StatisticalTraits", "Statistics", "StatsBase", "Tables"]
-git-tree-sha1 = "6d433d34a1764324cf37a1ddc47dcc42ec05340f"
+deps = ["CategoricalArrays", "CategoricalDistributions", "ComputationalResources", "Dates", "DelimitedFiles", "Distributed", "Distributions", "InteractiveUtils", "InvertedIndices", "LearnAPI", "LinearAlgebra", "MLJModelInterface", "Missings", "OrderedCollections", "Parameters", "PrettyTables", "ProgressMeter", "Random", "RecipesBase", "Reexport", "ScientificTypes", "Serialization", "StatisticalMeasuresBase", "StatisticalTraits", "Statistics", "StatsBase", "Tables"]
+git-tree-sha1 = "4927a192f5b5156f3952f3f0dbbb4b207eef0836"
 uuid = "a7f614a8-145f-11e9-1d2a-a57a1082229d"
-version = "1.0.1"
+version = "1.1.1"
 weakdeps = ["StatisticalMeasures"]
 
     [deps.MLJBase.extensions]
@@ -1308,9 +1167,9 @@ version = "0.4.0"
 
 [[deps.MLJFlow]]
 deps = ["MLFlowClient", "MLJBase", "MLJModelInterface"]
-git-tree-sha1 = "dc0de70a794c6d4c1aa4bde8196770c6b6e6b550"
+git-tree-sha1 = "89d0e7a7e08359476482f20b2d8ff12080d171ee"
 uuid = "7b7b8358-b45c-48ea-a8ef-7ca328ad328f"
-version = "0.2.0"
+version = "0.3.0"
 
 [[deps.MLJIteration]]
 deps = ["IterationControl", "MLJBase", "Random", "Serialization"]
@@ -1320,21 +1179,21 @@ version = "0.6.0"
 
 [[deps.MLJModelInterface]]
 deps = ["Random", "ScientificTypesBase", "StatisticalTraits"]
-git-tree-sha1 = "0cd3514d865b928e6a36f03497f65b5b1dee38c1"
+git-tree-sha1 = "14bd8088cf7cd1676aa83a57004f8d23d43cd81e"
 uuid = "e80e1ace-859a-464e-9ed9-23947d8ae3ea"
-version = "1.9.4"
+version = "1.9.5"
 
 [[deps.MLJModels]]
 deps = ["CategoricalArrays", "CategoricalDistributions", "Combinatorics", "Dates", "Distances", "Distributions", "InteractiveUtils", "LinearAlgebra", "MLJModelInterface", "Markdown", "OrderedCollections", "Parameters", "Pkg", "PrettyPrinting", "REPL", "Random", "RelocatableFolders", "ScientificTypes", "StatisticalTraits", "Statistics", "StatsBase", "Tables"]
-git-tree-sha1 = "10d221910fc3f3eedad567178ddbca3cc0f776a3"
+git-tree-sha1 = "6868ebd0963fd3d6bfd6d5389dddd0219070120e"
 uuid = "d491faf4-2d78-11e9-2867-c94bc002c0b7"
-version = "0.16.12"
+version = "0.16.15"
 
 [[deps.MLJTuning]]
 deps = ["ComputationalResources", "Distributed", "Distributions", "LatinHypercubeSampling", "MLJBase", "ProgressMeter", "Random", "RecipesBase", "StatisticalMeasuresBase"]
-git-tree-sha1 = "44dc126646a15018d7829f020d121b85b4def9bc"
+git-tree-sha1 = "8d435794dbfba25509f6b32ab5e55779db1bfda2"
 uuid = "03970b2e-30c4-11ea-3135-d1576263f10f"
-version = "0.8.0"
+version = "0.8.1"
 
 [[deps.MLStyle]]
 git-tree-sha1 = "bc38dff0548128765760c79eb7388a4b37fae2c8"
@@ -1349,9 +1208,9 @@ version = "0.4.4"
 
 [[deps.MacroTools]]
 deps = ["Markdown", "Random"]
-git-tree-sha1 = "b211c553c199c111d998ecdaf7623d1b89b69f93"
+git-tree-sha1 = "2fa9ee3e63fd3a4f7a9a4f4744a52f4856de82df"
 uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.5.12"
+version = "0.5.13"
 
 [[deps.Markdown]]
 deps = ["Base64"]
@@ -1367,17 +1226,6 @@ version = "1.1.9"
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
 version = "2.28.2+1"
-
-[[deps.Measures]]
-git-tree-sha1 = "c13304c81eec1ed3af7fc20e75fb6b26092a1102"
-uuid = "442fdcdd-2543-5da2-b0f3-8c86c306513e"
-version = "0.3.2"
-
-[[deps.Media]]
-deps = ["MacroTools", "Test"]
-git-tree-sha1 = "75a54abd10709c01f1b86b84ec225d26e840ed58"
-uuid = "e89f7d12-3494-54d1-8411-f7d8b9ae1f27"
-version = "0.5.0"
 
 [[deps.MicroCollections]]
 deps = ["BangBang", "InitialValues", "Setfield"]
@@ -1400,9 +1248,9 @@ version = "2023.1.10"
 
 [[deps.NNlib]]
 deps = ["Adapt", "Atomix", "ChainRulesCore", "GPUArraysCore", "KernelAbstractions", "LinearAlgebra", "Pkg", "Random", "Requires", "Statistics"]
-git-tree-sha1 = "900a11b3a2b02e36b25cb55a80777d4a4670f0f6"
+git-tree-sha1 = "d2811b435d2f571bdfdfa644bb806a66b458e186"
 uuid = "872c559c-99b0-510c-b3b7-b6c96a88d5cd"
-version = "0.9.10"
+version = "0.9.11"
 
     [deps.NNlib.extensions]
     NNlibAMDGPUExt = "AMDGPU"
@@ -1431,15 +1279,6 @@ version = "0.1.5"
 [[deps.NetworkOptions]]
 uuid = "ca575930-c2e3-43a9-ace4-1e988b2c1908"
 version = "1.2.0"
-
-[[deps.OffsetArrays]]
-git-tree-sha1 = "6a731f2b5c03157418a20c12195eb4b74c8f8621"
-uuid = "6fe1bfb0-de20-5000-8ca7-80f57d26f881"
-version = "1.13.0"
-weakdeps = ["Adapt"]
-
-    [deps.OffsetArrays.extensions]
-    OffsetArraysAdaptExt = "Adapt"
 
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
@@ -1503,11 +1342,31 @@ deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
 version = "1.10.0"
 
+[[deps.PlotlyBase]]
+deps = ["ColorSchemes", "Dates", "DelimitedFiles", "DocStringExtensions", "JSON", "LaTeXStrings", "Logging", "Parameters", "Pkg", "REPL", "Requires", "Statistics", "UUIDs"]
+git-tree-sha1 = "56baf69781fc5e61607c3e46227ab17f7040ffa2"
+uuid = "a03496cd-edff-5a9b-9e67-9cda94a718b5"
+version = "0.8.19"
+
+[[deps.PlutoPlotly]]
+deps = ["AbstractPlutoDingetjes", "BaseDirs", "Colors", "Dates", "Downloads", "HypertextLiteral", "InteractiveUtils", "LaTeXStrings", "Markdown", "Pkg", "PlotlyBase", "Reexport", "TOML"]
+git-tree-sha1 = "58dcb661ba1e58a13c7adce77435c3c6ac530ef9"
+uuid = "8e989ff0-3d88-8e9f-f020-2b208a939ff0"
+version = "0.4.4"
+
+    [deps.PlutoPlotly.extensions]
+    PlotlyKaleidoExt = "PlotlyKaleido"
+    UnitfulExt = "Unitful"
+
+    [deps.PlutoPlotly.weakdeps]
+    PlotlyKaleido = "f2990250-8cf9-495f-b13a-cce12b45703c"
+    Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
+
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
-git-tree-sha1 = "bd7c69c7f7173097e7b5e1be07cee2b8b7447f51"
+git-tree-sha1 = "68723afdb616445c6caaef6255067a8339f91325"
 uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.54"
+version = "0.7.55"
 
 [[deps.PooledArrays]]
 deps = ["DataAPI", "Future"]
@@ -1547,10 +1406,6 @@ version = "2.3.1"
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 
-[[deps.Profile]]
-deps = ["Printf"]
-uuid = "9abbd945-dff8-562f-b5e8-e1ebf5ef1b79"
-
 [[deps.ProgressMeter]]
 deps = ["Distributed", "Printf"]
 git-tree-sha1 = "00099623ffee15972c16111bcf84c58a0051257c"
@@ -1559,15 +1414,15 @@ version = "1.9.0"
 
 [[deps.QuadGK]]
 deps = ["DataStructures", "LinearAlgebra"]
-git-tree-sha1 = "9ebcd48c498668c7fa0e97a9cae873fbee7bfee1"
+git-tree-sha1 = "9b23c31e76e333e6fb4c1595ae6afa74966a729e"
 uuid = "1fd47b50-473d-5c70-9696-f719f8f3bcdc"
-version = "2.9.1"
+version = "2.9.4"
 
 [[deps.RCall]]
 deps = ["CategoricalArrays", "Conda", "DataFrames", "DataStructures", "Dates", "Libdl", "Missings", "REPL", "Random", "Requires", "StatsModels", "WinReg"]
-git-tree-sha1 = "3084689b18f9e5e817a6ce9a83a7654d8ad0f2f6"
+git-tree-sha1 = "34c461e47346d921474f73ee34a83ee6e7368973"
 uuid = "6f49c342-dc21-5d91-9882-a32aef131414"
-version = "0.13.18"
+version = "0.14.0"
 
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
@@ -1576,16 +1431,6 @@ uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 [[deps.Random]]
 deps = ["SHA"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-
-[[deps.Ratios]]
-deps = ["Requires"]
-git-tree-sha1 = "1342a47bf3260ee108163042310d26f2be5ec90b"
-uuid = "c84ed2f1-dad5-54f0-aa8e-dbefe2724439"
-version = "0.4.5"
-weakdeps = ["FixedPointNumbers"]
-
-    [deps.Ratios.extensions]
-    RatiosFixedPointNumbersExt = "FixedPointNumbers"
 
 [[deps.RecipesBase]]
 deps = ["PrecompileTools"]
@@ -1658,10 +1503,6 @@ git-tree-sha1 = "e2cc6d8c88613c05e1defb55170bf5ff211fbeac"
 uuid = "efcf1570-3423-57d1-acb7-fd33fddbac46"
 version = "1.1.1"
 
-[[deps.SharedArrays]]
-deps = ["Distributed", "Mmap", "Random", "Serialization"]
-uuid = "1a1011a3-84de-559e-8e89-a11a2f7dc383"
-
 [[deps.ShiftedArrays]]
 git-tree-sha1 = "503688b59397b3307443af35cd953a13e8005c16"
 uuid = "1277b4bf-5013-50f5-be3d-901d8477a67a"
@@ -1671,12 +1512,6 @@ version = "2.0.0"
 git-tree-sha1 = "7f534ad62ab2bd48591bdeac81994ea8c445e4a5"
 uuid = "605ecd9f-84a6-4c9e-81e2-4798472b76a3"
 version = "0.1.0"
-
-[[deps.Showoff]]
-deps = ["Dates", "Grisu"]
-git-tree-sha1 = "91eddf657aca81df9ae6ceb20b959ae5653ad1de"
-uuid = "992d4aef-0814-514b-bc4d-f2e9a6c4116f"
-version = "1.0.3"
 
 [[deps.SimpleBufferStream]]
 git-tree-sha1 = "874e8867b33a00e784c8a7e4b60afe9e037b74e1"
@@ -1727,9 +1562,9 @@ version = "1.0.1"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "PrecompileTools", "Random", "StaticArraysCore"]
-git-tree-sha1 = "4e17a790909b17f7bf1496e3aec138cf01b60b3b"
+git-tree-sha1 = "7b0e9c14c624e435076d19aea1e5cbdec2b9ca37"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.9.0"
+version = "1.9.2"
 weakdeps = ["ChainRulesCore", "Statistics"]
 
     [deps.StaticArrays.extensions]
@@ -1743,9 +1578,9 @@ version = "1.4.2"
 
 [[deps.StatisticalMeasures]]
 deps = ["CategoricalArrays", "CategoricalDistributions", "Distributions", "LearnAPI", "LinearAlgebra", "MacroTools", "OrderedCollections", "PrecompileTools", "ScientificTypesBase", "StatisticalMeasuresBase", "Statistics", "StatsBase"]
-git-tree-sha1 = "b58c7cc3d7de6c0d75d8437b81481af924970123"
+git-tree-sha1 = "b9a868f0f8d033efe8e5b50603ce0cf28b398c65"
 uuid = "a19d573c-0a75-4610-95b3-7071388c7541"
-version = "0.1.3"
+version = "0.1.4"
 
     [deps.StatisticalMeasures.extensions]
     LossFunctionsExt = "LossFunctions"
@@ -1780,9 +1615,9 @@ version = "1.7.0"
 
 [[deps.StatsBase]]
 deps = ["DataAPI", "DataStructures", "LinearAlgebra", "LogExpFunctions", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "StatsAPI"]
-git-tree-sha1 = "d1bf48bfcc554a3761a133fe3a9bb01488e06916"
+git-tree-sha1 = "1d77abd07f617c4868c33d4f5b9e1dbb2643c9cf"
 uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
-version = "0.33.21"
+version = "0.34.2"
 
 [[deps.StatsFuns]]
 deps = ["HypergeometricFunctions", "IrrationalConstants", "LogExpFunctions", "Reexport", "Rmath", "SpecialFunctions"]
@@ -1862,9 +1697,9 @@ weakdeps = ["Random", "Test"]
 
 [[deps.Transducers]]
 deps = ["Adapt", "ArgCheck", "BangBang", "Baselet", "CompositionsBase", "ConstructionBase", "DefineSingletons", "Distributed", "InitialValues", "Logging", "Markdown", "MicroCollections", "Requires", "Setfield", "SplittablesBase", "Tables"]
-git-tree-sha1 = "e579d3c991938fecbb225699e8f611fa3fbf2141"
+git-tree-sha1 = "3064e780dbb8a9296ebb3af8f440f787bb5332af"
 uuid = "28d57a85-8fef-5791-bfe6-a80928e7c999"
-version = "0.4.79"
+version = "0.4.80"
 
     [deps.Transducers.extensions]
     TransducersBlockArraysExt = "BlockArrays"
@@ -1929,12 +1764,6 @@ git-tree-sha1 = "cd910906b099402bcc50b3eafa9634244e5ec83b"
 uuid = "1b915085-20d7-51cf-bf83-8f477d6f5128"
 version = "1.0.0"
 
-[[deps.WoodburyMatrices]]
-deps = ["LinearAlgebra", "SparseArrays"]
-git-tree-sha1 = "c1a7aa6219628fcd757dede0ca95e245c5cd9511"
-uuid = "efce3f68-66dc-5838-9240-27a6d6f5f9b6"
-version = "1.0.0"
-
 [[deps.WorkerUtilities]]
 git-tree-sha1 = "cd1659ba0d57b71a464a29e64dbc67cfe83d54e7"
 uuid = "76eceee3-57b5-4d4a-8e66-0e911cebbf60"
@@ -1962,80 +1791,65 @@ version = "17.4.0+2"
 """
 
 # ╔═╡ Cell order:
-# ╟─c4194c6c-ad99-11ee-2cac-e971a64ae700
-# ╟─fa3d6b3e-c220-4faf-bf6d-0f2ba40f2a32
-# ╠═de61a84a-8117-45b2-bf76-3466210af414
-# ╠═0264f77f-69ef-45d8-b6ca-37c3037f62b8
-# ╠═91766885-46eb-48da-8268-61c10e81a625
-# ╠═7e314e22-a017-40ce-9a3b-6c60ef58d613
-# ╟─d26ea522-7f5b-4a0b-bc64-43a031618761
-# ╠═fe0365e4-e2ab-4885-9b49-76adeb13a3cf
-# ╟─10da0038-be7d-4ea0-902d-9c00d099b5d4
-# ╠═3671a6e9-669c-40a2-92c4-c4b7230711e8
-# ╟─28cde657-5f83-431f-a8f5-ad321a46fc93
-# ╠═1250bb55-7c71-4a94-95bb-1ae19414c5b9
-# ╟─304ca0fb-9bda-4e25-8c97-8df4bcf527cf
-# ╠═998e9220-55f5-40bf-8424-854feb4e292b
-# ╟─999b6169-3867-4a9e-bf0d-26245b6fb38a
-# ╠═2106dac6-0003-41f2-9099-b25f2bf052ac
-# ╟─442308d3-4b6d-42c5-89ee-cc04018a5c5d
-# ╠═974b8dd8-d2e2-49ac-be8d-e50c57118664
-# ╟─ec8634a6-30dd-4381-ac2f-47615b2b67c5
-# ╟─ccc6967c-7e1c-49a9-8fc0-7b4d7b768d2e
-# ╠═e7ec823e-b98a-4295-908c-228cd023bac9
-# ╟─696a4954-000a-4a47-861b-1af3e8dedfff
-# ╠═007907f9-970d-4efb-b075-48e027ec7b07
-# ╟─d1ac4dd3-87e5-4c9a-b754-6e59bafa460b
-# ╠═93d1f99a-7819-45e6-b6a8-1113b91d6bf8
-# ╟─107bb1d6-2b35-4f67-96dd-3e8d5b15f568
-# ╠═ce220be7-7d29-408a-a39a-d082efb34af9
-# ╟─941c5f6c-a9a9-48c4-903f-9ba5c3857486
-# ╠═71691eae-cd33-4634-824f-f3bf1ff04cfd
-# ╟─69153a44-73a9-4325-98d8-3369437adf02
-# ╠═d1e6e60b-be3b-47a8-b1f8-347c09382ced
-# ╟─bc97d6ef-24a5-4884-b266-e7f1547b421c
-# ╠═48406c22-ec54-4a12-bf59-d40f19f67ba6
-# ╠═5d1b2bd5-0131-4dd5-ab66-31c09c8b99a4
-# ╟─307ec3bf-457d-4a99-8709-b7f38897e46f
-# ╠═758093aa-d160-4e86-8381-1f0046b12803
-# ╟─8f381487-b64e-4b96-8f10-d0bb0bd75bc1
-# ╠═03f41d6d-efe5-49c1-86e7-d683b3327737
-# ╟─45098f24-39bd-4c02-8dfd-338cb00d5bb8
-# ╠═d5be1bf5-1177-4602-8f39-0e16e307d0f3
-# ╟─548ea04b-cc9c-4695-b670-2b84aeae8272
-# ╠═ef1279b5-3dcc-4b2b-99fe-016ac1e0d3c2
-# ╟─01c0cefd-5462-4951-a381-74144e98b399
-# ╠═b51a32b5-d325-42da-9740-62c7707d2773
-# ╟─94218173-d39d-49c6-8df9-4c23128cac8d
-# ╠═672b8d1f-2f93-474c-a1a9-6645274452b0
-# ╟─7f75495f-b18d-4d03-acc8-d740ca23265b
-# ╠═42dc3130-97e0-4e72-8865-cd0dab8f2b54
-# ╠═08fc723e-08b0-4182-8d5e-99fc59a9e044
-# ╟─b2e1636a-2ee8-4ad3-912b-9826677fb4d4
-# ╠═6b652ffe-4383-4409-ad3b-7d7eb84050dd
-# ╠═f20f07a8-e852-476b-be26-db49e904be2e
-# ╟─48d4867d-5a96-4f37-947e-13fe403c6d80
-# ╠═dacba88d-c008-45dc-b39a-cf9965d96430
-# ╟─9bd259b9-3982-44b7-8fd3-584efef65aa6
-# ╠═bbf4c808-2698-47d7-aa8b-a0dff46b504a
-# ╠═8c4b739c-810b-465c-883a-213e8825c9b8
-# ╠═ddc4f1f6-2bd5-4328-8f34-57e7d3fafb27
-# ╟─feb50242-4391-4a13-9540-73b635a0c8c0
-# ╠═e7ef76fc-e844-405c-9ea4-dc486449a055
-# ╟─8d9562a6-8628-431b-be31-a836c85c62c1
-# ╠═94063ef3-7c58-49df-8ec7-7927fcb19b4c
-# ╠═eb1787f7-d6f2-41ba-bf97-4e5ae467092c
-# ╟─16630287-c6d6-4fc8-b686-cbf06e1d5c1b
-# ╠═427dac45-d8ec-4a09-ac2d-7b02ef794c06
-# ╠═9ad79dc8-1453-4c39-ae88-abe905e1e7fd
-# ╟─e9a10401-f775-4745-b88e-b424459f4a0d
-# ╠═09de889f-76af-4481-893c-2f002cde2885
-# ╟─07c2d457-56fe-498f-9238-7ab215cf5f78
-# ╠═bdd96bf4-8e70-4f08-a497-2d5ae8a04591
-# ╟─5da4da12-ccc6-4d9c-81a1-f338b39be0ae
-# ╠═438d0cc9-8624-4d8d-8dbd-ea97d3dad21a
-# ╠═aeef5146-4b45-4a39-a5b4-d925e059587d
-# ╠═33578ffc-32d4-4d83-906d-b303decfa075
-# ╠═8d7b9f8a-8ff2-435c-a661-a6f9629d1c84
+# ╟─09f00ae0-bfbb-11ee-0e78-8323f9572c2e
+# ╟─bd52d18c-13f7-42fa-9472-7487cb8967f1
+# ╠═e6495531-6e35-410f-a901-b6f0702cdd68
+# ╠═a4297957-cd14-45b3-b977-ddf612e866e8
+# ╠═ce0be6b6-558a-4deb-8ef1-4c3405298a80
+# ╠═b70d632a-ee34-449b-84c0-73ed2f2762cd
+# ╟─e7b9cae1-63e7-44d8-8717-c18dbd26def5
+# ╠═61d2f27e-00a3-463a-91ce-35108aef6044
+# ╟─004a90cd-9d6f-4e3c-8da0-2ca0e80071fe
+# ╠═acf88edb-4ad2-4638-97db-3d12a47a6100
+# ╟─21978fda-b811-40e8-872f-ec6a29281a57
+# ╠═add9285e-6ada-4dc9-bba9-877faf8ba1ec
+# ╟─373b4997-f722-4143-b15e-59c9671cf015
+# ╠═b9323edc-4eb7-4370-93b8-2bfaf5905cfa
+# ╟─7a454f9f-0cb3-4d9e-983a-3ac822e7e565
+# ╠═b0db8b0e-f362-4c94-a214-34068230d2fa
+# ╟─367239b5-a16f-46d3-b1dd-cf61e50b9180
+# ╠═54fca320-fa54-439e-b878-d7bb80648f63
+# ╟─eac86c7e-100e-48f0-8dc1-9ff98ae8ba14
+# ╠═ef1e484c-821f-4f9e-a42b-d8691531e4ea
+# ╟─04357a3a-ece8-4500-802e-818e4cfbca6c
+# ╠═de0a9656-b983-47d5-988b-207fa612fa77
+# ╟─86c3410e-abca-4cd9-8ce3-aa5c3211fe8f
+# ╠═3f97834b-49e1-4ec2-9ac2-64b0bf2b61d1
+# ╟─24daa2fc-7e35-4967-9c27-7b448f0e9c50
+# ╠═1d0af760-479b-4a9c-a10f-4dd99887eca3
+# ╟─0f305c86-9fd2-4d93-a26d-56d322249e85
+# ╠═1d6479cc-e777-4efe-9591-33b2fbc88f80
+# ╟─4865f4a6-ae6f-429f-b017-c30a300b2259
+# ╠═060c3bb0-454e-4fbb-87fd-3518f7393958
+# ╠═002c3396-229b-43c6-878a-7c4730868ec1
+# ╠═bd6b724e-8ce1-41f8-9076-484d239a2da2
+# ╠═2e635d35-05a3-46b4-bc28-d530be1a4533
+# ╠═528e36b5-33b1-493b-8cc3-293e04fbca6b
+# ╠═8c72d56b-413a-42ef-a032-2e980b76b990
+# ╟─4616f50e-13e9-44d3-ba0f-18deac14b27d
+# ╠═0b930239-fcd9-429a-a699-ab0128b3752f
+# ╠═5ee2a2d1-314e-4033-85e8-e4c2089d4f06
+# ╟─b6d1b95b-ad97-4913-9f3f-5c2168f709d5
+# ╠═af2a3509-0dc4-4155-ab4e-482cc88559f6
+# ╟─fd23ab44-6e9d-4201-90d7-eccae1f5e310
+# ╠═d921f2a7-0ebd-4419-9fc7-93a56693fbea
+# ╠═e495b8b1-793d-4001-b94c-81f939091f62
+# ╠═1e29656f-84e6-4331-928d-1cb1ef7e9e38
+# ╠═e55dadfa-34d4-4efc-8fff-1c739553013c
+# ╟─8a4d97fc-9121-4308-8ed6-a0e9cf4c7a0a
+# ╟─e3df1a41-b690-40de-b60b-a6b50450af47
+# ╠═44770281-b1b8-43e0-a189-94eaacf7ef98
+# ╠═02432655-148c-4451-ace2-db30684e3e87
+# ╠═3e59bb44-9b40-4a6d-9fb1-f91a89c6f8c3
+# ╟─ef2f7e98-0534-4c2e-9dd9-02178097baf0
+# ╠═c5e7172e-6fa7-4702-b436-5846d436d05e
+# ╟─1048bd97-b881-40d2-acd5-d9b5851b3327
+# ╠═f7848856-b67c-4ce7-98ec-a984596cc360
+# ╠═b54dfbdb-f679-4f26-b02e-33a4ae1f086a
+# ╠═042c45c7-fa41-4bda-9b94-313aac8c86d2
+# ╠═06b6a2a4-51c1-4ccf-a09b-cc16f490ce74
+# ╠═ce42f077-320b-46d3-8a73-2fb54e8888ff
+# ╠═a7110ce4-be72-451e-8de8-5253a0145e11
+# ╠═a77e4f61-f03f-4ec9-9f8d-f70e89867866
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
