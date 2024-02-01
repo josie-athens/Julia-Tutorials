@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.36
+# v0.19.37
 
 using Markdown
 using InteractiveUtils
@@ -216,28 +216,44 @@ plot(
 	)
 )
 
-# ╔═╡ 002c3396-229b-43c6-878a-7c4730868ec1
+# ╔═╡ dd81c950-499d-45e7-9970-5dc36495dd9c
 plot(
 	kfm,
 	x=:mat_weight, y=:dl_milk, color=:sex,
+	mode="markers", shape="spline",
+	Layout(
+		xaxis_title = "Maternal weight (kg)",
+		yaxis_title = "Breast-milk intake (dl/day)"
+	)
+)
+
+# ╔═╡ 002c3396-229b-43c6-878a-7c4730868ec1
+plot(
+	kfm,
+	x=:mat_weight, y=:dl_milk, facet_col=:sex,
 	mode="markers",
 	Layout(
 		xaxis_title = "Maternal weight (kg)",
 		yaxis_title = "Breast-milk intake (dl/day)"
-	),
-	smooth=true
+	)
 )
 
 # ╔═╡ bd6b724e-8ce1-41f8-9076-484d239a2da2
-model = lm(@formula(dl_milk ~ mat_weight * sex), kfm)
+model_1 = lm(@formula(dl_milk ~ mat_weight), kfm)
+
+# ╔═╡ 240de780-80b5-4a30-a02c-4f8dbe933993
+model_2 = lm(@formula(dl_milk ~ mat_weight*sex), kfm)
 
 # ╔═╡ 2e635d35-05a3-46b4-bc28-d530be1a4533
-kfm.fit = GLM.predict(model);
+kfm.fit_1 = GLM.predict(model_1);
+
+# ╔═╡ ae6c0f3d-d64a-4b5a-b69a-ed4d247ddd91
+kfm.fit_2 = GLM.predict(model_2);
 
 # ╔═╡ 528e36b5-33b1-493b-8cc3-293e04fbca6b
 plot(
 	kfm,
-	x=:mat_weight, y=:fit, color=:sex,
+	x=:mat_weight, y=:fit_2, color=:sex, 
 	Layout(
 		xaxis_title = "Maternal weight (kg)",
 		yaxis_title = "Breast-milk intake (dl/day)"
@@ -246,16 +262,41 @@ plot(
 
 # ╔═╡ 8c72d56b-413a-42ef-a032-2e980b76b990
 let
-	p1 = plot(;
-		x=kfm.mat_weight, y=kfm.dl_milk, color=:sex,
-		mode="markers",
+	p1 = scatter(
+		kfm,
+		x=:mat_weight, y=:dl_milk,
+		mode="markers"
 	)
 	
-	p2 = plot(;
-		x=kfm.mat_weight, y=kfm.fit, color=:sex,
+	p2 = scatter(
+		kfm,
+		x=:mat_weight, y=:fit_1,
+		mode="lines"
 	)
 	
 	layout = Layout(;
+		xaxis_title = "Maternal weight (kg)",
+		yaxis_title = "Breast-milk intake (dl/day)"
+	)
+
+	plot([p1, p2], layout)
+end
+
+# ╔═╡ b48cf26a-72c3-4fd7-998b-e76e07d82ca2
+let
+	p1 = scatter(
+		kfm,
+		x=:mat_weight, y=:dl_milk, color=:sex,
+		mode="markers"
+	)
+	
+	p2 = scatter(
+		kfm,
+		x=:mat_weight, y=:fit_2, color=:sex,
+		mode="lines"
+	)
+	
+	layout = Layout(
 		xaxis_title = "Maternal weight (kg)",
 		yaxis_title = "Breast-milk intake (dl/day)"
 	)
@@ -475,7 +516,7 @@ plot(
 
 # ╔═╡ ce42f077-320b-46d3-8a73-2fb54e8888ff
 begin
-	fn1(x, u=mean(x), s=std(x)) = (bwt=u, ymin=u-s, ymax=u+s)
+	fn1(x, u=mean(x), s=1.96*std(x)/sqrt(length(x))) = (bwt=u, ymin=u-s, ymax=u+s)
 	birth_bst = combine(groupby(birth, [:smoke, :Race]), :bwt=>fn1=>AsTable)
 end
 
@@ -1821,11 +1862,15 @@ version = "17.4.0+2"
 # ╠═1d6479cc-e777-4efe-9591-33b2fbc88f80
 # ╟─4865f4a6-ae6f-429f-b017-c30a300b2259
 # ╠═060c3bb0-454e-4fbb-87fd-3518f7393958
+# ╠═dd81c950-499d-45e7-9970-5dc36495dd9c
 # ╠═002c3396-229b-43c6-878a-7c4730868ec1
 # ╠═bd6b724e-8ce1-41f8-9076-484d239a2da2
+# ╠═240de780-80b5-4a30-a02c-4f8dbe933993
 # ╠═2e635d35-05a3-46b4-bc28-d530be1a4533
+# ╠═ae6c0f3d-d64a-4b5a-b69a-ed4d247ddd91
 # ╠═528e36b5-33b1-493b-8cc3-293e04fbca6b
 # ╠═8c72d56b-413a-42ef-a032-2e980b76b990
+# ╠═b48cf26a-72c3-4fd7-998b-e76e07d82ca2
 # ╟─4616f50e-13e9-44d3-ba0f-18deac14b27d
 # ╠═0b930239-fcd9-429a-a699-ab0128b3752f
 # ╠═5ee2a2d1-314e-4033-85e8-e4c2089d4f06
