@@ -220,7 +220,7 @@ plot(
 plot(
 	kfm,
 	x=:mat_weight, y=:dl_milk, color=:sex,
-	mode="markers", shape="spline",
+	mode="markers", smooth=:true,
 	Layout(
 		xaxis_title = "Maternal weight (kg)",
 		yaxis_title = "Breast-milk intake (dl/day)"

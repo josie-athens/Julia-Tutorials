@@ -308,31 +308,16 @@ Args:
 - title: An optional string for the title.
 
 Returns:
-- A Makie plot.
+- A plot.
 """
 rvf_plot = function (perf::DataFrames.DataFrame; title::String = "")
-  fig = Figure()
-  ax = Axis(
-    fig[1, 1],
-    xlabel="Fitted values",
+	@df perf scatter(
+		:predicted, :std_error,
+		xlabel="Fitted values",
     ylabel="Std Residuals",
-    title=title
-  )
-
-  layers = visual(
-    Scatter, markersize=6, color=:indianred
-  ) + smooth()
-
-  p = data(perf) *
-      mapping(
-        :predicted,
-        :std_error
-      ) *
-      layers * mapping()
-
-  draw!(ax, p)
-  hlines!(ax, [-2, 2], linestyle=:dash, color=:cadetblue)
-  fig
+		leg=false, msize=2, mc=:midnightblue
+	)
+	hline!([-2, 2], linestyle=:dash)
 end
 
 """
@@ -345,30 +330,15 @@ Args:
 - title: An optional string for the title.
 
 Returns:
-- A Makie plot.
+- A plot.
 """
 variance_plot = function (perf::DataFrames.DataFrame; title::String = "")
-  fig = Figure()
-  ax = Axis(
-    fig[1, 1],
-    xlabel="Fitted values",
+	@df perf scatter(
+		:predicted, :sqr_error,
+		xlabel="Fitted values",
     ylabel="√|Std res|",
-    title=title
-  )
-
-  layers = visual(
-    Scatter, markersize=5, color=:indianred
-  ) + smooth()
-
-  p = data(perf) *
-      mapping(
-        :predicted,
-        :sqr_error
-      ) *
-      layers * mapping()
-
-  draw!(ax, p)
-  fig
+		leg=false, msize=2, mc=:midnightblue
+	)
 end
 
 """
@@ -380,31 +350,16 @@ Args:
 - perf: A data frame obtained via model_perf.
 
 Returns:
-- A Makie plot.
+- A plot.
 """
 res_lev_plot = function (perf::DataFrames.DataFrame; title::String = "")
-  fig = Figure()
-  ax = Axis(
-    fig[1, 1],
-    xlabel="Leverage",
+	@df perf scatter(
+		:lever, :std_error,
+		xlabel="Leverage",
     ylabel="Std residuals",
-    title=title
-  )
-
-  layers = visual(
-    Scatter, markersize=5, color=:indianred
-  ) + smooth()
-
-  p = data(perf) *
-      mapping(
-        :lever,
-        :std_error
-      ) *
-      layers * mapping()
-
-  draw!(ax, p)
-  hlines!(ax, [-2, 2], linestyle=:dash, color=:cadetblue)
-  fig
+		leg=false, msize=2, mc=:midnightblue
+	)
+	hline!([-2, 2], linestyle=:dash)
 end
 
 """
@@ -417,30 +372,15 @@ Args:
 - title: An optional string for the title.
 
 Returns:
-- A Makie plot.
+- A plot.
 """
 cook_lev_plot = function (perf::DataFrames.DataFrame; title::String = "")
-  fig = Figure()
-  ax = Axis(
-    fig[1, 1],
-    xlabel="Leverage",
+	@df perf scatter(
+		:lever, :cook,
+		xlabel="Leverage",
     ylabel="Cook's Distance",
-    title=title
-  )
-
-  layers = visual(
-    Scatter, markersize=5, color=:cadetblue
-  )
-
-  p = data(perf) *
-      mapping(
-        :lever => "Leverage",
-        :cook => "Cook's Distance"
-      ) *
-      layers * mapping()
-
-  draw!(ax, p)
-  fig
+		leg=false, msize=2, mc=:midnightblue
+	)
 end
 
 """
@@ -474,34 +414,32 @@ cooks_plot = function (perf::DataFrames.DataFrame; title::String = "")
 end
 
 """
-  qq_plot(df::DataFrames.DataFrame, var::Symbol; ylab::String = "Sample quantiles")
+  qq_plot(var; ylab = "Sample quantiles", title = "")
 
 Constructs a QQ-plot against theoretical quartiles from the normal distribution.
 
 Args:
-- var: A numerical variable.
+- var: A numerical vector.
 - ylab: String to be used for the y-label.
 - title: An optional string for the title.
 
 Returns:
-- A Makie QQ-Plot.
+- A QQ-Plot.
 """
-qq_plot = function (var::Array; ylab::String="Sample quantiles", title::String="")
-  fig = Figure()
-
-  ax = Axis(
-    fig[1, 1],
-    xlabel="Normal quantiles",
-    ylabel=ylab,
-    title=title
-  )
-
-  qqnorm!(ax, var, qqline=:fitrobust, color=:indianred, markersize=6)
-  return fig
+qq_plot = function (var::Array; ylab::String="Sample quantiles", title::String = "")
+	data = DataFrame(; y = var)
+	
+	@df data qqnorm(
+		:y, qqline=:R,
+		xlabel="Theoretical quantiles",
+		ylabel=ylab,
+		title=title,
+		msize=2, mc=:midnightblue
+	)
 end
 
 """
-  strip_error(predictor, outcome, df, df_bst; 
+  strip_error(predictor, outcome; 
     xlab = "Predictor", ylab = "Outcome", title = "")
 
 Constructs a strip chart with error bars on bootstrapped 95% CI around the mean.
@@ -509,46 +447,33 @@ Constructs a strip chart with error bars on bootstrapped 95% CI around the mean.
 Args:
 - predictor: A categorical variable: the predictor.
 - outcome: A numerical variable: the outcome.
-- df: The original data frame.
-- df_bst: A data frame with the CI generated via pubh.gen_bst_df.
+- xlab: String for the x-axis label.
+- ylab: String for the y-axis label.
+- title: An optional string for the title.
 
 Returns:
-- A Gadfly plot.
+- A plot.
 """
 strip_error = function (
-  predictor,
-  outcome,
-  df,
-  df_bst;
-  xlab="Predictor",
-  ylab="Outcome",
-  title=""
-)
+	predictor::CategoricalArrays.CategoricalVector, 
+	outcome::Array; 
+	xlab::String = "Predictor", 
+	ylab::String = "Outcome", 
+	title::String = ""
+	)
+	boxplot(
+		predictor, outcome,
+		xlabel=xlab,
+		ylabel=ylab,
+		title=title,
+		leg=false, msize=2, color=:indianred,
+		bar_width=0.6, opacity=0.5
+	)
 
-  p1 = plot(
-    layer(
-      df,
-      x=predictor,
-      y=outcome,
-      Geom.beeswarm,
-      size=fill(2px, nrow(df)),
-      Theme(default_color="MidnightBlue")
-    ),
-    layer(
-      df_bst,
-      x=predictor,
-      y=outcome,
-      ymin=:LowerCI,
-      ymax=:UpperCI,
-      Geom.point,
-      Geom.errorbar,
-      Theme(default_color="IndianRed")
-    ),
-    Guide.xlabel(xlab),
-    Guide.ylabel(ylab),
-    Guide.title(title)
-  )
-  return p1
+	dotplot!(
+		predictor, outcome,
+		msize=2, bar_width=0.4, mc=:midnightblue
+	)
 end
 
 """
