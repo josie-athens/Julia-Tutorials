@@ -94,27 +94,17 @@ coef_det = function (fit::Array, obs::Array)
 end
 
 """
-  ci_mean(x::Array, digits)
+  cis(x)
 
 Estimates the confidence interval for a sample mean.
 
 Args:
 - x: A numerical vector.
-- digits: An integer, the number of digits to use for rounding. Default is 2.
 
 Returns:
 - The lower and upper 95% CI of the sample.
 """
-ci_mean = function (x::Array, digits=2)
-  n = length(x)
-  s = std(x)
-  α = 0.05
-  za = quantile(TDist(n - 1), 1 - α + (α / 2))
-  se = s / sqrt(n)
-  ci = [mean(x) - za * se, mean(x) + za * se]
-  res = round.(ci, digits=digits)
-  return res
-end
+cis(x, u=mean(x), s=1.96*std(x)/sqrt(length(x))) = (outcome=u, err=(u+s)-(u-s),  lower=u-s, upper=u+s)
 
 """
   reference_range(μ, σ)
@@ -439,7 +429,7 @@ qq_plot = function (var::Array; ylab::String="Sample quantiles", title::String =
 end
 
 """
-  strip_error(predictor, outcome; 
+  box_error(predictor, outcome; 
     xlab = "Predictor", ylab = "Outcome", title = "")
 
 Constructs a strip chart with error bars on bootstrapped 95% CI around the mean.
@@ -454,7 +444,7 @@ Args:
 Returns:
 - A plot.
 """
-strip_error = function (
+box_error = function (
 	predictor::CategoricalArrays.CategoricalVector, 
 	outcome::Array; 
 	xlab::String = "Predictor", 
@@ -474,6 +464,98 @@ strip_error = function (
 		predictor, outcome,
 		msize=2, bar_width=0.4, mc=:midnightblue
 	)
+end
+
+"""
+  strip_error(df, predictor, outcome; 
+    xlab = "Predictor", ylab = "Outcome", title = "")
+
+Constructs a strip chart with error bars on bootstrapped 95% CI around the mean.
+
+Args:
+- df: A data frame.
+- predictor: A string corresponding to the column name of the predictor (categorical variable).
+- outcome: A string corresponding to the column name of the outcome (numerical variable).
+- xlab: String for the x-axis label.
+- ylab: String for the y-axis label.
+- title: An optional string for the title.
+
+Returns:
+- A plot.
+"""
+strip_error = function (
+	df::DataFrames.DataFrame,
+	predictor::String, 
+	outcome::String;
+	xlab::String = "Predictor", 
+	ylab::String = "Outcome", 
+	title::String = ""
+	)
+
+	df_bst = combine(groupby(df, predictor), outcome=>cis=>AsTable)
+	
+	dotplot(
+		df[!, predictor], df[!, outcome],
+		xlabel=xlab,
+		ylabel=ylab,
+		title=title,
+		bar_width = 0.3,
+		leg = false, ms=3, mc=:midnightblue
+	)
+
+	xs = df_bst[:, 1]
+	ys = df_bst.outcome
+	err = df_bst.err
+
+	scatter!(xs, ys, yerror=err)
+end
+
+"""
+  strip_group(df, predictor, outcome, group; 
+    xlab = "Predictor", ylab = "Outcome", title = "")
+
+Constructs a strip chart with error bars on bootstrapped 95% CI around the mean.
+
+Args:
+- df: A data frame.
+- predictor: A string corresponding to the column name of the predictor (categorical variable).
+- outcome: A string corresponding to the column name of the outcome (numerical variable).
+- group: A string corresponding to the column name of the panel group (categorical variable).
+- xlab: String for the x-axis label.
+- ylab: String for the y-axis label.
+- title: An optional string for the title.
+
+Returns:
+- A plot.
+"""
+strip_group = function (
+	df::DataFrames.DataFrame,
+	predictor::String,
+	outcome::String,
+	group::String;
+	xlab::String = "Predictor", 
+	ylab::String = "Outcome", 
+	title::String = ""
+	)
+
+	df_bst = combine(groupby(df, [predictor, group]), outcome=>cis=>AsTable)
+	
+	dotplot(
+		df[!, predictor], df[!, outcome],
+		group=df[!, group],
+		xlabel=xlab,
+		ylabel=ylab,
+		title=title, 
+		bar_width = 0.3, layout=2, 
+		ms=2, mc=:midnightblue
+	)
+
+	xs = df_bst[:, 1]
+	ys = df_bst.outcome
+	gs = df_bst[:, 2]
+	err = df_bst.err
+
+	scatter!(xs, ys, group=gs, yerror=err, label=missing)
 end
 
 """

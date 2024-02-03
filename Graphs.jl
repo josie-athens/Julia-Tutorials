@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.37
+# v0.19.38
 
 using Markdown
 using InteractiveUtils
@@ -10,7 +10,7 @@ using PlutoUI; PlutoUI.TableOfContents(aside=true, title="📚 Contents")
 # ╔═╡ 2f3c57b6-c4fa-43ad-9a91-976b2cbf855e
 begin
 	using StatsBase, DataFrames, DataFrameMacros, MLJ
-	using RCall, CategoricalArrays, CSV, GLM, Distributions
+	using RCall, CategoricalArrays, CSV, Distributions
 	using MLJ: schema
 end
 
@@ -21,9 +21,13 @@ begin
 	theme(:wong)
 end
 
+# ╔═╡ c57b4b3e-57d5-4e21-a91a-d6e656721fa5
+using Loess
+
 # ╔═╡ 09803c29-0fab-410d-a2a8-e1fb843b15f5
 begin
 	include("pubh.jl")
+	import GLM.@formula
 	@rimport readr
 	@rimport pubh
 end
@@ -35,7 +39,7 @@ md"""
 !!! note \"Josie Athens\"
 
 	- Systems Biology Enabling Platform, **AgResearch Ltd**
-	- 2 February 2024
+	- 3 February 2024
 """
 
 # ╔═╡ 9f2bc172-51b2-41e9-bcdd-34652ab1deb5
@@ -167,10 +171,17 @@ We have a better plot when we use faceting, i.e., plotting the distributions in 
 @df wcgs histogram(
 	:sbp, bins = 20, norm = :pdf, 
 	colour="#330C73", opacity=0.5,
-	group = :chd, layout=2,
+	group = :chd, layout=2, link=:y,
 	xlabel = "SBP (mm Hg)",
 	ylabel = "PDF"
 )
+
+# ╔═╡ 4c7611c8-5c5a-4d72-b887-36f86f4c86db
+md"""
+!!! tip
+
+	We can *link* the axis so both graphs plot on the same scale.
+"""
 
 # ╔═╡ a2f5807a-d77b-4488-aa1a-d194712ceb3f
 md"""
@@ -206,8 +217,8 @@ md"""
 @df wcgs |> dropmissing density(
 	:chol, group = :chd,
 	xlabel = "Cholesterol (mg/dl)",
-	ylabel = "Density",
-	lw = 2
+	ylabel = "Density", fill=:true,
+	opacity = 0.5
 )
 
 # ╔═╡ feff5803-2bcc-4e99-b42c-6c704b510514
@@ -295,17 +306,24 @@ md"""
 	xlabel = "Maternal weight (kg)",
 	ylabel = "Breast-milk intake (dl/day)",
 	legend = :topleft,
-	marker=3, smooth=:true
+	marker=3, reg=:true
 )
 
 # ╔═╡ bbe18424-f37f-4322-ab7c-858160484025
-@df kfm scatter(
-	:mat_weight, :dl_milk, 
-	xlabel = "Maternal weight (kg)",
-	ylabel = "Breast-milk intake (dl/day)",
-	legend = false,
-	marker=3, smooth=:true
-)
+let
+	@df kfm scatter(
+		:mat_weight, :dl_milk, 
+		xlabel = "Maternal weight (kg)",
+		ylabel = "Breast-milk intake (dl/day)",
+		legend = false, marker=3, mc=:cadetblue,
+	)
+
+	model = loess(kfm.mat_weight, kfm.dl_milk, span=0.7)
+	us = range(extrema(kfm.mat_weight)...; step=1)
+	vs = Loess.predict(model, us)
+	
+	plot!(us, vs)
+end
 
 # ╔═╡ 2af333a2-bfe5-4506-89f8-aff1a1619046
 md"## Correlation Plots"
@@ -402,52 +420,32 @@ In the previous plot the presence of an outlier is clear. If we would like to re
 # ╔═╡ d15e0821-bc49-489e-a909-a167562af3f0
 md"## Strip charts"
 
-# ╔═╡ 90da604e-88fd-4fe8-9091-27b23cad86e1
-@df energy dotplot(
-	:stature, :expend,
-	xlabel = "Stature",
-	ylabel = "Energy expenditure (MJ)",
-	bar_width = 0.2,
-	leg = false, msize=3
+# ╔═╡ 4ee73be3-b543-4513-bb03-3230f97cfb9f
+strip_error(
+	energy, "stature", "expend",
+	xlab="Stature",
+	ylab="Energy expenditure (MJ)"
 )
-
-# ╔═╡ 367b5880-5035-4ec6-9d64-6ad530bc8ecb
-let
-	@df energy boxplot(
-		:stature, :expend,
-		xlabel = "Stature",
-		ylabel = "Energy expenditure (MJ)",
-		leg = false, msize=2, color=:firebrick,
-		bar_width=0.5, opacity=0.5
-	)
-
-	@df energy dotplot!(
-		:stature, :expend,
-		msize=2, bar_width=0.3
-	)
-
-end
 
 # ╔═╡ 6e2a9883-a717-4166-99fb-4c663b8d899d
 md"""
 !!! tip
 
-	We can use `strip_error` instead, for a quicker version!
+	We can use `box_error` instead, for displaying box-plots instead of error bars.
 """
 
 # ╔═╡ d975d67f-3b17-4f88-a228-b6c341c52997
-strip_error(
+box_error(
 	energy.stature,
 	energy.expend,
 	xlab="Stature", ylab="Energy expenditure (MJ)"
 )
 
-# ╔═╡ 8694df4d-70c0-495d-89f1-0aceadc1fc0e
-@df birth dotplot(
-	:race, :bwt, group = :smoke,
-	ylabel = "Birth weight (g)",
-	msize=2, leg = :top,
-	bar_width = 0.2
+# ╔═╡ ac59d193-921c-4737-be6f-b8df172d3c6c
+strip_group(
+	birth, "race", "bwt", "smoke",
+	xlab="Race",
+	ylab="Birth weight (g)"
 )
 
 # ╔═╡ 4bfd627a-0a3c-4d40-accc-98e7dea405f0
@@ -555,45 +553,29 @@ md"""
 ### Expectation
 
 For continuous variables, we can plot the expected (mean) values.
+
+!!! tip
+
+	Construct a new data frame with the confindence intervals using the function `cis` in combination with `combine` and `groupby`.
 """
 
 # ╔═╡ 31e9b006-ec3a-492f-bfbd-853c630c04c5
-kfm_bst = pubh.gen_bst_df(@formula(dl_milk ~ sex), data=kfm) |> rcopy
-
-# ╔═╡ 5b9028c7-3792-4563-b844-c4e31a9061d7
-@df kfm_bst bar(
-	:sex, :dl_milk,
-	ylabel = "Breast-milk intake (dl/day)",
-	leg=false
-)
-
-# ╔═╡ 67af176d-05ac-4dca-9ef8-465317a4e7a1
-@transform!(
-	kfm_bst,
-	:err = :UpperCI - :LowerCI
-)
+kfm_bst = combine(groupby(kfm, :sex), :dl_milk => cis => AsTable)
 
 # ╔═╡ 596eeac8-c975-4472-bc62-17382b262135
 @df kfm_bst bar(
-	:sex, :dl_milk,
+	:sex, :outcome,
 	ylabel = "Breast-milk intake (dl/day)",
 	yerr=:err, leg=false,
 	color=:indianred, opacity=0.7, lc=:black, mc=:black, lw=1.5
 )
 
 # ╔═╡ ba8ba540-c110-470b-afa6-9f37b78160d7
-begin
-	fn1(x, u=mean(x), s=1.96*std(x)/sqrt(length(x))) = (bwt=u, ymin=u-s, ymax=u+s)
-	birth_bst = combine(groupby(birth, [:smoke, :Race]), :bwt=>fn1=>AsTable)
-	@transform!(
-		birth_bst,
-		:err = :ymax - :ymin
-	)
-end
+birth_bst = combine(groupby(birth, [:smoke, :Race]), :bwt => cis => AsTable)
 
 # ╔═╡ 915a2eea-cf0e-4acd-974c-595fb7ac717b
 @df birth_bst groupedbar(
-	:Race, :bwt, group=:smoke, bar_position = :dodge, bar_width=0.5,
+	:Race, :outcome, group=:smoke, bar_position = :dodge, bar_width=0.5,
 	ylabel="Birth weight (g)", yerror=:err, leg=:top,
 	opacity=0.7, lc=:black, mc=:black, lw=1.5
 )
@@ -607,6 +589,7 @@ DataFrameMacros = "75880514-38bc-4a95-a458-c2aea5a3a702"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
+Loess = "4345ca2d-374a-55d4-8d30-97f9976e7612"
 MLJ = "add582a8-e3ab-11e8-2d5e-e98b27df1bc7"
 PlotThemes = "ccf2f8ad-2431-5c83-bf29-c5338b663b6a"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
@@ -621,6 +604,7 @@ DataFrameMacros = "~0.4.1"
 DataFrames = "~1.5.0"
 Distributions = "~0.25.106"
 GLM = "~1.8.3"
+Loess = "~0.6.3"
 MLJ = "~0.19.2"
 PlotThemes = "~3.1.0"
 PlutoUI = "~0.7.51"
@@ -635,7 +619,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.0"
 manifest_format = "2.0"
-project_hash = "6c24d08999476318fbc654115059e9d7e3c5ddbc"
+project_hash = "aa075ef41687a7354e93a379d7cd23ce56b6ba12"
 
 [[deps.ARFFFiles]]
 deps = ["CategoricalArrays", "Dates", "Parsers", "Tables"]
@@ -1313,6 +1297,12 @@ version = "2.36.0+0"
 [[deps.LinearAlgebra]]
 deps = ["Libdl", "OpenBLAS_jll", "libblastrampoline_jll"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+
+[[deps.Loess]]
+deps = ["Distances", "LinearAlgebra", "Statistics", "StatsAPI"]
+git-tree-sha1 = "a113a8be4c6d0c64e217b472fb6e61c760eb4022"
+uuid = "4345ca2d-374a-55d4-8d30-97f9976e7612"
+version = "0.6.3"
 
 [[deps.LogExpFunctions]]
 deps = ["DocStringExtensions", "IrrationalConstants", "LinearAlgebra"]
@@ -2337,6 +2327,7 @@ version = "1.4.1+1"
 # ╠═6f849dbb-78d3-49ca-9e06-be0737a3dea9
 # ╟─89cd9f4e-5bd6-4c84-bc32-0529eaa46379
 # ╠═1405d755-54c5-4ab0-b306-959a5ccebf42
+# ╟─4c7611c8-5c5a-4d72-b887-36f86f4c86db
 # ╟─a2f5807a-d77b-4488-aa1a-d194712ceb3f
 # ╠═0ec007b3-0721-4e07-8468-1515cfb2b354
 # ╠═448f93db-4613-455c-a6ea-a574a3abb68e
@@ -2356,6 +2347,7 @@ version = "1.4.1+1"
 # ╠═7ce6cb34-8266-4b40-9165-04deced05981
 # ╟─e7293e7b-eb72-430a-9cd6-4d5f776c7856
 # ╠═bd307bcc-aeff-410c-a05e-938b3aab26ce
+# ╠═c57b4b3e-57d5-4e21-a91a-d6e656721fa5
 # ╠═bbe18424-f37f-4322-ab7c-858160484025
 # ╟─2af333a2-bfe5-4506-89f8-aff1a1619046
 # ╟─de1572f7-2e50-4a2a-9326-247a8de516db
@@ -2373,11 +2365,10 @@ version = "1.4.1+1"
 # ╠═bed871a3-02a3-4489-b627-6f7eca4532d4
 # ╠═49a83a71-abe4-4e43-933e-dfc96ecc8374
 # ╟─d15e0821-bc49-489e-a909-a167562af3f0
-# ╠═90da604e-88fd-4fe8-9091-27b23cad86e1
-# ╠═367b5880-5035-4ec6-9d64-6ad530bc8ecb
+# ╠═4ee73be3-b543-4513-bb03-3230f97cfb9f
 # ╟─6e2a9883-a717-4166-99fb-4c663b8d899d
 # ╠═d975d67f-3b17-4f88-a228-b6c341c52997
-# ╠═8694df4d-70c0-495d-89f1-0aceadc1fc0e
+# ╠═ac59d193-921c-4737-be6f-b8df172d3c6c
 # ╟─4bfd627a-0a3c-4d40-accc-98e7dea405f0
 # ╠═6cec7689-b28e-44f5-8007-7dab7a3f028c
 # ╠═c580333a-ef00-4261-85cf-b08cb0eafa24
@@ -2389,8 +2380,6 @@ version = "1.4.1+1"
 # ╠═4cbd9f8f-26fa-4705-939a-bbda42a53e6a
 # ╟─df1e4865-9914-4d0c-8334-52ad2259b203
 # ╠═31e9b006-ec3a-492f-bfbd-853c630c04c5
-# ╠═5b9028c7-3792-4563-b844-c4e31a9061d7
-# ╠═67af176d-05ac-4dca-9ef8-465317a4e7a1
 # ╠═596eeac8-c975-4472-bc62-17382b262135
 # ╠═ba8ba540-c110-470b-afa6-9f37b78160d7
 # ╠═915a2eea-cf0e-4acd-974c-595fb7ac717b
