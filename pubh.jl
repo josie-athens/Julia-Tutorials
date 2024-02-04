@@ -205,31 +205,26 @@ Args:
 - ratio: Logical. If true, the function exponentiates the results to plot a ratio (e.g. OR in logistic regression). Default is: ratio=false.
 		
 Returns:
-- A Makie plot.
+- A plot.
 """
 coef_plot = function (model; labs, ratio = false)
-  n = length(coef(model))
+	n = length(coef(model))
 	n2 = n-1
   estimate = ratio ? exp.(coef(model)[2:n]) : coef(model)[2:n]
   low = ratio ? exp.(confint(model)[2:n, 1]) : confint(model)[2:n, 1]
   up = ratio ? exp.(confint(model)[2:n, 2]) : confint(model)[2:n, 2]
+	err = abs.(abs.(up) - abs.(low))
   n0 = n - 1
   y = 1:1:n0
   x0 = ratio ? 1 : 0
-
-  df = DataFrame(; estimate, low, up, y)
-
-	fig = Figure()
-	ax = Axis(
-		fig[1, 1], 
-		yticks = (1:n2, labs),
-		xlabel  = ratio ? "Ratio" : "Coefficient"
-	)
 	
-	scatter!(ax, df.estimate, df.y)
-	rangebars!(ax, df.y, df.low, df.up, whiskerwidth = 10, direction = :x)
-	vlines!(ax, x0, linestyle=:dash, color=:cadetblue)
-	fig
+	scatter(
+		estimate, y, xerr=err, 
+		xlabel= ratio ? "Ratio" : "Coefficient",
+		leg=false, mc=:midnightblue,
+		yticks=(1:n, labs)
+	)
+	vline!([x0], linestyle=:dash, color=:cadetblue)
 end
 
 """
@@ -383,24 +378,19 @@ Args:
 - title: An optional string for the title.
 
 Returns:
-- A Makie plot.
+- A plot.
 """
 cooks_plot = function (perf::DataFrames.DataFrame; title::String = "")
-  fig = Figure()
-
-  ax = Axis(
-    fig[1, 1],
-    xlabel="Index",
-    ylabel="Cook's Distance",
-    title=title
-  )
-
   μ = mean(perf.cook)
+	
+	plot(
+	 1:nrow(perf), perf.cook, line=:stem,
+	 marker=2, mc=:firebrick, lc=:indianred,
+	 xlabel="Index", ylabel="Cook's Distance",
+	 title=title, lw=1.5, leg=false
+	)
 
-  stem!(ax, 1:nrow(perf), perf.cook; markersize=7)
-  hlines!(ax, μ, linestyle=:dash, color=:plum)
-
-  fig
+  hline!([μ], linestyle=:dash, color=:cadetblue)
 end
 
 """
