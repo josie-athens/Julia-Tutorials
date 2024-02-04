@@ -45,7 +45,7 @@ I am using *julia* library /Gadfly/ for plotting. Plots render well in Jupyter n
 [[file:descriptives.html][Descriptive Statistics]]
 
 ** Graphical Analysis
-[[file:CairoMakie.html][Graphical Analysis]]
+[[file:Graphs.html][Graphical Analysis]]
 
 * Hypothesis Testing
 ** Estimation

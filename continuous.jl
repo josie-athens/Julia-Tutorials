@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.37
+# v0.19.38
 
 using Markdown
 using InteractiveUtils
@@ -26,10 +26,10 @@ using HypothesisTests
 
 # ╔═╡ 3929273b-4572-486e-93d0-a84cdab67391
 begin
+	import GLM.@formula
 	include("pubh.jl")
 	@rimport readr
 	@rimport pubh
-	import GLM.@formula
 end
 
 # ╔═╡ 2a9b0e48-2da3-11ee-21f3-c3e92488a854
@@ -39,7 +39,7 @@ md"""
 !!! note \"Josie Athens\"
 
 	- Systems Biology Enabling Platform, **AgRresearch Ltd**
-	- 23 January 2024
+	- 9 February 2024
 """
 
 # ╔═╡ 953e1df5-0f62-4832-b7c0-47c216ac95a5
@@ -83,13 +83,13 @@ qq_plot(
 md"Let’s assume normality and estimate the 95% CI around the mean baseline temperature for all patients."
 
 # ╔═╡ 68e29f99-cf15-44fa-b977-f246aa343ed6
-r3.(ci_mean(bernard.temp0))
+ bernard.temp0 |> cis
 
 # ╔═╡ 8ce5ef9b-7a5f-4b4f-991c-a15e1ab49dad
 md"What about the 95% CI around the mean temperature after 36 hr of treatment?"
 
-# ╔═╡ aa8bb4b0-5c26-4d5f-858d-c00e234cd162
-r3.(ci_mean(@subset(bernard, !ismissing(:temp10)).temp10))
+# ╔═╡ 32616602-1282-4f82-a33e-f731564c3a37
+@subset(bernard, !ismissing(:temp10)).temp10 |> cis
 
 # ╔═╡ abec6086-b66d-45aa-bed1-305b5b5c695f
 md"""
@@ -321,16 +321,18 @@ md"""
 md"""
 ```julia
 strip_error(
-	energy.stature, energy.expend,
-	xlab="Stature", ylab="Energy expenditure (MJ)"
+	energy, "stature", "expend",
+	xlab="Stature",
+	ylab="Energy expenditure (MJ)"
 )
 ```
 """ |> hint
 
 # ╔═╡ 2e1cb31a-34c9-4e36-9697-c0350ba067cb
 strip_error(
-	energy.stature, energy.expend,
-	xlab="Stature", ylab="Energy expenditure (MJ)"
+	energy, "stature", "expend",
+	xlab="Stature",
+	ylab="Energy expenditure (MJ)"
 )
 
 # ╔═╡ 34236077-91c8-4650-aa24-9b641af142ee
@@ -513,7 +515,7 @@ md"Given the number of observations per group, we use a strip chart to compare t
 
 # ╔═╡ 1424910e-ee12-417e-91db-f9310f93af39
 strip_error(
-	smokew.smoking, smokew.bweight,
+	smokew, "smoking", "bweight",
 	xlab="Smoking status", ylab="Birth weight (kg)"
 )
 
@@ -639,14 +641,15 @@ md"We can use the estimated effects to get a nice visualisation of the data:"
 @df smoke_eff scatter(
 	:smoking, :bweight,
 	ylabel="Birth weight (kg)",
-	yerr=:err, leg=false
+	yerr=:err, leg=false, 
+	xrot=20
 )
 
 # ╔═╡ e58d3dba-f513-4a8f-8a9b-c13f56cdb452
 md"""
 !!! tip
 
-	To display the levels of smoking in the right order, we used `sorter`. Notice that the function was applied on the orginal data set, `smokew`, which is the one that has the right order.
+	We can rotate the labels of the ticks with `xrotation` or `xrot` (even `xr`) and the degrees.
 """
 
 # ╔═╡ 53a8b3e5-b5d4-4922-b7dd-85572c1e1a6f
@@ -839,7 +842,7 @@ md"""
 md"""
 ```julia
 strip_error(
-	fent.group, fent.pain,
+	fent, "group", "pain",
 	xlab="Cohort", ylab="Pain reduction"
 )
 ```
@@ -847,7 +850,7 @@ strip_error(
 
 # ╔═╡ c62c76fe-f7fd-44ad-9ccb-91c66c63cfae
 strip_error(
-	fent.group, fent.pain,
+	fent, "group", "pain",
 	xlab="Cohort", ylab="Pain reduction"
 )
 
@@ -2995,7 +2998,7 @@ version = "1.4.1+1"
 # ╟─b9232d76-707e-486f-bc61-f1fbe4c835da
 # ╠═68e29f99-cf15-44fa-b977-f246aa343ed6
 # ╟─8ce5ef9b-7a5f-4b4f-991c-a15e1ab49dad
-# ╠═aa8bb4b0-5c26-4d5f-858d-c00e234cd162
+# ╠═32616602-1282-4f82-a33e-f731564c3a37
 # ╟─abec6086-b66d-45aa-bed1-305b5b5c695f
 # ╠═554ed4b0-c91c-4e0f-b7a9-b2a185b4e975
 # ╟─2e43817a-82ab-4bab-aade-1b7a64ee32ff

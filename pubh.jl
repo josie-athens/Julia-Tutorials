@@ -492,7 +492,7 @@ strip_error = function (
 	title::String = ""
 	)
 
-	df_bst = combine(groupby(df, predictor), outcome=>cis=>AsTable)
+	df_bst = DataFrames.combine(groupby(df, predictor), outcome=>cis=>AsTable)
 	
 	dotplot(
 		df[!, predictor], df[!, outcome],
@@ -538,7 +538,7 @@ strip_group = function (
 	title::String = ""
 	)
 
-	df_bst = combine(groupby(df, [predictor, group]), outcome=>cis=>AsTable)
+	df_bst = DataFrames.combine(groupby(df, [predictor, group]), outcome=>cis=>AsTable)
 	
 	dotplot(
 		df[!, predictor], df[!, outcome],
