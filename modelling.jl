@@ -39,7 +39,7 @@ md"""
 !!! note \"Josie Athens\"
 
 	- Systems Biology Enabling Platform, **AgRresearch Ltd**
-	- 24 January 2024
+	- 7 February 2024
 """
 
 # ╔═╡ dc3c9cd9-98c3-48ff-89ef-881991721051

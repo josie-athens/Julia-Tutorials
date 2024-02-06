@@ -38,7 +38,7 @@ md"""
 
 !!! note \"Josie Athens\"
 
-	- Systems Biology Enabling Platform, *AgResearch Ltd*
+	- Systems Biology Enabling Platform, **AgResearch Ltd**
 	- 6 February 2024
 """
 
@@ -610,40 +610,21 @@ We will create a data frame with the table of coefficients.
 """
 
 # ╔═╡ 2b49f581-52ba-4c92-a0da-c96f5c212e47
-mammo_coef = coeftable(mammo_2) |> DataFrame; mammo_coef |> head
+mammo_coef = coeftable(mammo_2) |> DataFrame
 
 # ╔═╡ ecfc5608-bb7a-43f9-ba57-3f8cb9af66d9
 md"""
 Corresponding table of coefficients showing Odds Ratios and confindence intervals:
 """
 
-# ╔═╡ 82e842af-8727-4603-aa23-f28e625239ac
-mammo_exp = @select(
-	mammo_coef,
-	1, 2, 6, 7, 5
-);
-
-# ╔═╡ 92314416-5d70-4134-9a36-e53a37d40a5d
-begin
-	mammo_exp[:, 2] = r3.(exp.(mammo_exp[:, 2]))
-	mammo_exp[:, 3] = r3.(exp.(mammo_exp[:, 3]))
-	mammo_exp[:, 4] = r3.(exp.(mammo_exp[:, 4]))
-	mammo_exp
-end
-
-# ╔═╡ b0d821cb-1940-479c-99c0-ad4157bada38
-let
-	x = mammo_exp[:, 2]
-	y = mammo_exp[:, 1]
-	err = (mammo_exp[:, 3], mammo_exp[:, 4])
-
-
-	scatter(
-		x, y, xerr=err, ms=2,
-		leg=false, xlab="PE"
-	)
-	vline!([1], linestyle=:dash, color=:cadetblue)
-end
+# ╔═╡ 0583f606-bb57-4f12-af2e-09cc151167fe
+mammo_exp = DataFrame(
+	;
+	Variable = mammo_coef[1:6, 1],
+	PE = exp.(mammo_coef[1:6, 2]),
+	lower = exp.(mammo_coef[1:6, 6]),
+	upper = exp.(mammo_coef[1:6, 7])
+)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2973,8 +2954,6 @@ version = "1.4.1+1"
 # ╟─b30db2a0-c613-42c9-8f71-38b632dc0610
 # ╠═2b49f581-52ba-4c92-a0da-c96f5c212e47
 # ╟─ecfc5608-bb7a-43f9-ba57-3f8cb9af66d9
-# ╠═82e842af-8727-4603-aa23-f28e625239ac
-# ╠═92314416-5d70-4134-9a36-e53a37d40a5d
-# ╠═b0d821cb-1940-479c-99c0-ad4157bada38
+# ╠═0583f606-bb57-4f12-af2e-09cc151167fe
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

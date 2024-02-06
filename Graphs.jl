@@ -448,6 +448,23 @@ strip_group(
 	ylab="Birth weight (g)"
 )
 
+# ╔═╡ ef53db4b-e8ec-42ca-b1f2-4346a648699d
+md"""
+## Error bars
+"""
+
+# ╔═╡ 31043e75-3133-465d-8377-476825630f08
+birth_bst = combine(groupby(birth, [:smoke, :race]), :bwt => cis => AsTable)
+
+# ╔═╡ 66adc25d-56a5-4817-b400-a07a2ef52336
+@df birth_bst scatter(
+	:race, :outcome, yerr=:err, 
+	group=:smoke, layout=2,
+	ylab="Birth weight (g)",
+	ms=3, mc=:firebrick, lc=:indianred,
+	ylim=(2000, 4000)
+)
+
 # ╔═╡ 4bfd627a-0a3c-4d40-accc-98e7dea405f0
 md"## Violin plots"
 
@@ -570,13 +587,10 @@ kfm_bst = combine(groupby(kfm, :sex), :dl_milk => cis => AsTable)
 	color=:indianred, opacity=0.7, lc=:black, mc=:black, lw=1.5
 )
 
-# ╔═╡ ba8ba540-c110-470b-afa6-9f37b78160d7
-birth_bst = combine(groupby(birth, [:smoke, :Race]), :bwt => cis => AsTable)
-
 # ╔═╡ 915a2eea-cf0e-4acd-974c-595fb7ac717b
 @df birth_bst groupedbar(
-	:Race, :outcome, group=:smoke, bar_position = :dodge, bar_width=0.5,
-	ylabel="Birth weight (g)", yerror=:err, leg=:top,
+	:race, :outcome, group=:smoke, bar_position = :dodge, bar_width=0.5,
+	ylabel="Birth weight (g)", yerror=:err, 
 	opacity=0.7, lc=:black, mc=:black, lw=1.5
 )
 
@@ -2369,6 +2383,9 @@ version = "1.4.1+1"
 # ╟─6e2a9883-a717-4166-99fb-4c663b8d899d
 # ╠═d975d67f-3b17-4f88-a228-b6c341c52997
 # ╠═ac59d193-921c-4737-be6f-b8df172d3c6c
+# ╟─ef53db4b-e8ec-42ca-b1f2-4346a648699d
+# ╠═31043e75-3133-465d-8377-476825630f08
+# ╠═66adc25d-56a5-4817-b400-a07a2ef52336
 # ╟─4bfd627a-0a3c-4d40-accc-98e7dea405f0
 # ╠═6cec7689-b28e-44f5-8007-7dab7a3f028c
 # ╠═c580333a-ef00-4261-85cf-b08cb0eafa24
@@ -2381,7 +2398,6 @@ version = "1.4.1+1"
 # ╟─df1e4865-9914-4d0c-8334-52ad2259b203
 # ╠═31e9b006-ec3a-492f-bfbd-853c630c04c5
 # ╠═596eeac8-c975-4472-bc62-17382b262135
-# ╠═ba8ba540-c110-470b-afa6-9f37b78160d7
 # ╠═915a2eea-cf0e-4acd-974c-595fb7ac717b
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

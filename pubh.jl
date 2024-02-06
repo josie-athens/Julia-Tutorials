@@ -104,7 +104,7 @@ Args:
 Returns:
 - The lower and upper 95% CI of the sample.
 """
-cis(x, u=mean(x), s=1.96*std(x)/sqrt(length(x))) = (outcome=u, err=(u+s)-(u-s),  lower=u-s, upper=u+s)
+cis(x, u=mean(x), s=1.96*std(x)/sqrt(length(x))) = (outcome=u, err=((u+s)-(u-s))/2,  lower=u-s, upper=u+s)
 
 """
   reference_range(μ, σ)
@@ -213,7 +213,7 @@ coef_plot = function (model; labs, ratio = false)
   estimate = ratio ? exp.(coef(model)[2:n]) : coef(model)[2:n]
   low = ratio ? exp.(confint(model)[2:n, 1]) : confint(model)[2:n, 1]
   up = ratio ? exp.(confint(model)[2:n, 2]) : confint(model)[2:n, 2]
-	err = abs.(abs.(up) - abs.(low))
+	err = (up - low)/2
   n0 = n - 1
   y = 1:1:n0
   x0 = ratio ? 1 : 0
@@ -222,7 +222,7 @@ coef_plot = function (model; labs, ratio = false)
 		estimate, y, xerr=err, 
 		xlabel= ratio ? "Ratio" : "Coefficient",
 		leg=false, mc=:midnightblue,
-		yticks=(1:n, labs)
+		yticks=(1:n, labs), ms=3
 	)
 	vline!([x0], linestyle=:dash, color=:cadetblue)
 end

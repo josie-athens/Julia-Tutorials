@@ -642,7 +642,7 @@ md"We can use the estimated effects to get a nice visualisation of the data:"
 	:smoking, :bweight,
 	ylabel="Birth weight (kg)",
 	yerr=:err, leg=false, 
-	xrot=20
+	xrot=20, ylim=(2.5, 4)
 )
 
 # ╔═╡ e58d3dba-f513-4a8f-8a9b-c13f56cdb452

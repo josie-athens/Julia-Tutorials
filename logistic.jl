@@ -215,7 +215,7 @@ eff_2 = effects(
 # ╔═╡ 6a0d8a09-191f-4506-9369-79e1cd375030
 @df eff_2 scatter(
 	:agegrp, :mf_cont, yerr=:err,
-	xlabel="Residence",
+	xlabel="Age group (years)",
 	ylabel="P (Infection)",
 	leg=false
 )

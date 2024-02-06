@@ -254,24 +254,23 @@ Reference range and confidence intervals are not the same.
 For the calculation of the reference range, we used about two standard deviations (~ 1.96) around the mean (as we assumed a normal distribution). For the confidence interval, we use about two standard errors around the mean.
 """
 
-# ╔═╡ 6ac63d4f-ba36-4c70-8bda-4b6cb62a99f6
-md"""
-## $t$-distribution
-
-The $t$-distribution is also bell shaped, but with a heavier tail. It has one more parameter than the normal distribution: the degrees of freedom (df). For our example:
-
-$$df=n-1$$
-
-where, $n$ is the sample size. As the sample size increases, the $t$-distribution is almost the same as the normal distribution (for $n>30$).
-
-The next tutorial goes deeper into hypothesis testing. We can estimate confidence intervals around the mean from a sample using a one side $t$-test:
-"""
-
 # ╔═╡ 87d638e6-c680-4b97-8721-2d5338b360cd
 r3.(OneSampleTTest(wcgs.height) |> confint)
 
 # ╔═╡ 845627ad-734d-4ccf-b69a-8e245746f29f
 cis(wcgs.height)
+
+# ╔═╡ 14dad96a-9bed-4d42-850e-c10d06412cc4
+md"""
+!!! note
+
+	The output of `cis` are:
+
+	- `outcome`: the expected (mean) value of the variable.
+	- `err`: distance from the expected value to a limit of the CI (used for plotting).
+	- `lower`: the lower limit of the CI.
+	- `upper`: the upper limit of the CI.
+"""
 
 # ╔═╡ f50eae66-490f-474c-ab76-2b646bc3fc66
 md"""
@@ -279,6 +278,9 @@ We can also estimate 95% CI by the method of bootstrap:
 """
 
 # ╔═╡ d8fc873d-3dcb-4a3b-b365-e5cd6a682f13
+pubh.bst(wcgs.height) |> rcopy
+
+# ╔═╡ 81e4e16d-28dc-4a94-8755-54bb8165ad1e
 pubh.bst(wcgs.dbp) |> rcopy
 
 # ╔═╡ 9a49942e-b90b-4a39-8a99-f5b4d6ae454d
@@ -295,31 +297,18 @@ pubh.bst(wcgs.dbp, stat="median") |> rcopy
 
 # ╔═╡ 4d775025-1162-4c4c-8e46-9e7065f4bd8b
 md"""
-We can even estimate bootstrap confidence intervals with the `pubh` function `gen_best_df`:
+## Stratified CIs
+
+We can estimate 95% confidence intervals by group by using `cis` with `combine` and `groupby`.
 """
 
 # ╔═╡ bb1c4dba-a651-4e1b-b224-dc9f6cde7282
 kfm = readr.read_rds("data/kfm.rds") |> rcopy; kfm |> schema
 
-# ╔═╡ cafd0912-18ea-4b85-a7fb-47e652eed5b3
-pubh.gen_bst_df(@formula(dl_milk ~ sex), data=kfm) |> rcopy
-
-# ╔═╡ 91bd30a9-bec7-484e-a06a-186ded34e4d3
-md"""
-Another option is to use `cis` with `combine` and `groupy`.
-"""
-
-# ╔═╡ 55fa61b8-554f-440a-bd84-4c6138ea7230
+# ╔═╡ 1eed36b4-8069-4257-8733-3de32d7db8f8
 combine(groupby(kfm, :sex), :dl_milk => cis => AsTable)
 
-# ╔═╡ 7815f4a6-c3e7-41fc-8bc9-9a954a3b2279
-md"""
-!!! note
-
-	When we use this approach, the column `outcome` represents the expected (mean) value of the continuous variable while the `err` column corresponds to the difference between the upper and the lower limits of the CIs (which can be used for plotting).
-"""
-
-# ╔═╡ d27ae8b1-8af1-4ea4-950f-eee8add38738
+# ╔═╡ 04eb33f6-012f-426b-8dd9-b12020fe4f42
 combine(groupby(wcgs |> dropmissing, [:chd, :dib_pat]), :chol => cis => AsTable)
 
 # ╔═╡ c547687b-2419-48e8-9e94-3863e1e18080
@@ -2445,23 +2434,21 @@ version = "1.4.1+1"
 # ╠═1d546d72-5c9f-46b9-bb9f-71f31879208b
 # ╟─0411608b-04e8-4d31-a101-0dc5814900e9
 # ╟─15213037-d788-441e-8f59-47a8a3ead43c
-# ╟─6ac63d4f-ba36-4c70-8bda-4b6cb62a99f6
 # ╠═a5fc2f28-d508-4152-b716-552a44184e34
 # ╠═87d638e6-c680-4b97-8721-2d5338b360cd
 # ╠═845627ad-734d-4ccf-b69a-8e245746f29f
+# ╟─14dad96a-9bed-4d42-850e-c10d06412cc4
 # ╟─f50eae66-490f-474c-ab76-2b646bc3fc66
 # ╠═d8fc873d-3dcb-4a3b-b365-e5cd6a682f13
+# ╠═81e4e16d-28dc-4a94-8755-54bb8165ad1e
 # ╟─9a49942e-b90b-4a39-8a99-f5b4d6ae454d
 # ╠═d84d5e7f-12c7-4a2c-b3ba-50ba1ff0371f
 # ╟─e6158296-3a46-4ebe-ae28-edbeac5b1b6d
 # ╠═f6514dae-88c5-4a25-bfc9-f426dc00840a
 # ╟─4d775025-1162-4c4c-8e46-9e7065f4bd8b
 # ╠═bb1c4dba-a651-4e1b-b224-dc9f6cde7282
-# ╠═cafd0912-18ea-4b85-a7fb-47e652eed5b3
-# ╟─91bd30a9-bec7-484e-a06a-186ded34e4d3
-# ╠═55fa61b8-554f-440a-bd84-4c6138ea7230
-# ╟─7815f4a6-c3e7-41fc-8bc9-9a954a3b2279
-# ╠═d27ae8b1-8af1-4ea4-950f-eee8add38738
+# ╠═1eed36b4-8069-4257-8733-3de32d7db8f8
+# ╠═04eb33f6-012f-426b-8dd9-b12020fe4f42
 # ╟─c547687b-2419-48e8-9e94-3863e1e18080
 # ╠═bd2f8c6d-df2c-4c11-b046-b014916562ac
 # ╠═216b8b42-2562-48b2-a1ae-fde49fccf30c
