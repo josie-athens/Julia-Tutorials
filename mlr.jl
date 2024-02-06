@@ -283,6 +283,12 @@ md"""
 Another way to look at coefficients is through a plot of coefficients. In these kind of plots, the intercept is omitted by default.
 """
 
+# ╔═╡ 94e40a39-cc19-4398-ac6b-6710de3ca047
+confint(model_4)
+
+# ╔═╡ 7f89d8c6-46d9-4055-a336-e171c1a1fb71
+model_4
+
 # ╔═╡ 1aa2f9f5-24b3-48e7-bc23-4b162ea2b1b8
 coef_plot(
 	model_4, 
@@ -2590,6 +2596,8 @@ version = "1.4.1+1"
 # ╠═cd1e2414-a9a5-438d-9511-945451abf5f8
 # ╟─f84b475d-7272-484a-b574-3a1a7ebe935a
 # ╟─02a358ee-1d1f-471d-9e6e-783b30c7e074
+# ╠═94e40a39-cc19-4398-ac6b-6710de3ca047
+# ╠═7f89d8c6-46d9-4055-a336-e171c1a1fb71
 # ╠═1aa2f9f5-24b3-48e7-bc23-4b162ea2b1b8
 # ╠═77c85293-40c4-4082-b9af-7235253be742
 # ╟─763bf02a-aa24-45ff-8f9d-0dee9d68114b
