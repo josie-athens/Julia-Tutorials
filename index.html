@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2024-02-04 Sun 09:34 -->
+<!-- 2024-02-07 Wed 21:38 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Julia Tutorials</title>
@@ -23,39 +23,40 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org7d931f0">1. Preface</a>
+<li><a href="#orgc583217">1. Preface</a>
 <ul>
-<li><a href="#orgde5e41d">1.1. Warning</a></li>
+<li><a href="#org2f8874a">1.1. Warning</a></li>
 </ul>
 </li>
-<li><a href="#org427c487">2. Basics</a>
+<li><a href="#org6309708">2. Basics</a>
 <ul>
-<li><a href="#org21f4305">2.1. Introduction</a></li>
-<li><a href="#orgdd20e8c">2.2. Data Frames</a></li>
-<li><a href="#org97a1de5">2.3. Descriptive Statistics</a></li>
-<li><a href="#orgea56882">2.4. Graphical Analysis</a></li>
+<li><a href="#org7914b2a">2.1. Introduction</a></li>
+<li><a href="#org604542c">2.2. Data Frames</a></li>
+<li><a href="#org9362a83">2.3. Descriptive Statistics</a></li>
+<li><a href="#org25bf17a">2.4. Graphical Analysis</a></li>
 </ul>
 </li>
-<li><a href="#org97e6ce6">3. Hypothesis Testing</a>
+<li><a href="#orgafb9af4">3. Hypothesis Testing</a>
 <ul>
-<li><a href="#orgfdc8903">3.1. Estimation</a></li>
-<li><a href="#org5f8b160">3.2. Continuous Outcomes</a></li>
-<li><a href="#org7150d06">3.3. Binary Outcomes</a></li>
-<li><a href="#orgfc7b50e">3.4. Correlation and Causality</a></li>
+<li><a href="#org5f65cee">3.1. Estimation</a></li>
+<li><a href="#org362ecef">3.2. Continuous Outcomes</a></li>
+<li><a href="#orgabeb3ac">3.3. Binary Outcomes</a></li>
+<li><a href="#orgdb66d4e">3.4. Correlation and Causality</a></li>
 </ul>
 </li>
-<li><a href="#orgeb8ec71">4. Regression</a>
+<li><a href="#org81850c2">4. Regression</a>
 <ul>
-<li><a href="#org9b0aa7e">4.1. Multiple Linear Regression</a></li>
-<li><a href="#org2a1206f">4.2. Statistical Modelling</a></li>
-<li><a href="#orga7bdd50">4.3. Logistic Regression</a></li>
+<li><a href="#orgeea5bc2">4.1. Multiple Linear Regression</a></li>
+<li><a href="#org430b515">4.2. Statistical Modelling</a></li>
+<li><a href="#orgdb5d97f">4.3. Logistic Regression</a></li>
+<li><a href="#org1665655">4.4. Extensions to Logistic Regression</a></li>
 </ul>
 </li>
-<li><a href="#org83d60b5">5. Advanced Topics</a>
+<li><a href="#orgf59f3df">5. Advanced Topics</a>
 <ul>
-<li><a href="#orga21ab8a">5.1. Binary Classification</a></li>
-<li><a href="#org882e87d">5.2. Classification</a></li>
-<li><a href="#org4648c58">5.3. Introduction to ODEs</a></li>
+<li><a href="#orgfc95c6a">5.1. Binary Classification</a></li>
+<li><a href="#org9aff7b5">5.2. Classification</a></li>
+<li><a href="#org0428772">5.3. Introduction to ODEs</a></li>
 </ul>
 </li>
 </ul>
@@ -65,8 +66,8 @@
 .<img src="https://julialang.org/assets/infra/logo.svg" alt="logo.svg" class="org-svg" />
 </p>
 
-<div id="outline-container-org7d931f0" class="outline-2">
-<h2 id="org7d931f0"><span class="section-number-2">1.</span> Preface</h2>
+<div id="outline-container-orgc583217" class="outline-2">
+<h2 id="orgc583217"><span class="section-number-2">1.</span> Preface</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 My dad once dropped some wisdom on me about leaving a legacy. He said there were three key things I should do:
@@ -137,8 +138,8 @@ I use the following <b>callouts</b> for the Tutorials:
 </table>
 </div>
 
-<div id="outline-container-orgde5e41d" class="outline-3">
-<h3 id="orgde5e41d"><span class="section-number-3">1.1.</span> Warning</h3>
+<div id="outline-container-org2f8874a" class="outline-3">
+<h3 id="org2f8874a"><span class="section-number-3">1.1.</span> Warning</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 I am using <b>julia</b> library <i>Gadfly</i> for plotting. Plots render well in Jupyter notebooks and Pluto notebooks. For the static <i>html</i> files shown in the tutorials, the plots are not well rendered by <i>Chrome</i>; alternatives are <i>Firefox</i> and <i>Safari</i>.
@@ -147,12 +148,12 @@ I am using <b>julia</b> library <i>Gadfly</i> for plotting. Plots render well in
 </div>
 </div>
 
-<div id="outline-container-org427c487" class="outline-2">
-<h2 id="org427c487"><span class="section-number-2">2.</span> Basics</h2>
+<div id="outline-container-org6309708" class="outline-2">
+<h2 id="org6309708"><span class="section-number-2">2.</span> Basics</h2>
 <div class="outline-text-2" id="text-2">
 </div>
-<div id="outline-container-org21f4305" class="outline-3">
-<h3 id="org21f4305"><span class="section-number-3">2.1.</span> Introduction</h3>
+<div id="outline-container-org7914b2a" class="outline-3">
+<h3 id="org7914b2a"><span class="section-number-3">2.1.</span> Introduction</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 <a href="Intro.html">Introduction</a>
@@ -160,8 +161,8 @@ I am using <b>julia</b> library <i>Gadfly</i> for plotting. Plots render well in
 </div>
 </div>
 
-<div id="outline-container-orgdd20e8c" class="outline-3">
-<h3 id="orgdd20e8c"><span class="section-number-3">2.2.</span> Data Frames</h3>
+<div id="outline-container-org604542c" class="outline-3">
+<h3 id="org604542c"><span class="section-number-3">2.2.</span> Data Frames</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 <a href="DataFrames.html">Data Frames</a>
@@ -169,8 +170,8 @@ I am using <b>julia</b> library <i>Gadfly</i> for plotting. Plots render well in
 </div>
 </div>
 
-<div id="outline-container-org97a1de5" class="outline-3">
-<h3 id="org97a1de5"><span class="section-number-3">2.3.</span> Descriptive Statistics</h3>
+<div id="outline-container-org9362a83" class="outline-3">
+<h3 id="org9362a83"><span class="section-number-3">2.3.</span> Descriptive Statistics</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 <a href="descriptives.html">Descriptive Statistics</a>
@@ -178,8 +179,8 @@ I am using <b>julia</b> library <i>Gadfly</i> for plotting. Plots render well in
 </div>
 </div>
 
-<div id="outline-container-orgea56882" class="outline-3">
-<h3 id="orgea56882"><span class="section-number-3">2.4.</span> Graphical Analysis</h3>
+<div id="outline-container-org25bf17a" class="outline-3">
+<h3 id="org25bf17a"><span class="section-number-3">2.4.</span> Graphical Analysis</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 <a href="Graphs.html">Graphical Analysis</a>
@@ -188,12 +189,12 @@ I am using <b>julia</b> library <i>Gadfly</i> for plotting. Plots render well in
 </div>
 </div>
 
-<div id="outline-container-org97e6ce6" class="outline-2">
-<h2 id="org97e6ce6"><span class="section-number-2">3.</span> Hypothesis Testing</h2>
+<div id="outline-container-orgafb9af4" class="outline-2">
+<h2 id="orgafb9af4"><span class="section-number-2">3.</span> Hypothesis Testing</h2>
 <div class="outline-text-2" id="text-3">
 </div>
-<div id="outline-container-orgfdc8903" class="outline-3">
-<h3 id="orgfdc8903"><span class="section-number-3">3.1.</span> Estimation</h3>
+<div id="outline-container-org5f65cee" class="outline-3">
+<h3 id="org5f65cee"><span class="section-number-3">3.1.</span> Estimation</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 <a href="estimation.html">Estimation</a>
@@ -201,8 +202,8 @@ I am using <b>julia</b> library <i>Gadfly</i> for plotting. Plots render well in
 </div>
 </div>
 
-<div id="outline-container-org5f8b160" class="outline-3">
-<h3 id="org5f8b160"><span class="section-number-3">3.2.</span> Continuous Outcomes</h3>
+<div id="outline-container-org362ecef" class="outline-3">
+<h3 id="org362ecef"><span class="section-number-3">3.2.</span> Continuous Outcomes</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 <a href="continuous.html">Continuous Outcomes</a>
@@ -210,8 +211,8 @@ I am using <b>julia</b> library <i>Gadfly</i> for plotting. Plots render well in
 </div>
 </div>
 
-<div id="outline-container-org7150d06" class="outline-3">
-<h3 id="org7150d06"><span class="section-number-3">3.3.</span> Binary Outcomes</h3>
+<div id="outline-container-orgabeb3ac" class="outline-3">
+<h3 id="orgabeb3ac"><span class="section-number-3">3.3.</span> Binary Outcomes</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 <a href="categorical.html">Binary Outcomes</a>
@@ -219,8 +220,8 @@ I am using <b>julia</b> library <i>Gadfly</i> for plotting. Plots render well in
 </div>
 </div>
 
-<div id="outline-container-orgfc7b50e" class="outline-3">
-<h3 id="orgfc7b50e"><span class="section-number-3">3.4.</span> Correlation and Causality</h3>
+<div id="outline-container-orgdb66d4e" class="outline-3">
+<h3 id="orgdb66d4e"><span class="section-number-3">3.4.</span> Correlation and Causality</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
 <a href="correlation.html">Correlation and Causality</a>
@@ -229,12 +230,12 @@ I am using <b>julia</b> library <i>Gadfly</i> for plotting. Plots render well in
 </div>
 </div>
 
-<div id="outline-container-orgeb8ec71" class="outline-2">
-<h2 id="orgeb8ec71"><span class="section-number-2">4.</span> Regression</h2>
+<div id="outline-container-org81850c2" class="outline-2">
+<h2 id="org81850c2"><span class="section-number-2">4.</span> Regression</h2>
 <div class="outline-text-2" id="text-4">
 </div>
-<div id="outline-container-org9b0aa7e" class="outline-3">
-<h3 id="org9b0aa7e"><span class="section-number-3">4.1.</span> Multiple Linear Regression</h3>
+<div id="outline-container-orgeea5bc2" class="outline-3">
+<h3 id="orgeea5bc2"><span class="section-number-3">4.1.</span> Multiple Linear Regression</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
 <a href="mlr.html">Multiple Linear Regression</a>
@@ -242,8 +243,8 @@ I am using <b>julia</b> library <i>Gadfly</i> for plotting. Plots render well in
 </div>
 </div>
 
-<div id="outline-container-org2a1206f" class="outline-3">
-<h3 id="org2a1206f"><span class="section-number-3">4.2.</span> Statistical Modelling</h3>
+<div id="outline-container-org430b515" class="outline-3">
+<h3 id="org430b515"><span class="section-number-3">4.2.</span> Statistical Modelling</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 <a href="modelling.html">Statistical Modelling</a>
@@ -251,22 +252,31 @@ I am using <b>julia</b> library <i>Gadfly</i> for plotting. Plots render well in
 </div>
 </div>
 
-<div id="outline-container-orga7bdd50" class="outline-3">
-<h3 id="orga7bdd50"><span class="section-number-3">4.3.</span> Logistic Regression</h3>
+<div id="outline-container-orgdb5d97f" class="outline-3">
+<h3 id="orgdb5d97f"><span class="section-number-3">4.3.</span> Logistic Regression</h3>
 <div class="outline-text-3" id="text-4-3">
 <p>
 <a href="logistic.html">Logistic Regression</a>
 </p>
 </div>
 </div>
+
+<div id="outline-container-org1665655" class="outline-3">
+<h3 id="org1665655"><span class="section-number-3">4.4.</span> Extensions to Logistic Regression</h3>
+<div class="outline-text-3" id="text-4-4">
+<p>
+<a href="ordinal.html">Ordinal Regression</a>
+</p>
+</div>
+</div>
 </div>
 
-<div id="outline-container-org83d60b5" class="outline-2">
-<h2 id="org83d60b5"><span class="section-number-2">5.</span> Advanced Topics</h2>
+<div id="outline-container-orgf59f3df" class="outline-2">
+<h2 id="orgf59f3df"><span class="section-number-2">5.</span> Advanced Topics</h2>
 <div class="outline-text-2" id="text-5">
 </div>
-<div id="outline-container-orga21ab8a" class="outline-3">
-<h3 id="orga21ab8a"><span class="section-number-3">5.1.</span> Binary Classification</h3>
+<div id="outline-container-orgfc95c6a" class="outline-3">
+<h3 id="orgfc95c6a"><span class="section-number-3">5.1.</span> Binary Classification</h3>
 <div class="outline-text-3" id="text-5-1">
 <p>
 <a href="binary_class.html">Binary Classification</a>
@@ -274,17 +284,17 @@ I am using <b>julia</b> library <i>Gadfly</i> for plotting. Plots render well in
 </div>
 </div>
 
-<div id="outline-container-org882e87d" class="outline-3">
-<h3 id="org882e87d"><span class="section-number-3">5.2.</span> Classification</h3>
+<div id="outline-container-org9aff7b5" class="outline-3">
+<h3 id="org9aff7b5"><span class="section-number-3">5.2.</span> Classification</h3>
 <div class="outline-text-3" id="text-5-2">
 <p>
-<a href="Classification.html">Classification</a>
+<a href="mlj_class.html">Machine Learning: Classification</a>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org4648c58" class="outline-3">
-<h3 id="org4648c58"><span class="section-number-3">5.3.</span> Introduction to ODEs</h3>
+<div id="outline-container-org0428772" class="outline-3">
+<h3 id="org0428772"><span class="section-number-3">5.3.</span> Introduction to ODEs</h3>
 <div class="outline-text-3" id="text-5-3">
 <p>
 <a href="ode_intro.html">Ordinary Differential Equations</a>
@@ -295,7 +305,7 @@ I am using <b>julia</b> library <i>Gadfly</i> for plotting. Plots render well in
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Josie Athens</p>
-<p class="date">Created: 2024-02-04 Sun 09:34</p>
+<p class="date">Created: 2024-02-07 Wed 21:38</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

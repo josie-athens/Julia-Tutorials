@@ -70,12 +70,15 @@ I am using *julia* library /Gadfly/ for plotting. Plots render well in Jupyter n
 ** Logistic Regression
 [[file:logistic.html][Logistic Regression]]
 
+** Extensions to Logistic Regression
+[[file:ordinal.html][Ordinal Regression]]
+
 * Advanced Topics
 ** Binary Classification
 [[file:binary_class.html][Binary Classification]]
 
 ** Classification
-[[file:Classification.html][Classification]]
+[[file:mlj_class.html][Machine Learning: Classification]]
 
 ** Introduction to ODEs
 [[file:ode_intro.html][Ordinary Differential Equations]]
