@@ -323,7 +323,7 @@ model_2 = lm(
 ); aov.anova(model_2; type=3)
 
 # ╔═╡ 44bd2603-5444-46dc-aeec-9895147f33f3
-model_2
+glm_coef(model_2 |> coeftable |> DataFrame, ratio=false)
 
 # ╔═╡ 4615af75-7341-49b1-b9ab-e44f6b6ce3f3
 md"""
@@ -375,13 +375,13 @@ bw_mach = machine(glm, x1, y1)
 fit!(bw_mach, rows=train)
 
 # ╔═╡ daae6c76-e0d3-4cb1-973d-392e85533344
-report(bw_mach).coef_table
+report(bw_mach).coef_table |> DataFrame
 
 # ╔═╡ a9d97ec1-ffd4-4b14-bcbc-1032c10477e2
 md"The table of coefficients from the MLJ approach are very similar to those of the traditional GLM approach:"
 
 # ╔═╡ 6c5f55a1-d122-4b31-a14a-ac5ef4a2da6d
-model_2
+model_2 |> coeftable |> DataFrame
 
 # ╔═╡ 67113ad5-c737-4f5a-9973-1b99b075d6b2
 md"""
@@ -458,7 +458,7 @@ bw_mach2 = machine(glm, x3, y2)
 fit!(bw_mach2, rows=train)
 
 # ╔═╡ d40fa321-576d-4b5b-a711-9e473826567b
-report(bw_mach2).coef_table
+glm_coef(report(bw_mach2).coef_table |> DataFrame, ratio=false)
 
 # ╔═╡ b33b6bb6-ea41-4b1e-977e-9cc554808a94
 md"Our results, are consistent, yay!!"

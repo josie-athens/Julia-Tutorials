@@ -613,3 +613,30 @@ estat = function (df, labs=nothing)
   DataFrames.rename!(res, :variable => :Variable)
   return res
 end
+
+"""
+	glm_coef(model; ratio = true)
+	
+Reports table of coefficients from linear regression models, rounded to 3 digits. By default, exponentiates coefficients and confidence intervals.
+
+Args: 
+- model_coef: A data frame with the table of coefficients.
+- ratio: A boolean. Default to true. To report results in the original, i.e. not-exponentiated, use ratio = false.
+
+Returns:
+- A data frame with rounded table of coefficients, exponentiated by default.
+"""
+glm_coef = function(model_coef::DataFrames.DataFrame; ratio = true)
+	if ratio == true
+		model_coef[:, [2,3,6,7]] = r3.(exp.(model_coef[:, [2,3,6,7]]))
+		model_coef[:, 5] = r3.(model_coef[:, 5])
+		
+		coef_exp = select(model_coef, [1,2,6,7,5])
+		
+	else
+		model_coef[:, 2:end] = r3.(model_coef[:, 2:end])
+		select!(model_coef, [1,2,6,7,5])
+	end
+		
+	return ratio ? coef_exp : model_coef
+end

@@ -129,8 +129,8 @@ md"""
 When we exponentiate, we obtain the Odds Ratio:
 """
 
-# ╔═╡ 0a133eb3-2016-4bec-b132-2ed271e02e30
-exp.(model_1 |> coef)[2] |> r3
+# ╔═╡ 6030d6a8-665d-4061-9441-4811da97cd17
+ glm_coef(model_1 |> coeftable |> DataFrame)[2:end, :]
 
 # ╔═╡ 57643061-9c8c-458c-b24c-7c5103eab292
 md"""
@@ -203,8 +203,8 @@ Next, we fit a logistic linear regression model.
 # ╔═╡ 95d19887-b8e0-41d7-981e-d237930cd81e
 model_2 = glm(@formula(mf_cont ~ agegrp), Oncho, Binomial(), LogitLink())
 
-# ╔═╡ 42471ad7-b711-4b63-a01b-1e249ee9a759
-exp.(model_2 |> coef)[2:4]
+# ╔═╡ cda9e59d-dc30-4c69-ae8c-796bfeb9355e
+glm_coef(model_2 |> coeftable |> DataFrame)[2:end, :]
 
 # ╔═╡ 1bdc794c-ef45-413f-9b92-914d5436dafb
 eff_2 = effects(
@@ -314,6 +314,14 @@ RT.regtable(
 	model_3, model_4, model_5
 ) |> print
 
+# ╔═╡ 9993ea11-b8d4-4fa0-9617-736841c81be5
+md"""
+## Table of coefficients
+"""
+
+# ╔═╡ 4be6cfa5-a4fc-4363-bf12-a03bee44c03c
+glm_coef(model_4 |> coeftable |> DataFrame)[2:end, :]
+
 # ╔═╡ b204eff5-f8f7-4a2d-bc0e-0a695a0ea473
 md"""
 ## Effect plots
@@ -387,17 +395,60 @@ mach = machine(pipe, x, y) |> fit!;
 fitted_params(mach).linear_binary_classifier.features
 
 # ╔═╡ 5cec4fdf-7568-4134-a8f1-a9835baf8b61
-report(mach).linear_binary_classifier.coef_table
+report(mach).linear_binary_classifier.coef_table |> DataFrame
+
+# ╔═╡ d26ab13a-cdd2-4e86-bbc0-4732f04a9990
+glm_coef(report(mach).linear_binary_classifier.coef_table |> DataFrame)[1:end-1, :]
 
 # ╔═╡ ce305147-27b4-425a-a890-ef8e6d5afb4b
-glm(
+model_6 = glm(
 	@formula(mf_cont ~ agegrp + area + sex), 
 	Oncho, Binomial(), LogitLink(),
 	contrasts = oncho_cont
-)
+);
+
+# ╔═╡ d0bdd820-64d7-4bbb-b855-1e7cafdcea17
+glm_coef(model_6 |> coeftable |> DataFrame)[2:end, :]
+
+# ╔═╡ ede56b19-e982-4bcb-9d4b-59e25809af23
+md"""
+## Performance
+"""
 
 # ╔═╡ d22cfcc1-53d8-4a01-bd4c-ee2fcb2c216f
-exp(1.1227) |> r3
+oncho_ŷ = MLJ.predict(mach);
+
+# ╔═╡ 6edf51ba-225b-418a-846e-eda20210ed67
+oncho_ȳ = predict_mode(mach);
+
+# ╔═╡ 2642ceb7-8301-4b32-b915-68ef8e370d60
+cross_entropy(oncho_ŷ, y) |> r3
+
+# ╔═╡ b94f5086-6e37-4624-8143-b1fff9b6030a
+misclassification_rate(oncho_ȳ, y) |> r3
+
+# ╔═╡ 631b3633-7391-47b0-a8eb-085c61050722
+accuracy(oncho_ȳ, y) |> r3
+
+# ╔═╡ 1c52b79a-bb6a-4bf2-afd7-495e882b039a
+sensitivity(oncho_ȳ, y) |> r3
+
+# ╔═╡ c563473d-b3a2-4995-ad89-844b146601d2
+specificity(oncho_ȳ, y) |> r3
+
+# ╔═╡ 92fa8a31-e027-4c47-9e8e-f1168da82545
+let
+	plot(
+		roc_curve(oncho_ŷ, y),
+		leg=false, lw=2, lc=:firebrick,
+		xlab="False positive rate", 
+		ylab="True positive rate"
+	)
+	plot!([0, 1], [0, 1], linestyle=:dash, color=:cadetblue)
+end
+
+# ╔═╡ 7a4ccb0b-48a7-448c-a86f-b5585edcb055
+auc(oncho_ŷ, y) |> r3
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2500,7 +2551,7 @@ version = "1.4.1+1"
 # ╟─284fcbc9-392a-4c1f-b20e-6dff48ec3a19
 # ╠═0bfdd768-0076-44bc-8c43-debb779b6f00
 # ╟─f2f0b192-5fbe-491c-875e-8c2aa4f21695
-# ╠═0a133eb3-2016-4bec-b132-2ed271e02e30
+# ╠═6030d6a8-665d-4061-9441-4811da97cd17
 # ╟─57643061-9c8c-458c-b24c-7c5103eab292
 # ╠═947a4a7d-2681-4d16-8af1-65d0754a9058
 # ╟─82ef7dad-ae19-4fea-a799-0f067bf1a0df
@@ -2514,7 +2565,7 @@ version = "1.4.1+1"
 # ╠═3bf37493-cea7-4043-b6be-dca74345957d
 # ╟─5892c810-7072-4357-8ae8-3cd59402b29b
 # ╠═95d19887-b8e0-41d7-981e-d237930cd81e
-# ╠═42471ad7-b711-4b63-a01b-1e249ee9a759
+# ╠═cda9e59d-dc30-4c69-ae8c-796bfeb9355e
 # ╠═1bdc794c-ef45-413f-9b92-914d5436dafb
 # ╠═6a0d8a09-191f-4506-9369-79e1cd375030
 # ╟─79ebf23d-cdb2-4f37-a50e-402c76cab057
@@ -2535,6 +2586,8 @@ version = "1.4.1+1"
 # ╠═1737b14c-acbb-448d-ba12-cf30578df796
 # ╠═ed760e3c-cb25-40be-9f72-bd31094857e1
 # ╠═4a2fbf31-9601-4761-a844-7ec737972c9c
+# ╟─9993ea11-b8d4-4fa0-9617-736841c81be5
+# ╠═4be6cfa5-a4fc-4363-bf12-a03bee44c03c
 # ╟─b204eff5-f8f7-4a2d-bc0e-0a695a0ea473
 # ╠═45124d08-54bb-4ab8-9617-0e04602836d7
 # ╠═fed33bc4-dbbc-438e-95b3-2865faa6031c
@@ -2548,7 +2601,18 @@ version = "1.4.1+1"
 # ╠═7ecf7765-e4b8-4a54-9a9f-cf26b9b3016b
 # ╠═7c166229-d705-4bb6-937c-b071837a876b
 # ╠═5cec4fdf-7568-4134-a8f1-a9835baf8b61
+# ╠═d26ab13a-cdd2-4e86-bbc0-4732f04a9990
 # ╠═ce305147-27b4-425a-a890-ef8e6d5afb4b
+# ╠═d0bdd820-64d7-4bbb-b855-1e7cafdcea17
+# ╟─ede56b19-e982-4bcb-9d4b-59e25809af23
 # ╠═d22cfcc1-53d8-4a01-bd4c-ee2fcb2c216f
+# ╠═6edf51ba-225b-418a-846e-eda20210ed67
+# ╠═2642ceb7-8301-4b32-b915-68ef8e370d60
+# ╠═b94f5086-6e37-4624-8143-b1fff9b6030a
+# ╠═631b3633-7391-47b0-a8eb-085c61050722
+# ╠═1c52b79a-bb6a-4bf2-afd7-495e882b039a
+# ╠═c563473d-b3a2-4995-ad89-844b146601d2
+# ╠═92fa8a31-e027-4c47-9e8e-f1168da82545
+# ╠═7a4ccb0b-48a7-448c-a86f-b5585edcb055
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
