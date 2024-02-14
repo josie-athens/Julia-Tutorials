@@ -3026,17 +3026,18 @@ vertical-align: -.125em;
     <h2 id="toc-title">Contents</h2>
    
   <ul>
-  <li><a href="#basics" id="toc-basics" class="nav-link active" data-scroll-target="#basics"><span class="header-section-number">1</span> Basics</a></li>
-  <li><a href="#ifelse" id="toc-ifelse" class="nav-link" data-scroll-target="#ifelse"><span class="header-section-number">2</span> If/Else</a></li>
-  <li><a href="#functions" id="toc-functions" class="nav-link" data-scroll-target="#functions"><span class="header-section-number">3</span> Functions</a></li>
-  <li><a href="#memoize-and-benchmarktools" id="toc-memoize-and-benchmarktools" class="nav-link" data-scroll-target="#memoize-and-benchmarktools"><span class="header-section-number">4</span> Memoize and BenchmarkTools</a></li>
-  <li><a href="#arrays" id="toc-arrays" class="nav-link" data-scroll-target="#arrays"><span class="header-section-number">5</span> Arrays</a></li>
-  <li><a href="#named-tuples-and-structs" id="toc-named-tuples-and-structs" class="nav-link" data-scroll-target="#named-tuples-and-structs"><span class="header-section-number">6</span> Named tuples and Structs</a>
+  <li><a href="#main-menu" id="toc-main-menu" class="nav-link active" data-scroll-target="#main-menu"><span class="header-section-number">1</span> 📖 Main Menu</a></li>
+  <li><a href="#basics" id="toc-basics" class="nav-link" data-scroll-target="#basics"><span class="header-section-number">2</span> Basics</a></li>
+  <li><a href="#ifelse" id="toc-ifelse" class="nav-link" data-scroll-target="#ifelse"><span class="header-section-number">3</span> If/Else</a></li>
+  <li><a href="#functions" id="toc-functions" class="nav-link" data-scroll-target="#functions"><span class="header-section-number">4</span> Functions</a></li>
+  <li><a href="#memoize-and-benchmarktools" id="toc-memoize-and-benchmarktools" class="nav-link" data-scroll-target="#memoize-and-benchmarktools"><span class="header-section-number">5</span> Memoize and BenchmarkTools</a></li>
+  <li><a href="#arrays" id="toc-arrays" class="nav-link" data-scroll-target="#arrays"><span class="header-section-number">6</span> Arrays</a></li>
+  <li><a href="#named-tuples-and-structs" id="toc-named-tuples-and-structs" class="nav-link" data-scroll-target="#named-tuples-and-structs"><span class="header-section-number">7</span> Named tuples and Structs</a>
   <ul class="collapse">
-  <li><a href="#named-tuples" id="toc-named-tuples" class="nav-link" data-scroll-target="#named-tuples"><span class="header-section-number">6.1</span> Named tuples</a></li>
-  <li><a href="#struct" id="toc-struct" class="nav-link" data-scroll-target="#struct"><span class="header-section-number">6.2</span> Struct</a></li>
+  <li><a href="#named-tuples" id="toc-named-tuples" class="nav-link" data-scroll-target="#named-tuples"><span class="header-section-number">7.1</span> Named tuples</a></li>
+  <li><a href="#struct" id="toc-struct" class="nav-link" data-scroll-target="#struct"><span class="header-section-number">7.2</span> Struct</a></li>
+  <li><a href="#loops" id="toc-loops" class="nav-link" data-scroll-target="#loops"><span class="header-section-number">7.3</span> Loops</a></li>
   </ul></li>
-  <li><a href="#loops" id="toc-loops" class="nav-link" data-scroll-target="#loops"><span class="header-section-number">7</span> Loops</a></li>
   </ul>
 </nav>
 </div>
@@ -3071,11 +3072,14 @@ vertical-align: -.125em;
 
 </header>
 
+<section id="main-menu" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> <a href="index.html">📖 Main Menu</a></h1>
 <div class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Memoize</span>, <span class="bu">BenchmarkTools</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="basics" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="basics"><span class="header-section-number">1</span> Basics</h2>
+</section>
+<section id="basics" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Basics</h1>
 <p>Julia was built for doing applied math and comes with a simple syntax. You can assign variables by plain <code>=</code> like in <em>Python</em> or <em>R</em>.</p>
 <div class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> <span class="fl">3</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -3112,8 +3116,8 @@ vertical-align: -.125em;
 </div>
 </div>
 </section>
-<section id="ifelse" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="ifelse"><span class="header-section-number">2</span> If/Else</h2>
+<section id="ifelse" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> If/Else</h1>
 <p>In Julia you have a multiline if/else block and the ternary question mark operator <code>?</code>.</p>
 <div class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> a <span class="op">==</span> <span class="fl">1</span></span>
@@ -3194,8 +3198,8 @@ vertical-align: -.125em;
 </div>
 <p>We see these in loops or functions commonly, where it is combined with <code>return</code>, <code>continue</code> or <code>break</code>.</p>
 </section>
-<section id="functions" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="functions"><span class="header-section-number">3</span> Functions</h2>
+<section id="functions" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Functions</h1>
 <p>While variables are the synapsis, the brain of Julia are its functions. Really: If you understood functions in Julia, you are ready to work in Julia.</p>
 <p>There are many functions available builtin, we already saw a couple of them.</p>
 <p>An example of a function:</p>
@@ -3312,8 +3316,8 @@ vertical-align: -.125em;
 </div>
 </div>
 </section>
-<section id="memoize-and-benchmarktools" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="memoize-and-benchmarktools"><span class="header-section-number">4</span> Memoize and BenchmarkTools</h2>
+<section id="memoize-and-benchmarktools" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Memoize and BenchmarkTools</h1>
 <p>By now, we have everything we need to define our own fibonacci function :) https://en.wikipedia.org/wiki/Fibonacci_number</p>
 <div class="cell" data-execution_count="30">
 <div class="sourceCode cell-code" id="cb58"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;&quot;&quot;</span></span>
@@ -3385,8 +3389,8 @@ vertical-align: -.125em;
 </div>
 <p>Wow, that was fast!! As you can see the memoization kicks in and we have about constant access time.</p>
 </section>
-<section id="arrays" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="arrays"><span class="header-section-number">5</span> Arrays</h2>
+<section id="arrays" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Arrays</h1>
 <p>Arrays are the best supported DataType in Julia, it is multidimensional and highly optimized. You use it as both <code>list</code> and <code>numpy.array</code> in Python, i.e. no more switching between worlds.</p>
 <p>Create a column vector with respective elements:</p>
 <div class="cell" data-execution_count="35">
@@ -3573,10 +3577,10 @@ vertical-align: -.125em;
 </div>
 <p>We can see that perfomance improved drastically, while now having a memory footprint on each call.</p>
 </section>
-<section id="named-tuples-and-structs" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="named-tuples-and-structs"><span class="header-section-number">6</span> Named tuples and Structs</h2>
-<section id="named-tuples" class="level3" data-number="6.1">
-<h3 data-number="6.1" class="anchored" data-anchor-id="named-tuples"><span class="header-section-number">6.1</span> Named tuples</h3>
+<section id="named-tuples-and-structs" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Named tuples and Structs</h1>
+<section id="named-tuples" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="named-tuples"><span class="header-section-number">7.1</span> Named tuples</h2>
 <p>In practice we often have a bunch of variables we need to handle at once.</p>
 <ul>
 <li>In julia we can construct our own types for this, but they may be a bit clumsy at times.</li>
@@ -3609,8 +3613,8 @@ vertical-align: -.125em;
 </div>
 </div>
 </section>
-<section id="struct" class="level3" data-number="6.2">
-<h3 data-number="6.2" class="anchored" data-anchor-id="struct"><span class="header-section-number">6.2</span> Struct</h3>
+<section id="struct" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="struct"><span class="header-section-number">7.2</span> Struct</h2>
 <p>This is one of the most useful tools for fast prototyping. There is even no performance penalty in using <code>namedtuples</code>, actually it is able to create optimal code.</p>
 <p>In case we want to define our own types for a more stable interface between different parts of our code you can use <code>struct</code>.</p>
 <div class="cell" data-execution_count="58">
@@ -3698,9 +3702,8 @@ Important
 </div>
 </div>
 </section>
-</section>
-<section id="loops" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="loops"><span class="header-section-number">7</span> Loops</h2>
+<section id="loops" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="loops"><span class="header-section-number">7.3</span> Loops</h2>
 <div class="cell" data-execution_count="67">
 <div class="sourceCode cell-code" id="cb126"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb126-1"><a href="#cb126-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="fl">4</span></span>
 <span id="cb126-2"><a href="#cb126-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">println</span>(i)</span>
@@ -3737,6 +3740,7 @@ Caution
 <pre><code>10</code></pre>
 </div>
 </div>
+</section>
 </section>
 
 </main>

@@ -39,13 +39,13 @@ I am using *julia* library /Gadfly/ for plotting. Plots render well in Jupyter n
 [[file:Intro.html][Introduction]]
 
 ** Data Frames
-[[file:DataFrames.html][Data Frames]]
+[[file:data_frames.html][Data Frames]]
 
 ** Descriptive Statistics
 [[file:descriptives.html][Descriptive Statistics]]
 
 ** Graphical Analysis
-[[file:Graphs.html][Graphical Analysis]]
+[[file:graphical.html][Graphical Analysis]]
 
 * Hypothesis Testing
 ** Estimation
