@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2024-02-14 Wed 19:41 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Julia Tutorials</title>
+<meta name="author" content="Josie Athens" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/readtheorg.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/js/readtheorg.js"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Julia Tutorials</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org4152c9b">1. Preface</a>
+<ul>
+<li><a href="#orgf241cbb">1.1. Warning</a></li>
+</ul>
+</li>
+<li><a href="#org86397d1">2. Basics</a>
+<ul>
+<li><a href="#org048cda3">2.1. Introduction</a></li>
+<li><a href="#orgb31c889">2.2. Data Frames</a></li>
+<li><a href="#org6785980">2.3. Descriptive Statistics</a></li>
+<li><a href="#org0967119">2.4. Graphical Analysis</a></li>
+</ul>
+</li>
+<li><a href="#org80af5f5">3. Hypothesis Testing</a>
+<ul>
+<li><a href="#org524138e">3.1. Estimation</a></li>
+<li><a href="#org9673833">3.2. Continuous Outcomes</a></li>
+<li><a href="#orgf69eccf">3.3. Binary Outcomes</a></li>
+<li><a href="#org6db93e3">3.4. Correlation and Causality</a></li>
+</ul>
+</li>
+<li><a href="#orgc11c21f">4. Regression</a>
+<ul>
+<li><a href="#org67a5e5b">4.1. Multiple Linear Regression</a></li>
+<li><a href="#orgca3d33b">4.2. Logistic Regression</a></li>
+</ul>
+</li>
+<li><a href="#org6e65ee5">5. Advanced Topics</a>
+<ul>
+<li><a href="#orgfc91edf">5.1. Classification</a></li>
+<li><a href="#org7a6a1f3">5.2. Differential Equations</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<p>
+.<img src="https://julialang.org/assets/infra/logo.svg" alt="logo.svg" class="org-svg" />
+</p>
+
+<div id="outline-container-org4152c9b" class="outline-2">
+<h2 id="org4152c9b"><span class="section-number-2">1.</span> Preface</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+My dad once dropped some wisdom on me about leaving a legacy. He said there were three key things I should do:
+</p>
+
+<ol class="org-ol">
+<li>Plant a seed and watch it grow into a beautiful tree.</li>
+<li>Get creative and do something awesome, like writing a book (or anything else you’re passionate about).</li>
+<li>Have some kiddos of your own.</li>
+</ol>
+
+<p>
+When I was a wee little one, I planted a peach seed. Believe it or not, that peach tree is still standing strong in my parents’ backyard.
+</p>
+
+<p>
+Oh, and guess what? I ended up having two amazing kids of my own!
+</p>
+
+<p>
+And as for the book, this one ticks off that second point on my dad’s legacy list.
+</p>
+
+<p>
+I use the following <b>callouts</b> for the Tutorials:
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left"><b>Block</b></th>
+<th scope="col" class="org-left"><b>callout</b></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">Answer</td>
+<td class="org-left"><i>hint</i></td>
+</tr>
+
+<tr>
+<td class="org-left">Example</td>
+<td class="org-left"><i>tip</i></td>
+</tr>
+
+<tr>
+<td class="org-left">Exercise</td>
+<td class="org-left"><i>note</i></td>
+</tr>
+
+<tr>
+<td class="org-left">Interpretation</td>
+<td class="org-left"><i>danger</i></td>
+</tr>
+
+<tr>
+<td class="org-left">Question</td>
+<td class="org-left"><i>warning</i></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div id="outline-container-orgf241cbb" class="outline-3">
+<h3 id="orgf241cbb"><span class="section-number-3">1.1.</span> Warning</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+I am using <b>julia</b> library <i>Gadfly</i> for plotting. Plots render well in Jupyter notebooks and Pluto notebooks. For the static <i>html</i> files shown in the tutorials, the plots are not well rendered by <i>Chrome</i>; alternatives are <i>Firefox</i> and <i>Safari</i>.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org86397d1" class="outline-2">
+<h2 id="org86397d1"><span class="section-number-2">2.</span> Basics</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org048cda3" class="outline-3">
+<h3 id="org048cda3"><span class="section-number-3">2.1.</span> Introduction</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+<a href="Intro.html">Introduction</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb31c889" class="outline-3">
+<h3 id="orgb31c889"><span class="section-number-3">2.2.</span> Data Frames</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+<a href="data_frames.html">Data Frames</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6785980" class="outline-3">
+<h3 id="org6785980"><span class="section-number-3">2.3.</span> Descriptive Statistics</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+<a href="descriptives.html">Descriptive Statistics</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0967119" class="outline-3">
+<h3 id="org0967119"><span class="section-number-3">2.4.</span> Graphical Analysis</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+<a href="graphical.html">Graphical Analysis</a>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org80af5f5" class="outline-2">
+<h2 id="org80af5f5"><span class="section-number-2">3.</span> Hypothesis Testing</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org524138e" class="outline-3">
+<h3 id="org524138e"><span class="section-number-3">3.1.</span> Estimation</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+<a href="estimation.html">Estimation</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org9673833" class="outline-3">
+<h3 id="org9673833"><span class="section-number-3">3.2.</span> Continuous Outcomes</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+<a href="continuous.html">Continuous Outcomes</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf69eccf" class="outline-3">
+<h3 id="orgf69eccf"><span class="section-number-3">3.3.</span> Binary Outcomes</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+<a href="categorical.html">Binary Outcomes</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6db93e3" class="outline-3">
+<h3 id="org6db93e3"><span class="section-number-3">3.4.</span> Correlation and Causality</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+<a href="correlation.html">Correlation and Causality</a>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc11c21f" class="outline-2">
+<h2 id="orgc11c21f"><span class="section-number-2">4.</span> Regression</h2>
+<div class="outline-text-2" id="text-4">
+</div>
+<div id="outline-container-org67a5e5b" class="outline-3">
+<h3 id="org67a5e5b"><span class="section-number-3">4.1.</span> Multiple Linear Regression</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+<a href="mlr.html">Multiple Linear Regression</a>
+</p>
+
+<p>
+<a href="modelling.html">Statistical Modelling</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgca3d33b" class="outline-3">
+<h3 id="orgca3d33b"><span class="section-number-3">4.2.</span> Logistic Regression</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+<a href="logistic.html">Logistic Regression</a>
+</p>
+
+<p>
+<a href="ordinal.html">Ordinal Regression</a>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6e65ee5" class="outline-2">
+<h2 id="org6e65ee5"><span class="section-number-2">5.</span> Advanced Topics</h2>
+<div class="outline-text-2" id="text-5">
+</div>
+<div id="outline-container-orgfc91edf" class="outline-3">
+<h3 id="orgfc91edf"><span class="section-number-3">5.1.</span> Classification</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+<a href="binary_class.html">Binary Classification</a>
+</p>
+
+<p>
+<a href="mlj_class.html">Machine Learning: Classification</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7a6a1f3" class="outline-3">
+<h3 id="org7a6a1f3"><span class="section-number-3">5.2.</span> Differential Equations</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+<a href="ode_intro.html">Introduction to Differential Equations</a>
+</p>
+
+<p>
+<a href="odes.html">ODEs: Biological Examples</a>
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Josie Athens</p>
+<p class="date">Created: 2024-02-14 Wed 19:41</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
