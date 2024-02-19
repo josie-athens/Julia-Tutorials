@@ -75,7 +75,7 @@ I am using *julia* library /Gadfly/ for plotting. Plots render well in Jupyter n
 ** Classification
 [[file:binary_class.html][Binary Classification]]
 
-[[file:mlj_class.html][Machine Learning: Classification]]
+[[file:classification.html][Machine Learning: Classification]]
 
 ** Differential Equations
 [[file:ode_intro.html][Introduction to Differential Equations]]
