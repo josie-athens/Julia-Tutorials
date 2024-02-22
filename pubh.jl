@@ -1,6 +1,7 @@
 #=
 Julia functions
 =#
+
 hint(text) = Markdown.MD(Markdown.Admonition("hint", "Answer", [text]))
 
 head(df) = first(df, 5)
@@ -103,7 +104,7 @@ Args:
 Returns:
 - The lower and upper 95% CI of the sample.
 """
-cis(x, u=mean(x), s=1.96*std(x)/sqrt(length(x))) = (outcome=u, lower=u-s, upper=u+s)
+cis(x, u=mean(x), s=1.96*std(x)/sqrt(length(x))) = (outcome=u, err=((u+s)-(u-s))/2,  lower=u-s, upper=u+s)
 
 """
   reference_range(μ, σ)
@@ -118,8 +119,8 @@ Returns:
 - The reference range.
 """
 reference_range = function (μ, σ)
-  low = quantile(Distributions.Normal(μ, σ), 0.025)
-  up = quantile(Distributions.Normal(μ, σ), 0.975)
+  low = quantile(Normal(μ, σ), 0.025)
+  up = quantile(Normal(μ, σ), 0.975)
   ri = [low, up]
   return ri
 end
@@ -194,7 +195,7 @@ vec_group = function (df, outcome, group)
 end
 
 """
-  coef_plot(model, labs; ratio=false)
+  coef_plot(model; labs, ratio)
 
 Constructs a coefficient plot from a regression model.
 
@@ -204,34 +205,26 @@ Args:
 - ratio: Logical. If true, the function exponentiates the results to plot a ratio (e.g. OR in logistic regression). Default is: ratio=false.
 		
 Returns:
-- A Gadfly plot.
+- A plot.
 """
-coef_plot = function (model, labs; ratio=false)
-
-  n = length(coef(model))
+coef_plot = function (model; labs, ratio = false)
+	n = length(coef(model))
+	n2 = n-1
   estimate = ratio ? exp.(coef(model)[2:n]) : coef(model)[2:n]
   low = ratio ? exp.(confint(model)[2:n, 1]) : confint(model)[2:n, 1]
   up = ratio ? exp.(confint(model)[2:n, 2]) : confint(model)[2:n, 2]
+	err = (up - low)/2
   n0 = n - 1
   y = 1:1:n0
   x0 = ratio ? 1 : 0
-
-  df = DataFrame(; estimate, low, up, y)
-
-  plot(
-    df,
-    x=:estimate, y=:y, xmin=:low,
-    xmax=:up, xintercept=[0],
-    Geom.point, Geom.errorbar,
-    Geom.vline(
-      style=[:dash],
-      size=[0.2mm],
-      color=["cadetblue"]
-    ),
-    Guide.xlabel(ratio ? "Ratio" : "Coefficients"),
-    Guide.ylabel("Predictors"),
-    Gadfly.Scale.y_discrete(labels=i -> labs[i])
-  )
+	
+	scatter(
+		estimate, y, xerr=err, 
+		xlabel= ratio ? "Ratio" : "Coefficient",
+		leg=false, mc=:midnightblue,
+		yticks=(1:n, labs), ms=3
+	)
+	vline!([x0], linestyle=:dash, color=:cadetblue)
 end
 
 """
@@ -275,244 +268,194 @@ model_perf = function (model)
 end
 
 """
-  resid_plot(perf; title = "")
+  resid_plot(perf; title)
 
 Constructs a QQ-plot of the residuals from a linear regression model which assumes a normal distribution.
 
 Args:
 - perf: A data frame obtained via model_perf.
-- title: String to be used for the title of the plot.
+- title: An optional string for the title.
 
 Returns:
-- A QQ-plot of the residuals from the model against the Normal quantiles using Gafly.
+- A QQ-plot of the residuals from the model against the Normal quantiles.
 """
-resid_plot = function (perf; title = "")
-  y1 = minimum(perf.error)
-  y2 = maximum(perf.error)
-  yeqx(x=y1:y2) = layer(
-    x=x,
-    Geom.abline(color="gray80")
-  )
-
-  p1 = plot(
-    perf,
-    x=fit.([Normal], [perf.error]),
-    y=:error,
-    Stat.qq, yeqx,
-    Guide.xlabel("Theoretical quantiles"),
-    Guide.ylabel("Residuals"),
-    Guide.title(title),
-    Theme(default_color="IndianRed"),
-    Coord.cartesian(ymin=y1)
-  )
-
-  return p1
+resid_plot = function (perf::DataFrames.DataFrame; title::String = "")
+  qq_plot(perf.error, ylab="Residuals", title=title)
 end
 
 """
-  rvf_plot(perf; title = "")
+  rvf_plot(perf; title)
 
 Plots Std. Residuals versus Fitted values from a linear regression model.
 
 Args:
 - perf: A data frame obtained via model_perf.
-- title: String to be used for the title of the plot.
+- title: An optional string for the title.
 
 Returns:
-- A Gadfly plot.
+- A plot.
 """
-rvf_plot = function (perf; title = "")
-  p1 = plot(
-    perf,
-    layer(
-      x=:predicted,
-      y=:std_error,
-      yintercept=[2, -2],
-      Geom.point,
-      Geom.hline(
-        style=[:dash, :dash],
-        size=[0.2mm, 0.2mm],
-        color=["cadetblue", "cadetblue"]
-      ),
-      Theme(default_color="MidnightBlue")
-    ),
-    layer(
-      x=:predicted,
-      y=:std_error,
-      Geom.smooth(smoothing=0.8),
-      Theme(default_color="IndianRed")
-    ),
-    Guide.xlabel("Fitted values"),
-    Guide.ylabel("Std residuals"),
-    Guide.title(title)
-  )
-  return p1
+rvf_plot = function (perf::DataFrames.DataFrame; title::String = "")
+	@df perf scatter(
+		:predicted, :std_error,
+		xlabel="Fitted values",
+    ylabel="Std Residuals",
+		leg=false, msize=2, mc=:midnightblue
+	)
+	hline!([-2, 2], linestyle=:dash)
 end
 
 """
-  variance_plot(perf; title = "")
+  variance_plot(perf; title)
 
 Plots the square root of the absolute Std. Residuals versus Fitted values from a linear regression model. Diagnostic plot to check on homoscedasticity.
 
 Args:
 - perf: A data frame obtained via model_perf.
-- title: String to be used for the title of the plot.
+- title: An optional string for the title.
 
 Returns:
-- A Gadfly plot.
+- A plot.
 """
-variance_plot = function (perf; title = "")
-  p1 = plot(
-    perf,
-    layer(
-      x=:predicted,
-      y=:sqr_error,
-      Theme(default_color="MidnightBlue")
-    ),
-    layer(
-      x=:predicted,
-      y=:sqr_error,
-      Geom.smooth(smoothing=0.8),
-      Theme(default_color="IndianRed")
-    ),
-    Guide.xlabel("Fitted values"),
-    Guide.ylabel("√|Std res|"),
-    Guide.title(title)
-  )
-  return p1
+variance_plot = function (perf::DataFrames.DataFrame; title::String = "")
+	@df perf scatter(
+		:predicted, :sqr_error,
+		xlabel="Fitted values",
+    ylabel="√|Std res|",
+		leg=false, msize=2, mc=:midnightblue
+	)
 end
 
 """
-  res_lev_plot(perf; title = "")
+  res_lev_plot(perf; title)
 
 Plots the standardised residuals versus leverage from a linear regression model. 
 
 Args:
 - perf: A data frame obtained via model_perf.
-- title: String to be used for the title of the plot.
 
 Returns:
-- A Gadfly plot.
+- A plot.
 """
-res_lev_plot = function (perf; title = "")
-  p1 = plot(
-    perf,
-    layer(
-      x=:lever,
-      y=:std_error,
-      Theme(default_color="MidnightBlue")
-    ),
-    layer(
-      x=:lever,
-      y=:std_error,
-      Geom.smooth(smoothing=0.8),
-      Theme(default_color="IndianRed")
-    ),
-    Guide.xlabel("Leverage"),
-    Guide.ylabel("Std res"),
-    Guide.title(title)
-  )
-  return p1
+res_lev_plot = function (perf::DataFrames.DataFrame; title::String = "")
+	@df perf scatter(
+		:lever, :std_error,
+		xlabel="Leverage",
+    ylabel="Std residuals",
+		leg=false, msize=2, mc=:midnightblue
+	)
+	hline!([-2, 2], linestyle=:dash)
 end
 
 """
-  cook_lev_plot(perf; title = "")
+  cook_lev_plot(perf; title)
 
 Plots Cook's distance versus leverage from a linear regression model. 
 
 Args:
 - perf: A data frame obtained via model_perf.
-- title: String to be used for the title of the plot.
+- title: An optional string for the title.
 
 Returns:
-- A Gadfly plot.
+- A plot.
 """
-cook_lev_plot = function (perf; title = "")
-  p1 = plot(
-    perf,
-    layer(
-      x=:lever,
-      y=:cook,
-      Theme(default_color="MidnightBlue")
-    ),
-    layer(
-      x=:lever,
-      y=:cook,
-      Geom.smooth(smoothing=0.8),
-      Theme(default_color="IndianRed")
-    ),
-    Guide.xlabel("Leverage"),
-    Guide.ylabel("Cook's Distance"),
-    Guide.title(title)
-  )
-  return p1
+cook_lev_plot = function (perf::DataFrames.DataFrame; title::String = "")
+	@df perf scatter(
+		:lever, :cook,
+		xlabel="Leverage",
+    ylabel="Cook's Distance",
+		leg=false, msize=2, mc=:midnightblue
+	)
 end
 
 """
-  cooks_plot(perf; title = "")
+  cooks_plot(perf; title)
 
 Plots Cook's distance of residuals. Diagnostic plot to check on potential outliers.
 
 Args:
 - perf: A data frame obtained via model_perf.
-- title: String to be used for the title of the plot.
+- title: An optional string for the title.
 
 Returns:
-- A Gadfly plot.
+- A plot.
 """
-cooks_plot = function (perf; title = "")
-  p1 = plot(
-    perf,
-    y=:cook,
-    yintercept = [mean(perf.cook)],
-    Geom.hair, Geom.point,
-    Geom.hline(
-      style=[:dash],
-      color=["indianred"],
-      size=[0.2mm]
-    ),
-    Guide.xlabel("Index"),
-    Guide.ylabel("Cook's Distance"),
-    Guide.title(title),
-    Theme(default_color="MidnightBlue")
-  )
-  return p1
+cooks_plot = function (perf::DataFrames.DataFrame; title::String = "")
+  μ = mean(perf.cook)
+	
+	plot(
+	 1:nrow(perf), perf.cook, line=:stem,
+	 marker=2, mc=:firebrick, lc=:indianred,
+	 xlabel="Index", ylabel="Cook's Distance",
+	 title=title, lw=1.5, leg=false
+	)
+
+  hline!([μ], linestyle=:dash, color=:cadetblue)
 end
 
 """
-  qq_plot(df, var; ylab = "Sample quantiles", title = "")
+  qq_plot(var; ylab = "Sample quantiles", title = "")
 
 Constructs a QQ-plot against theoretical quartiles from the normal distribution.
 
 Args:
-- df: A data frame.
-- var: A numerical variable from df
+- var: A numerical vector.
 - ylab: String to be used for the y-label.
-- title: String to be used for the title of the plot.
+- title: An optional string for the title.
 
 Returns:
-- A Gadfly QQ-Plot.
+- A QQ-Plot.
 """
-qq_plot = function (var::Array; ylab="Sample quantiles", title="")
-  y1 = minimum(var)
-  y2 = maximum(var)
-  yeqx(x=y1:y2) = layer(
-    x=x,
-    Geom.abline(color="gray80")
-  )
+qq_plot = function (var::Array; ylab::String="Sample quantiles", title::String = "")
+	data = DataFrame(; y = var)
+	
+	@df data qqnorm(
+		:y, qqline=:R,
+		xlabel="Theoretical quantiles",
+		ylabel=ylab,
+		title=title,
+		msize=2, mc=:midnightblue
+	)
+end
 
-  p1 = plot(
-    x=fit.([Distributions.Normal], [var]),
-    y=var,
-    Stat.qq, yeqx,
-    Guide.xlabel("Theoretical quantiles"),
-    Guide.ylabel(ylab),
-    Guide.title(title),
-    Theme(default_color="IndianRed"),
-    Coord.cartesian(ymin=y1)
-  )
+"""
+  box_error(df, predictor, outcome; 
+    xlab = "Predictor", ylab = "Outcome", title = "")
 
-  return p1
+Constructs a strip chart with error bars on bootstrapped 95% CI around the mean.
+
+Args:
+- df: A data frame
+- predictor: A symbol corresponding to the predictor.
+- outcome: A symbol corresponding to the outcome.
+- xlab: String for the x-axis label.
+- ylab: String for the y-axis label.
+- title: An optional string for the title.
+
+Returns:
+- A plot.
+"""
+box_error = function (
+	df::DataFrames.DataFrame,
+	predictor::DataFrames.Symbol, 
+	outcome::DataFrames.Symbol; 
+	xlab::String = "Predictor", 
+	ylab::String = "Outcome", 
+	title::String = ""
+	)
+	boxplot(
+		df[!, predictor], df[!, outcome],
+		xlabel=xlab,
+		ylabel=ylab,
+		title=title,
+		leg=false, msize=2, color=:indianred,
+		bar_width=0.6, opacity=0.5
+	)
+
+	dotplot!(
+		df[!, predictor], df[!, outcome],
+		msize=2, bar_width=0.4, mc=:midnightblue
+	)
 end
 
 """
@@ -522,91 +465,126 @@ end
 Constructs a strip chart with error bars on bootstrapped 95% CI around the mean.
 
 Args:
-- df: The original data frame.
-- predictor: A categorical variable: the predictor.
-- outcome: A numerical variable: the outcome.
+- df: A data frame.
+- predictor: A symbol corresponding to the column name of the predictor (categorical variable).
+- outcome: A symbol corresponding to the column name of the outcome (numerical variable).
+- xlab: String for the x-axis label.
+- ylab: String for the y-axis label.
+- title: An optional string for the title.
 
 Returns:
-- A Gadfly plot.
+- A plot.
 """
 strip_error = function (
-  df::DataFrames.DataFrame,
-  predictor,
-  outcome;
-  xlab="Predictor",
-  ylab="Outcome",
-  title=""
-)
+	df::DataFrames.DataFrame,
+	predictor::DataFrames.Symbol, 
+	outcome::DataFrames.Symbol;
+	xlab::String = "Predictor", 
+	ylab::String = "Outcome", 
+	title::String = ""
+	)
 
-  df_bst = DataFrames.combine(groupby(df, predictor), outcome => cis => AsTable)
+	df_bst = DataFrames.combine(groupby(df, predictor), outcome=>cis=>AsTable)
+	
+	dotplot(
+		df[!, predictor], df[!, outcome],
+		xlabel=xlab,
+		ylabel=ylab,
+		title=title,
+		bar_width = 0.3,
+		leg = false, ms=3, mc=:midnightblue
+	)
 
-  df_bst = DataFrames.combine(
-    groupby(df, predictor), outcome => cis => AsTable
-  )
+	xs = df_bst[:, 1]
+	ys = df_bst.outcome
+	err = df_bst.err
 
-  p1 = plot(
-    layer(
-      x=df[!, predictor],
-      y=df[!, outcome],
-      Geom.beeswarm,
-      size=fill(2px, nrow(df)),
-      Theme(default_color="MidnightBlue")
-    ),
-    layer(
-      df_bst,
-      x=predictor,
-      y=:outcome,
-      ymin=:lower,
-      ymax=:upper,
-      Geom.point,
-      Geom.errorbar,
-      Theme(default_color="IndianRed")
-    ),
-    Guide.xlabel(xlab),
-    Guide.ylabel(ylab),
-    Guide.title(title)
-  )
-  return p1
+	scatter!(xs, ys, yerror=err)
 end
 
 """
-  effect_plot(df_eff, predictor, outcome; 
+  strip_group(df, predictor, outcome, group; 
+    xlab = "Predictor", ylab = "Outcome", title = "")
+
+Constructs a strip chart with error bars on bootstrapped 95% CI around the mean.
+
+Args:
+- df: A data frame.
+- predictor: A symbol corresponding to the column name of the predictor (categorical variable).
+- outcome: A symbol corresponding to the column name of the outcome (numerical variable).
+- group: A symbol corresponding to the column name of the panel group (categorical variable).
+- xlab: String for the x-axis label.
+- ylab: String for the y-axis label.
+- title: An optional string for the title.
+
+Returns:
+- A plot.
+"""
+strip_group = function (
+	df::DataFrames.DataFrame,
+	predictor::DataFrames.Symbol,
+	outcome::DataFrames.Symbol,
+	group::DataFrames.Symbol;
+	xlab::String = "Predictor", 
+	ylab::String = "Outcome", 
+	title::String = ""
+	)
+
+	df_bst = DataFrames.combine(groupby(df, [predictor, group]), outcome=>cis=>AsTable)
+	
+	dotplot(
+		df[!, predictor], df[!, outcome],
+		group=df[!, group],
+		xlabel=xlab,
+		ylabel=ylab,
+		title=title, 
+		bar_width = 0.3, layout=2, 
+		ms=2, mc=:midnightblue
+	)
+
+	xs = df_bst[:, 1]
+	ys = df_bst.outcome
+	gs = df_bst[:, 2]
+	err = df_bst.err
+
+	scatter!(xs, ys, group=gs, yerror=err, label=missing)
+end
+
+"""
+  effect_plot(predictor, outcome, df_eff; 
     xlab = "Predictor", ylab = "Outcome", title = "")
 
 Constructs a strip chart with error bars on bootstrapped 95% CI around the mean. Version for effects data frame.
 
 Args:
-- df_eff: A data frame with the CI generated via Effects.
 - predictor: A categorical variable: the predictor.
 - outcome: A numerical variable: the outcome.
-- xlab: A string: optional label for the x-axis.
-- ylab: A string: optional label for the y-axis.
-- title: A string: optional label for the title.
+- df_eff: A data frame with the CI generated via Effects.
 
 Returns:
 - A Gadfly plot.
 """
 effect_plot = function (
-	df_eff,
   predictor,
-  outcome;
-  xlab::String = "Predictor",
-  ylab::String = "Outcome",
-  title::String = ""
+  outcome,
+  df_eff;
+  xlab::String="Predictor",
+  ylab::String="Outcome",
+  title::String=""
 )
 
   p1 = plot(
-   df_eff,
-   x=predictor,
-   y=outcome,
-   ymin=:lower,
-   ymax=:upper,
-   Geom.point,
-   Geom.errorbar,
-   Theme(default_color="IndianRed"),
-   Guide.xlabel(xlab),
-   Guide.ylabel(ylab),
-   Guide.title(title)
+    df_eff,
+    x=predictor,
+    y=outcome,
+    ymin=:lower,
+    ymax=:upper,
+    Geom.point,
+    Geom.errorbar,
+    Theme(default_color="IndianRed"),
+    Guide.xlabel(xlab),
+    Guide.ylabel(ylab),
+    Guide.title(title)
   )
   return p1
 end

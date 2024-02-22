@@ -1,0 +1,30 @@
+---
+title: Binary Outcomes
+author: Josie Athens
+date: 5 December 2023
+---
+
+```julia
+using PlutoUI; PlutoUI.TableOfContents(aside=true, title="📚 Contents")
+```
+
+```julia
+using StatsBase, Distributions
+using AnovaGLM, Effects, HypothesisTests
+using DataFrames, CSV, Tidier
+using RCall, TexTables, MLJ
+using MLJ: schema
+include("pubh.jl");
+```
+
+```julia
+using AlgebraOfGraphics, CairoMakie, MakieThemes
+CairoMakie.activate!(type = "svg")
+AoG = AlgebraOfGraphics; data = AoG.data
+set_theme!(ggthemr(:light))
+```
+
+```julia
+@rlibrary readr
+@rimport pubh
+```
