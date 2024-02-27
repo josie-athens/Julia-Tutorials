@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.39
 
 using Markdown
 using InteractiveUtils
@@ -103,7 +103,13 @@ let
 end
 
 # ╔═╡ f86e25e3-7dad-4ba1-aeb1-41da139f11d8
+SurvivalAnalysis.predict(pyr_surv, DataFrame(times=30, event=trues(1)))
 
+# ╔═╡ 1979f85b-5f8a-486d-b539-a96df89bee25
+SurvivalAnalysis.predict(thio_surv, DataFrame(times=[30], event=[true])).survival_matrix
+
+# ╔═╡ de1bf1e5-827f-44e1-9254-29e09406c6bb
+summary(pyr_surv)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2228,5 +2234,7 @@ version = "1.4.1+1"
 # ╠═05d2b52f-342c-4178-89c2-3a992222f7cc
 # ╠═d2532702-88a7-4180-bfbb-09a06e00e6e2
 # ╠═f86e25e3-7dad-4ba1-aeb1-41da139f11d8
+# ╠═1979f85b-5f8a-486d-b539-a96df89bee25
+# ╠═de1bf1e5-827f-44e1-9254-29e09406c6bb
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
