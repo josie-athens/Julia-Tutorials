@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.38
+# v0.19.42
 
 using Markdown
 using InteractiveUtils
@@ -11,13 +11,8 @@ using PlutoUI; PlutoUI.TableOfContents(aside=true, title="📚 Contents")
 begin
 	using StatsBase, DataFrameMacros, TexTables
 	using RCall, DataFrames, CategoricalArrays
+	using StatsPlots
 	using DifferentialEquations
-end
-
-# ╔═╡ 831f52ca-b661-4754-ae5a-d774aef65f2d
-begin
-	using StatsPlots, PlotThemes
-	theme(:wong)
 end
 
 # ╔═╡ 3ad150bc-8085-4459-b758-ccf865cd46fb
@@ -29,8 +24,7 @@ md"""
 
 !!! note \"Josie Athens\"
 
-	- Systems Biology Enabling Platform, **AgResearch Ltd**
-	- 8 February 2024
+	20 June 2024
 """
 
 # ╔═╡ e198397d-c907-4a29-97c4-74194e6a869a
@@ -51,8 +45,8 @@ We start by defining a function, which depends on the vector of variables `u`, p
 md"""
 ```math
 \begin{gather}
-\frac{dx}{dt} = \alpha x - \beta xy \\
-\frac{dy}{dt} = \gamma xy - \delta y
+\frac{dx}{dt} &=& \alpha x - \beta xy \\
+\frac{dy}{dt} &=& \gamma xy - \delta y
 \end{gather}
 ```
 """
@@ -135,8 +129,9 @@ md"""
 # ╔═╡ 79347211-2d5e-45f8-a268-a55434b6d8b0
 plot(
 	lotka_sol, lw=2, 
-	xlab="Time (days)", ylab="Population (n)",
-	lab=["Prey" "Predator"], leg=:outertopright
+	xlabel="Time (days)", ylabel="Population (n)",
+	lab=["Prey" "Predator"], leg=:outertopright,
+	color_palette=jama
 )
 
 # ╔═╡ 921a0e50-bdad-482f-8738-d9f23e1392c5
@@ -162,14 +157,15 @@ lotka_melt = stack(lotka_df, Not(:timestamp)); lotka_melt |> head
 	:timestamp, :value, group=:variable,
 	xlab="Time (days)",
 	ylab="Population (n)",
-	lw=2, leg=:outertopright
+	lw=2, leg=:outertopright,
+	color_palette=jama
 )
 
 # ╔═╡ 7b542dce-bb60-4dae-baf2-836e6707f691
 @df lotka_df scatter(
 	:Prey, :Predator,
 	xlab="Prey (n)", ylab="Predator (n)",
-	leg=false, lw=2, lc=:indianred, ms=2, mc=:indianred
+	leg=false, ms=2, mc=jama[1]
 )
 
 # ╔═╡ 86c878f4-72bf-442c-8d88-1e3c1e2d3bb2
@@ -232,7 +228,8 @@ plot(
 	sir_sol, lw=2, leg=:right,
 	xlab="Time (days)",
 	ylab="Population (n)",
-	label = ["Susceptibles" "Infectious" "Recovered"]
+	label = ["Susceptibles" "Infectious" "Recovered"],
+	color_palette=jama
 )
 
 # ╔═╡ dbc782c5-49cc-49b4-99ab-b92998b48b03
@@ -245,11 +242,8 @@ md"""
 # ╔═╡ fd096074-3852-4fc9-8b45-fd4b0a9d6f35
 md"""
 ```math
-S = e^{-\delta_1 t} + \frac{1}{\gamma} e^{-\delta_2 t}
-```
-
-```math
 \begin{eqnarray}
+S &=& e^{-\delta_1 t} + \frac{1}{\gamma} e^{-\delta_2 t} \\
 \frac{dV_b}{dt} &=& k_{lb} V_b - c_b V_b \\
 \frac{dV_l}{dt} &=& S - k_{lf} Vl + k_{fl} V_f - c_l V_l \\
 \frac{dV_f}{dt} &=& k_{lf} V_l - k_{fl} V_f
@@ -305,7 +299,8 @@ plot(
 	leg=:outertopright, lw=2,
 	xlab="Time (days)",
 	ylab="Virus population",
-	lab=["Blood" "LT" "FDC"]
+	lab=["Blood" "LT" "FDC"],
+	color_palette=jama
 )
 
 # ╔═╡ 24ec12d6-d50d-4249-a7fd-28d48760f76e
@@ -325,7 +320,7 @@ end;
 	:time, :Vb,
 	xlab="Time (days)",
 	ylab="Virus in Blood",
-	leg=false, lw=2, lc=:indianred
+	leg=false, lw=2, lc=jama[1]
 )
 
 # ╔═╡ 0f29d569-afe5-46d5-99a2-57de2916b4e8
@@ -333,7 +328,7 @@ end;
 	:time, :Vlt, yaxis=:log10,
 	xlab="Time (days)",
 	ylab="Virus in Lymphoid Tissue",
-	leg=false, lw=2, lc=:indianred
+	leg=false, lw=2, lc=jama[1]
 )
 
 # ╔═╡ 3543b5f2-3851-48fa-a38d-136fc5219880
@@ -341,7 +336,7 @@ end;
 	:time, :Vfdc, yaxis=:log10,
 	xlab="Time (days)",
 	ylab="Virus in FDC",
-	leg=false, lw=2, lc=:indianred
+	leg=false, lw=2, lc=jama[1]
 )
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -351,7 +346,6 @@ CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
 DataFrameMacros = "75880514-38bc-4a95-a458-c2aea5a3a702"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
-PlotThemes = "ccf2f8ad-2431-5c83-bf29-c5338b663b6a"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 RCall = "6f49c342-dc21-5d91-9882-a32aef131414"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
@@ -363,7 +357,6 @@ CategoricalArrays = "~0.10.8"
 DataFrameMacros = "~0.4.1"
 DataFrames = "~1.6.1"
 DifferentialEquations = "~7.12.0"
-PlotThemes = "~3.1.0"
 PlutoUI = "~0.7.55"
 RCall = "~0.14.1"
 StatsBase = "~0.34.2"
@@ -375,9 +368,9 @@ TexTables = "~0.2.7"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.1"
+julia_version = "1.10.4"
 manifest_format = "2.0"
-project_hash = "f0e7433330388e60653a31547751a40de9cd4a40"
+project_hash = "24a203d6cf52e077dc55379007607f59884e647a"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "41c37aa88889c171f1300ceac1313c06e891d245"
@@ -651,7 +644,7 @@ weakdeps = ["Dates", "LinearAlgebra"]
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.0+0"
+version = "1.1.1+0"
 
 [[deps.ConcreteStructs]]
 git-tree-sha1 = "f749037478283d372048690eb3b5f92a79432b34"
@@ -2725,7 +2718,6 @@ version = "1.4.1+1"
 # ╟─e198397d-c907-4a29-97c4-74194e6a869a
 # ╠═37e8ec04-2b04-4010-9f22-ecaafc000044
 # ╠═f4eeec5c-19b4-4525-94e8-d0c75faff517
-# ╠═831f52ca-b661-4754-ae5a-d774aef65f2d
 # ╠═3ad150bc-8085-4459-b758-ccf865cd46fb
 # ╟─d7ebc8e7-083a-4c16-8fd1-da958953e718
 # ╟─5e044b14-0366-47d8-9c4a-25b93a3489ea

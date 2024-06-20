@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.41
+# v0.19.42
 
 using Markdown
 using InteractiveUtils
@@ -11,14 +11,8 @@ using PlutoUI; PlutoUI.TableOfContents(aside=true, title="📚 Contents")
 begin
 	using StatsBase, DataFrames, DataFrameMacros, MLJ
 	using RCall, CategoricalArrays, CSV, Distributions
+	using StatsPlots
 	using MLJ: schema
-end
-
-# ╔═╡ 7108af68-0125-4e50-a1f3-55761a48c883
-# ╠═╡ show_logs = false
-begin
-	using StatsPlots, PlotThemes
-	theme(:wong)
 end
 
 # ╔═╡ c57b4b3e-57d5-4e21-a91a-d6e656721fa5
@@ -38,8 +32,7 @@ md"""
 
 !!! note \"Josie Athens\"
 
-	- Systems Biology Enabling Platform, **AgResearch Ltd**
-	- 3 February 2024
+	20 June 2024
 """
 
 # ╔═╡ 9f2bc172-51b2-41e9-bcdd-34652ab1deb5
@@ -159,8 +152,15 @@ We can compare distributions using the density or the probability density functi
 	norm = :pdf,
 	group = :chd, opacity=0.7,
 	xlabel = "SBP (mm Hg)",
-	ylabel = "PDF"
+	ylabel = "PDF", color_palette = jama
 )
+
+# ╔═╡ 33f9f79f-aca4-4bbf-8c25-386cb31e2105
+md"""
+!!! tip
+
+These tutorials use the colour palette of the Journal of American Medical Association (JAMA). The palette is part of the `pubh` script and can be called with the argument: `colour_palette=jama`, as part of the plotting command.
+"""
 
 # ╔═╡ 89cd9f4e-5bd6-4c84-bc32-0529eaa46379
 md"""
@@ -203,7 +203,7 @@ Another way to look at the distribution of a continuous variable is with density
 	:sbp, group = :chd,
 	xlabel = "SBP (mm Hg)",
 	ylabel = "Density",
-	lw = 2
+	lw = 2, color_palette = jama
 )
 
 # ╔═╡ 90b97ace-05d4-410b-bd3e-a6fdf94722ce
@@ -218,7 +218,7 @@ md"""
 	:chol, group = :chd,
 	xlabel = "Cholesterol (mg/dl)",
 	ylabel = "Density", fill=:true,
-	opacity = 0.5
+	opacity = 0.5, color_palette = jama
 )
 
 # ╔═╡ feff5803-2bcc-4e99-b42c-6c704b510514
@@ -233,7 +233,7 @@ The best way to determine if a continuous variable is normally distributed or no
 	:bwt, qqline =:R,
 	xlabel="Theoretical quantiles",
 	ylabel="Birth weight (g)",
-	msize = 2
+	msize=2, mc=jama[1], lc=jama[2]
 )
 
 # ╔═╡ 2abd26cf-853c-4c04-b14b-2c82ad535606
@@ -244,10 +244,10 @@ md"""
 """
 
 # ╔═╡ 8f8a9eda-27f4-4459-afaf-3ebe35d2854d
-qq_plot(birth.bwt, ylab="Birth weight (g)")
+qq_plot(birth.bwt, ylabel="Birth weight (g)")
 
 # ╔═╡ a6456a41-8ca2-4e34-a955-64948c06d9a3
-qq_plot(kfm.dl_milk, ylab="Breast-milk intake (dl/day)")
+qq_plot(kfm.dl_milk, ylabel="Breast-milk intake (dl/day)")
 
 # ╔═╡ 26bbfd53-4267-4be1-928f-4fa16d8e1cf3
 md"""
@@ -255,7 +255,7 @@ Right-skewed variables, show an upper right curve in the QQ-plot:
 """
 
 # ╔═╡ de33482d-cc72-4693-bbd0-313e2001f631
-qq_plot(wcgs.dbp, ylab="DBP (mm Hg)")
+qq_plot(wcgs.dbp, ylabel="DBP (mm Hg)")
 
 # ╔═╡ 79d80816-a399-4dec-ab69-fe8c3cec30e7
 md"""
@@ -266,12 +266,13 @@ We can either, use a semi-log scale or plot the log of DBP:
 @df wcgs qqnorm(
 	:dbp, qqline = :R,
 	ylabel = "DBP (mm Hg)",
-	marker=(2, :indianred, stroke(0)),
-	yscale = :log10, minorgrid=true
+	marker=(2, jama[1], stroke(0)),
+	yscale = :log10, minorgrid=true,
+	lc=jama[2]
 )
 
 # ╔═╡ 8770abcb-69ed-4440-b85f-d2779e3a4b7f
-qq_plot(log.(wcgs.dbp), ylab="log (DBP)")
+qq_plot(log.(wcgs.dbp), ylabel="log (DBP)")
 
 # ╔═╡ 78ac720f-4b83-4c95-9f36-35ef12e204e8
 md"""
@@ -290,7 +291,7 @@ From the `kfm` dataset, let’s see if there is a relationship between the weigh
 	xlabel = "Maternal weight (kg)",
 	ylabel = "Breast-milk intake (dl/day)",
 	legend = :topleft,
-	marker=3
+	marker=3, color_palette=jama
 )
 
 # ╔═╡ e7293e7b-eb72-430a-9cd6-4d5f776c7856
@@ -305,8 +306,8 @@ md"""
 	:mat_weight, :dl_milk, group = :sex,
 	xlabel = "Maternal weight (kg)",
 	ylabel = "Breast-milk intake (dl/day)",
-	legend = :topleft,
-	marker=3, reg=:true
+	legend = :topleft, lw=2,
+	marker=3, reg=:true, color_palette=jama
 )
 
 # ╔═╡ bbe18424-f37f-4322-ab7c-858160484025
@@ -315,14 +316,14 @@ let
 		:mat_weight, :dl_milk, 
 		xlabel = "Maternal weight (kg)",
 		ylabel = "Breast-milk intake (dl/day)",
-		legend = false, marker=3, mc=:cadetblue,
+		legend = false, marker=3, mc=jama[1],
 	)
 
 	model = loess(kfm.mat_weight, kfm.dl_milk, span=0.7)
 	us = range(extrema(kfm.mat_weight)...; step=1)
 	vs = Loess.predict(model, us)
 	
-	plot!(us, vs)
+	plot!(us, vs, lc=jama[2])
 end
 
 # ╔═╡ 2af333a2-bfe5-4506-89f8-aff1a1619046
@@ -334,7 +335,7 @@ When we are working with more than two continuous variables and we want to look 
 """
 
 # ╔═╡ 1a4adb21-1f07-4ec0-a5c0-7693195dc5d7
-@df air |> dropmissing corrplot(cols(1:4), grid = false, markersize = 2)
+@df air |> dropmissing corrplot(cols(1:4), grid=false, ms=2)
 
 # ╔═╡ 98af0e1a-6ab1-4424-afc5-f7009ff42f3e
 @df air |> dropmissing cornerplot(
@@ -354,7 +355,7 @@ In this example, our dataset is in `wide` format.
 	:week, [:child, :young, :mid, :old], lw=2, marker=3,
 	ylabel = "Cases", xlabel = "Date",
 	label = ["Child" "Young" "Mid" "Old"],
-	legend = :topright
+	legend = :topright, color_palette=jama
 )
 
 # ╔═╡ 66684953-af4b-4422-93b1-ebec89475bd6
@@ -371,6 +372,7 @@ flu_melt = stack(flu, Not(:week)); flu_melt |> head
 	group = :variable,
 	ylabel = "Cases", xlabel = "Date",
 	label = ["Child" "Young" "Mid" "Old"],
+	color_palette = jama
 )
 
 # ╔═╡ 46cb6df0-d577-4b1e-9f38-158bf096522f
@@ -386,8 +388,8 @@ When we are comparing continuous variables, between two or more groups, box plot
 @df wcgs |> dropmissing boxplot(
 	:chd, :chol,
 	xlabel = "Coronary Heart Disease",
-	ylabel = "Cholesterol (mg/dl)",
-	leg = false, msize = 2
+	ylabel = "Cholesterol (mg/dl)", opacity = 0.7,
+	leg = false, msize = 2, color_palette = jama
 )
 
 # ╔═╡ 34cc3ec2-c7a4-476a-af8e-68b81d460011
@@ -414,7 +416,8 @@ In the previous plot the presence of an outlier is clear. If we would like to re
 	:race, :bwt, group = :smoke, opacity=0.7,
 	xlabel = "",
 	ylabel = "Birth weight (g)",
-	msize = 2, bar_width = 0.7, leg=:top
+	msize = 2, bar_width = 0.7, leg=:top,
+	color_palette = jama
 )
 
 # ╔═╡ d15e0821-bc49-489e-a909-a167562af3f0
@@ -423,8 +426,8 @@ md"## Strip charts"
 # ╔═╡ deb64847-0a50-48d4-981f-47019233ea42
 strip_error(
 	energy, :stature, :expend,
-	xlab="Stature",
-	ylab="Energy expenditure (MJ)"
+	xlabel="Stature",
+	ylabel="Energy expenditure (MJ)"
 )
 
 # ╔═╡ 6e2a9883-a717-4166-99fb-4c663b8d899d
@@ -439,14 +442,14 @@ box_error(
 	energy,
 	:stature,
 	:expend,
-	xlab="Stature", ylab="Energy expenditure (MJ)"
+	xlabel="Stature", ylabel="Energy expenditure (MJ)"
 )
 
 # ╔═╡ ac59d193-921c-4737-be6f-b8df172d3c6c
 strip_group(
 	birth, :race, :bwt, :smoke,
-	xlab="Race",
-	ylab="Birth weight (g)"
+	xlabel="Race",
+	ylabel="Birth weight (g)"
 )
 
 # ╔═╡ ef53db4b-e8ec-42ca-b1f2-4346a648699d
@@ -461,8 +464,8 @@ birth_bst = combine(groupby(birth, [:smoke, :race]), :bwt => cis => AsTable)
 @df birth_bst scatter(
 	:race, :outcome, yerr=:err, 
 	group=:smoke, layout=2,
-	ylab="Birth weight (g)",
-	ms=3, mc=:firebrick, lc=:indianred,
+	ylabel="Birth weight (g)",
+	ms=2, mc=:firebrick, lc=:indianred,
 	ylim=(2000, 4000)
 )
 
@@ -561,9 +564,10 @@ For categorical variables, we can plot the counts.
 
 # ╔═╡ 4cbd9f8f-26fa-4705-939a-bbda42a53e6a
 @df @combine(groupby(birth, [:race, :low]), :count = @nrow) groupedbar(
-	:race, :count, group=:low,
+	:race, :count, group=:low, opacity=0.8,
 	ylabel = "Frequency",
-	leg_title = "Low birth weight?"
+	leg_title = "Low birth weight?",
+	color_palette = jama
 )
 
 # ╔═╡ df1e4865-9914-4d0c-8334-52ad2259b203
@@ -592,8 +596,39 @@ kfm_bst = combine(groupby(kfm, :sex), :dl_milk => cis => AsTable)
 @df birth_bst groupedbar(
 	:race, :outcome, group=:smoke, bar_position = :dodge, bar_width=0.5,
 	ylabel="Birth weight (g)", yerror=:err, 
-	opacity=0.7, lc=:black, mc=:black, lw=1.5
+	opacity=0.8, lc=:black, mc=:black, lw=1.5, 
+	color_palette=jama, legend=:outertopright
 )
+
+# ╔═╡ 5870f1bb-116b-4580-8f01-f42b5b1440ec
+md"""
+# Exporting Plots
+
+The easiest way to export to export a plot is by right-click on the plot and then select the *save as* option. The plot will be saved as *PNG*.
+
+A second option, is to save high quality vector graphics, with the `savefig` command:
+"""
+
+# ╔═╡ 4198b841-5233-43ed-be82-5ad4c1116f03
+@df flu plot(
+	:week, [:child, :young, :mid, :old], lw=2, marker=3,
+	ylabel = "Cases", xlabel = "Date",
+	label = ["Child" "Young" "Mid" "Old"],
+	legend = :topright, color_palette=jama
+); savefig("fluplots.pdf")
+
+# ╔═╡ 5d5e24a0-68b5-4e1e-9a35-353bf47f59fe
+md"""
+Or we can call `Plots.svg` to save as an *SVG* file.
+"""
+
+# ╔═╡ 6bc0b15d-2630-441d-bc13-8662ec1a4057
+@df flu plot(
+	:week, [:child, :young, :mid, :old], lw=2, marker=3,
+	ylabel = "Cases", xlabel = "Date",
+	label = ["Child" "Young" "Mid" "Old"],
+	legend = :topright, color_palette=jama
+); Plots.svg("fluplots.svg")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -606,7 +641,6 @@ Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
 Loess = "4345ca2d-374a-55d4-8d30-97f9976e7612"
 MLJ = "add582a8-e3ab-11e8-2d5e-e98b27df1bc7"
-PlotThemes = "ccf2f8ad-2431-5c83-bf29-c5338b663b6a"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 RCall = "6f49c342-dc21-5d91-9882-a32aef131414"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
@@ -621,7 +655,6 @@ Distributions = "~0.25.106"
 GLM = "~1.8.3"
 Loess = "~0.6.3"
 MLJ = "~0.19.2"
-PlotThemes = "~3.1.0"
 PlutoUI = "~0.7.51"
 RCall = "~0.13.15"
 StatsBase = "~0.33.21"
@@ -632,9 +665,9 @@ StatsPlots = "~0.15.6"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.3"
+julia_version = "1.10.4"
 manifest_format = "2.0"
-project_hash = "aa075ef41687a7354e93a379d7cd23ce56b6ba12"
+project_hash = "e98da46b6a2a5f62de52e422fd1b0c09e2500647"
 
 [[deps.ARFFFiles]]
 deps = ["CategoricalArrays", "Dates", "Parsers", "Tables"]
@@ -2317,7 +2350,6 @@ version = "1.4.1+1"
 # ╟─9f2bc172-51b2-41e9-bcdd-34652ab1deb5
 # ╠═5a13d996-e176-4955-b00e-48a34973f9b9
 # ╠═2f3c57b6-c4fa-43ad-9a91-976b2cbf855e
-# ╠═7108af68-0125-4e50-a1f3-55761a48c883
 # ╠═09803c29-0fab-410d-a2a8-e1fb843b15f5
 # ╟─ee8350e2-081f-4678-a2c6-f99afef08bf8
 # ╟─5ecd66a2-9827-44e6-a2f2-7821f0b8ac78
@@ -2340,6 +2372,7 @@ version = "1.4.1+1"
 # ╠═e883c268-6f4f-4bb4-ab3e-8b26fec0888a
 # ╟─11ef391f-42ba-47be-af1f-273ea97f1dd8
 # ╠═6f849dbb-78d3-49ca-9e06-be0737a3dea9
+# ╟─33f9f79f-aca4-4bbf-8c25-386cb31e2105
 # ╟─89cd9f4e-5bd6-4c84-bc32-0529eaa46379
 # ╠═1405d755-54c5-4ab0-b306-959a5ccebf42
 # ╟─4c7611c8-5c5a-4d72-b887-36f86f4c86db
@@ -2400,5 +2433,9 @@ version = "1.4.1+1"
 # ╠═31e9b006-ec3a-492f-bfbd-853c630c04c5
 # ╠═596eeac8-c975-4472-bc62-17382b262135
 # ╠═915a2eea-cf0e-4acd-974c-595fb7ac717b
+# ╟─5870f1bb-116b-4580-8f01-f42b5b1440ec
+# ╠═4198b841-5233-43ed-be82-5ad4c1116f03
+# ╟─5d5e24a0-68b5-4e1e-9a35-353bf47f59fe
+# ╠═6bc0b15d-2630-441d-bc13-8662ec1a4057
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

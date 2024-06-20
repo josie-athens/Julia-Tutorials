@@ -13,6 +13,8 @@ odds_ratio(x::Matrix{Int}) = (x[1, 1] * x[2, 2]) / (x[1, 2] * x[2, 1])
 relative_risk(a::Int, b::Int, c::Int, d::Int) = (a / (a + b)) / (c / (c + d))
 relative_risk(x::Matrix{Int}) = (x[1, 1] / (x[1, 1] + x[1, 2])) / (x[2, 1] / (x[2, 1] + x[2, 2]))
 
+jama = ["#374E55FF", "#DF8F44FF", "#00A1D5FF", "#B24745FF", "#79AF97FF", "#6A6599FF", "indianred", "lightseagreen",  "midnightblue", "tan2", "lightcyan4", "burlywood4", "steelblue4"]
+
 """
   matched(v1::Array, v2::Array)
 
@@ -128,13 +130,13 @@ end
 """
   non_mising(x)
 
-Calculates the number of non missing observations from a variable.
+Calculates the number of non-missing observations from a variable.
   
 Args:
-- x: The variable to count the non missing observations from.
+- x: The variable from which to count the non-missing observations.
   
 Returns:
-- The number of non missing observations.
+- The number of non-missing observations.
 """
 non_missing = function (x)
   res = count(!ismissing, x)
@@ -147,7 +149,7 @@ end
 Calculates the Mean Absolute Percentage Error.
 
 Args:
-- df: A data frame with the performance of the model. It most include variables :error and :observed.
+- df: A data frame with the model's performance. It most include variables :error and :observed.
 
 Returns:
 - The mean absolute percentage error of a model.
@@ -195,34 +197,37 @@ vec_group = function (df, outcome, group)
 end
 
 """
-  coef_plot(model; labs, ratio)
+  coef_plot(model; ratio=true)
 
 Constructs a coefficient plot from a regression model.
 
 Args:
 - model: A regression model.
-- labs: A vector for the names of the predictors. Order of strings should match the order of the coefficients except the intercept, which should be omitted.
-- ratio: Logical. If true, the function exponentiates the results to plot a ratio (e.g. OR in logistic regression). Default is: ratio=false.
+- ratio: Logical. If true, the function exponentiates the results to plot a ratio (e.g. OR in logistic regression). Default is: ratio=true.
 		
 Returns:
 - A plot.
 """
-coef_plot = function (model; labs, ratio = false)
-	n = length(coef(model))
+coef_plot = function (model; labs, ratio = true)
+  n = length(coef(model))
 	n2 = n-1
   estimate = ratio ? exp.(coef(model)[2:n]) : coef(model)[2:n]
   low = ratio ? exp.(confint(model)[2:n, 1]) : confint(model)[2:n, 1]
   up = ratio ? exp.(confint(model)[2:n, 2]) : confint(model)[2:n, 2]
-	err = (up - low)/2
   n0 = n - 1
   y = 1:1:n0
   x0 = ratio ? 1 : 0
+	err = (up - low) / 2
+
+  df = DataFrame(; estimate, low, up, y)
+  
 	
 	scatter(
 		estimate, y, xerr=err, 
-		xlabel= ratio ? "Ratio" : "Coefficient",
-		leg=false, mc=:midnightblue,
-		yticks=(1:n, labs), ms=3
+		xlabel= ratio ? "Coefficient (ratio)" : "Coefficient (difference)",
+		leg=false, mc=jama[1],
+		ms=3,
+		yticks = (1:n2, labs)
 	)
 	vline!([x0], linestyle=:dash, color=:cadetblue)
 end
@@ -280,7 +285,7 @@ Returns:
 - A QQ-plot of the residuals from the model against the Normal quantiles.
 """
 resid_plot = function (perf::DataFrames.DataFrame; title::String = "")
-  qq_plot(perf.error, ylab="Residuals", title=title)
+  qq_plot(perf.error, ylabel="Residuals", title=title)
 end
 
 """
@@ -300,9 +305,9 @@ rvf_plot = function (perf::DataFrames.DataFrame; title::String = "")
 		:predicted, :std_error,
 		xlabel="Fitted values",
     ylabel="Std Residuals",
-		leg=false, msize=2, mc=:midnightblue
+		leg=false, msize=2, mc=jama[1]
 	)
-	hline!([-2, 2], linestyle=:dash)
+	hline!([-2, 2], linestyle=:dash, color=:cadetblue)
 end
 
 """
@@ -322,7 +327,7 @@ variance_plot = function (perf::DataFrames.DataFrame; title::String = "")
 		:predicted, :sqr_error,
 		xlabel="Fitted values",
     ylabel="√|Std res|",
-		leg=false, msize=2, mc=:midnightblue
+		leg=false, msize=2, mc=jama[1]
 	)
 end
 
@@ -342,9 +347,9 @@ res_lev_plot = function (perf::DataFrames.DataFrame; title::String = "")
 		:lever, :std_error,
 		xlabel="Leverage",
     ylabel="Std residuals",
-		leg=false, msize=2, mc=:midnightblue
+		leg=false, msize=2, mc=jama[1]
 	)
-	hline!([-2, 2], linestyle=:dash)
+	hline!([-2, 2], linestyle=:dash, color=:cadetblue)
 end
 
 """
@@ -364,7 +369,7 @@ cook_lev_plot = function (perf::DataFrames.DataFrame; title::String = "")
 		:lever, :cook,
 		xlabel="Leverage",
     ylabel="Cook's Distance",
-		leg=false, msize=2, mc=:midnightblue
+		leg=false, msize=2, mc=jama[1]
 	)
 end
 
@@ -385,7 +390,7 @@ cooks_plot = function (perf::DataFrames.DataFrame; title::String = "")
 	
 	plot(
 	 1:nrow(perf), perf.cook, line=:stem,
-	 marker=2, mc=:firebrick, lc=:indianred,
+	 marker=2, mc=jama[1], lc=jama[1],
 	 xlabel="Index", ylabel="Cook's Distance",
 	 title=title, lw=1.5, leg=false
 	)
@@ -394,33 +399,33 @@ cooks_plot = function (perf::DataFrames.DataFrame; title::String = "")
 end
 
 """
-  qq_plot(var; ylab = "Sample quantiles", title = "")
+  qq_plot(var; ylabel = "Sample quantiles", title = "")
 
 Constructs a QQ-plot against theoretical quartiles from the normal distribution.
 
 Args:
 - var: A numerical vector.
-- ylab: String to be used for the y-label.
+- ylabel: String to be used for the y-label.
 - title: An optional string for the title.
 
 Returns:
 - A QQ-Plot.
 """
-qq_plot = function (var::Array; ylab::String="Sample quantiles", title::String = "")
+qq_plot = function (var::Array; ylabel::String="Sample quantiles", title::String = "")
 	data = DataFrame(; y = var)
 	
 	@df data qqnorm(
 		:y, qqline=:R,
 		xlabel="Theoretical quantiles",
-		ylabel=ylab,
+		ylabel=ylabel,
 		title=title,
-		msize=2, mc=:midnightblue
+		msize=2, mc=jama[1], lc=jama[2]
 	)
 end
 
 """
   box_error(df, predictor, outcome; 
-    xlab = "Predictor", ylab = "Outcome", title = "")
+    xlabel = "Predictor", ylabel = "Outcome", title = "")
 
 Constructs a strip chart with error bars on bootstrapped 95% CI around the mean.
 
@@ -428,8 +433,8 @@ Args:
 - df: A data frame
 - predictor: A symbol corresponding to the predictor.
 - outcome: A symbol corresponding to the outcome.
-- xlab: String for the x-axis label.
-- ylab: String for the y-axis label.
+- xlabel: String for the x-axis label.
+- ylabel: String for the y-axis label.
 - title: An optional string for the title.
 
 Returns:
@@ -439,14 +444,14 @@ box_error = function (
 	df::DataFrames.DataFrame,
 	predictor::DataFrames.Symbol, 
 	outcome::DataFrames.Symbol; 
-	xlab::String = "Predictor", 
-	ylab::String = "Outcome", 
+	xlabel::String = "Predictor", 
+	ylabel::String = "Outcome", 
 	title::String = ""
 	)
 	boxplot(
 		df[!, predictor], df[!, outcome],
-		xlabel=xlab,
-		ylabel=ylab,
+		xlabel=xlabel,
+		ylabel=ylabel,
 		title=title,
 		leg=false, msize=2, color=:indianred,
 		bar_width=0.6, opacity=0.5
@@ -454,13 +459,13 @@ box_error = function (
 
 	dotplot!(
 		df[!, predictor], df[!, outcome],
-		msize=2, bar_width=0.4, mc=:midnightblue
+		msize=2, bar_width=0.4, mc=jama[1]
 	)
 end
 
 """
   strip_error(df, predictor, outcome; 
-    xlab = "Predictor", ylab = "Outcome", title = "")
+    xlabel = "Predictor", ylabel = "Outcome", title = "")
 
 Constructs a strip chart with error bars on bootstrapped 95% CI around the mean.
 
@@ -468,8 +473,8 @@ Args:
 - df: A data frame.
 - predictor: A symbol corresponding to the column name of the predictor (categorical variable).
 - outcome: A symbol corresponding to the column name of the outcome (numerical variable).
-- xlab: String for the x-axis label.
-- ylab: String for the y-axis label.
+- xlabel: String for the x-axis label.
+- ylabel: String for the y-axis label.
 - title: An optional string for the title.
 
 Returns:
@@ -479,8 +484,8 @@ strip_error = function (
 	df::DataFrames.DataFrame,
 	predictor::DataFrames.Symbol, 
 	outcome::DataFrames.Symbol;
-	xlab::String = "Predictor", 
-	ylab::String = "Outcome", 
+	xlabel::String = "Predictor", 
+	ylabel::String = "Outcome", 
 	title::String = ""
 	)
 
@@ -488,23 +493,23 @@ strip_error = function (
 	
 	dotplot(
 		df[!, predictor], df[!, outcome],
-		xlabel=xlab,
-		ylabel=ylab,
+		xlabel=xlabel,
+		ylabel=ylabel,
 		title=title,
 		bar_width = 0.3,
-		leg = false, ms=3, mc=:midnightblue
+		leg = false, ms=2, mc=jama[1]
 	)
 
 	xs = df_bst[:, 1]
 	ys = df_bst.outcome
 	err = df_bst.err
 
-	scatter!(xs, ys, yerror=err)
+	scatter!(xs, ys, yerror=err, mc=jama[2], lc=jama[2], ms=2)
 end
 
 """
   strip_group(df, predictor, outcome, group; 
-    xlab = "Predictor", ylab = "Outcome", title = "")
+    xlabel = "Predictor", ylabel = "Outcome", title = "")
 
 Constructs a strip chart with error bars on bootstrapped 95% CI around the mean.
 
@@ -513,8 +518,8 @@ Args:
 - predictor: A symbol corresponding to the column name of the predictor (categorical variable).
 - outcome: A symbol corresponding to the column name of the outcome (numerical variable).
 - group: A symbol corresponding to the column name of the panel group (categorical variable).
-- xlab: String for the x-axis label.
-- ylab: String for the y-axis label.
+- xlabel: String for the x-axis label.
+- ylabel: String for the y-axis label.
 - title: An optional string for the title.
 
 Returns:
@@ -525,8 +530,8 @@ strip_group = function (
 	predictor::DataFrames.Symbol,
 	outcome::DataFrames.Symbol,
 	group::DataFrames.Symbol;
-	xlab::String = "Predictor", 
-	ylab::String = "Outcome", 
+	xlabel::String = "Predictor", 
+	ylabel::String = "Outcome", 
 	title::String = ""
 	)
 
@@ -535,11 +540,11 @@ strip_group = function (
 	dotplot(
 		df[!, predictor], df[!, outcome],
 		group=df[!, group],
-		xlabel=xlab,
-		ylabel=ylab,
+		xlabel=xlabel,
+		ylabel=ylabel,
 		title=title, 
 		bar_width = 0.3, layout=2, 
-		ms=2, mc=:midnightblue
+		ms=2, mc=jama[1]
 	)
 
 	xs = df_bst[:, 1]
@@ -547,46 +552,8 @@ strip_group = function (
 	gs = df_bst[:, 2]
 	err = df_bst.err
 
-	scatter!(xs, ys, group=gs, yerror=err, label=missing)
-end
-
-"""
-  effect_plot(predictor, outcome, df_eff; 
-    xlab = "Predictor", ylab = "Outcome", title = "")
-
-Constructs a strip chart with error bars on bootstrapped 95% CI around the mean. Version for effects data frame.
-
-Args:
-- predictor: A categorical variable: the predictor.
-- outcome: A numerical variable: the outcome.
-- df_eff: A data frame with the CI generated via Effects.
-
-Returns:
-- A Gadfly plot.
-"""
-effect_plot = function (
-  predictor,
-  outcome,
-  df_eff;
-  xlab::String="Predictor",
-  ylab::String="Outcome",
-  title::String=""
-)
-
-  p1 = plot(
-    df_eff,
-    x=predictor,
-    y=outcome,
-    ymin=:lower,
-    ymax=:upper,
-    Geom.point,
-    Geom.errorbar,
-    Theme(default_color="IndianRed"),
-    Guide.xlabel(xlab),
-    Guide.ylabel(ylab),
-    Guide.title(title)
-  )
-  return p1
+	scatter!(xs, ys, group=gs, yerror=err, 
+	label=missing, mc=jama[2], lc=jama[2], ms=2)
 end
 
 """
@@ -642,3 +609,52 @@ glm_coef = function(model_coef::DataFrames.DataFrame; ratio = true)
 		
 	return ratio ? coef_exp : model_coef
 end
+
+"""
+	mix_coef(model; ratio = true)
+	
+Reports table of coefficients from mixed-effect models rounded to 3 digits. By default, exponentiates coefficients and confidence intervals.
+
+Args: 
+- model_coef: A data frame with the table of coefficients.
+- ratio: A boolean. Default to true. To report results in the original, i.e. not-exponentiated, use ratio = false.
+
+Returns:
+- A data frame with a rounded table of coefficients, exponentiated by default.
+"""
+mix_coef = function(model_coef::DataFrames.DataFrame; ratio = true)
+	if ratio == true
+		estimate = exp.(model_coef[:, 2])
+		coef = model_coef[:, 2]
+		se = model_coef[:, 3]
+    lower = exp.(coef - 1.96 * se)
+		upper = exp.(coef + 1.96 * se)
+
+    coef_exp = DataFrame(
+			;
+      parameter = model_coef[:, 1],
+			estimate, lower, upper,
+			p_val = model_coef[:, 5]
+    )
+
+		coef_exp[:, 2:end] = r3.(coef_exp[:, 2:end])		
+		
+	else
+		coef = model_coef[:, 2]
+		se = model_coef[:, 3]
+    lower = coef - 1.96 * se
+		upper = coef + 1.96 * se
+
+		coef_mix = DataFrame(
+			;
+      parameter = model_coef[:, 1],
+			coef, lower, upper, 
+			p_val = model_coef[:, 5]
+    )
+
+		coef_mix[:, 2:end] = r3.(coef_mix[:, 2:end])
+	end
+		
+	return ratio ? coef_exp : model_coef
+end
+
