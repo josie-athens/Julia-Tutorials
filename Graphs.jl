@@ -310,6 +310,16 @@ md"""
 	marker=3, reg=:true, color_palette=jama
 )
 
+# ╔═╡ e98d8e83-fc18-4209-9d04-70668b42cfbe
+@df kfm scatter(
+	:mat_weight, :dl_milk, group = :sex,
+	xlabel = "Maternal weight (kg)",
+	ylabel = "Breast-milk intake (dl/day)",
+	legend = :topleft, lw=2,
+	marker=3, reg=:true, 
+	color_palette=jama
+)
+
 # ╔═╡ bbe18424-f37f-4322-ab7c-858160484025
 let
 	@df kfm scatter(
@@ -466,9 +476,9 @@ birth_bst = combine(groupby(birth, [:smoke, :race]), :bwt => cis => AsTable)
 	:race, :outcome, yerr=:err, 
 	group=:smoke, layout=2,
 	ylabel="Birth weight (g)",
-	ms=2, mc=:firebrick, lc=:indianred,
+	ms=3, mc=:firebrick, lc=:indianred,
 	ylim=(2000, 4000), xlim=(0, 4),
-	xrot=20
+	xrot=20, lw=2
 )
 
 # ╔═╡ ee0ceea6-13ff-4e33-a01c-95fa0f6893ed
@@ -2400,6 +2410,7 @@ version = "1.4.1+1"
 # ╠═7ce6cb34-8266-4b40-9165-04deced05981
 # ╟─e7293e7b-eb72-430a-9cd6-4d5f776c7856
 # ╠═bd307bcc-aeff-410c-a05e-938b3aab26ce
+# ╠═e98d8e83-fc18-4209-9d04-70668b42cfbe
 # ╠═c57b4b3e-57d5-4e21-a91a-d6e656721fa5
 # ╠═bbe18424-f37f-4322-ab7c-858160484025
 # ╟─2af333a2-bfe5-4506-89f8-aff1a1619046

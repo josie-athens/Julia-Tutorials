@@ -510,7 +510,8 @@ strip_error = function (
 	ys = df_bst.outcome
 	err = df_bst.err
 
-	scatter!(xs, ys, yerror=err, mc=jama[2], lc=jama[2], ms=2)
+	scatter!(xs, ys, yerror=err, mc=jama[2], 
+	lc=jama[2], ms=3, lw=2)
 end
 
 """
@@ -564,8 +565,8 @@ strip_group = function (
 	gs = df_bst[:, 2]
 	err = df_bst.err
 
-	scatter!(xs, ys, group=gs, yerror=err, 
-	label=missing, mc=jama[2], lc=jama[2], ms=2)
+	scatter!(xs, ys, group=gs, yerror=err, lw=2,
+	label=missing, mc=jama[2], lc=jama[2], ms=3)
 end
 
 """
