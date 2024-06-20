@@ -465,7 +465,8 @@ end
 
 """
   strip_error(df, predictor, outcome; 
-    xlabel = "Predictor", ylabel = "Outcome", title = "")
+    xlabel = "Predictor", ylabel = "Outcome", 
+		title = "", xrot = 0)
 
 Constructs a strip chart with error bars on bootstrapped 95% CI around the mean.
 
@@ -476,6 +477,7 @@ Args:
 - xlabel: String for the x-axis label.
 - ylabel: String for the y-axis label.
 - title: An optional string for the title.
+- xrot: An integer. Rotation for the x-ticks.
 
 Returns:
 - A plot.
@@ -486,10 +488,12 @@ strip_error = function (
 	outcome::DataFrames.Symbol;
 	xlabel::String = "Predictor", 
 	ylabel::String = "Outcome", 
-	title::String = ""
+	title::String = "",
+	xrot = 0
 	)
 
 	df_bst = DataFrames.combine(groupby(df, predictor), outcome=>cis=>AsTable)
+	n = df[!, predictor] |> unique |> length
 	
 	dotplot(
 		df[!, predictor], df[!, outcome],
@@ -497,7 +501,9 @@ strip_error = function (
 		ylabel=ylabel,
 		title=title,
 		bar_width = 0.3,
-		leg = false, ms=2, mc=jama[1]
+		leg = false, ms=2, mc=jama[1],
+		xlim = (0, n+1),
+		xrot = xrot
 	)
 
 	xs = df_bst[:, 1]
@@ -509,7 +515,8 @@ end
 
 """
   strip_group(df, predictor, outcome, group; 
-    xlabel = "Predictor", ylabel = "Outcome", title = "")
+    xlabel = "Predictor", ylabel = "Outcome", 
+		title = "", xrot = 0)
 
 Constructs a strip chart with error bars on bootstrapped 95% CI around the mean.
 
@@ -521,6 +528,7 @@ Args:
 - xlabel: String for the x-axis label.
 - ylabel: String for the y-axis label.
 - title: An optional string for the title.
+- xrot: An integer. Rotation for the x-ticks.
 
 Returns:
 - A plot.
@@ -532,10 +540,12 @@ strip_group = function (
 	group::DataFrames.Symbol;
 	xlabel::String = "Predictor", 
 	ylabel::String = "Outcome", 
-	title::String = ""
+	title::String = "",
+	xrot=0
 	)
 
 	df_bst = DataFrames.combine(groupby(df, [predictor, group]), outcome=>cis=>AsTable)
+	n = df[!, predictor] |> unique |> length
 	
 	dotplot(
 		df[!, predictor], df[!, outcome],
@@ -544,7 +554,9 @@ strip_group = function (
 		ylabel=ylabel,
 		title=title, 
 		bar_width = 0.3, layout=2, 
-		ms=2, mc=jama[1]
+		ms=2, mc=jama[1],
+		xlim=(0, n+1),
+		xrot=xrot
 	)
 
 	xs = df_bst[:, 1]

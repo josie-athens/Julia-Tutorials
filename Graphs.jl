@@ -448,8 +448,9 @@ box_error(
 # ╔═╡ ac59d193-921c-4737-be6f-b8df172d3c6c
 strip_group(
 	birth, :race, :bwt, :smoke,
-	xlabel="Race",
-	ylabel="Birth weight (g)"
+	xlabel="",
+	ylabel="Birth weight (g)",
+	xrot=20
 )
 
 # ╔═╡ ef53db4b-e8ec-42ca-b1f2-4346a648699d
@@ -466,8 +467,12 @@ birth_bst = combine(groupby(birth, [:smoke, :race]), :bwt => cis => AsTable)
 	group=:smoke, layout=2,
 	ylabel="Birth weight (g)",
 	ms=2, mc=:firebrick, lc=:indianred,
-	ylim=(2000, 4000)
+	ylim=(2000, 4000), xlim=(0, 4),
+	xrot=20
 )
+
+# ╔═╡ ee0ceea6-13ff-4e33-a01c-95fa0f6893ed
+birth_bst.race |> unique |> length
 
 # ╔═╡ 4bfd627a-0a3c-4d40-accc-98e7dea405f0
 md"## Violin plots"
@@ -2420,6 +2425,7 @@ version = "1.4.1+1"
 # ╟─ef53db4b-e8ec-42ca-b1f2-4346a648699d
 # ╠═31043e75-3133-465d-8377-476825630f08
 # ╠═66adc25d-56a5-4817-b400-a07a2ef52336
+# ╠═ee0ceea6-13ff-4e33-a01c-95fa0f6893ed
 # ╟─4bfd627a-0a3c-4d40-accc-98e7dea405f0
 # ╠═6cec7689-b28e-44f5-8007-7dab7a3f028c
 # ╠═c580333a-ef00-4261-85cf-b08cb0eafa24
