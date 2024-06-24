@@ -671,3 +671,87 @@ mix_coef = function(model_coef::DataFrames.DataFrame; ratio = true)
 	return ratio ? coef_exp : model_coef
 end
 
+"""
+  effect_plot(df_eff, predictor, outcome; 
+    xlabel = "Predictor", ylabel = "Outcome", title = "" xrot = 0)
+
+Constructs a strip chart with error bars on bootstrapped 95% CI around the mean. Version for effects data frame.
+
+Args:
+- df_eff: A data frame with the CI generated via Effects.
+- predictor: A categorical variable: the predictor.
+- outcome: A numerical variable: the outcome.
+- xlabel: A string: optional label for the x-axis.
+- ylabel: A string: optional label for the y-axis.
+- title: A string: optional label for the title.
+- xrot: Optional angle rotation for x-ticks.
+
+Returns:
+- An Effect Plot.
+"""
+effect_plot = function (
+	df::DataFrames.DataFrame,
+	predictor::DataFrames.Symbol, 
+	outcome::DataFrames.Symbol;
+	xlabel::String = "Predictor", 
+	ylabel::String = "Outcome", 
+	title::String = "",
+	xrot = 0
+	)
+
+	n = df[!, predictor] |> unique |> length
+	xs = df[!, predictor]
+	ys = df[!, outcome]
+	err = df.err
+
+	scatter(
+		xs, ys, yerror=err, mc=jama[1],
+		lc=jama[1], ms=3, lw=1.5, xlabel=xlabel,
+		ylabel=ylabel, title=title,
+		xlim = (0, n), xrot = xrot, leg=false
+	)
+end
+
+"""
+  effgp_plot(df_eff, predictor, outcome, group; 
+    xlabel = "Predictor", ylabel = "Outcome", xrot = 0)
+
+Constructs a strip chart with error bars on bootstrapped 95% CI around the mean. Version for effects data frame.
+
+Args:
+- df_eff: A data frame with the CI generated via Effects.
+- predictor: A categorical variable: the main predictor.
+- outcome: A numerical variable: the outcome.
+- group: A categorical varible: a confounder or second predictor.
+- xlabel: A string: optional label for the x-axis.
+- ylabel: A string: optional label for the y-axis.
+- title: A string: optional label for the title.
+
+Returns:
+- An Effect plot.
+"""
+effgp_plot = function (
+	df::DataFrames.DataFrame,
+	predictor::DataFrames.Symbol, 
+	outcome::DataFrames.Symbol,
+	group::DataFrames.Symbol;
+	xlabel::String = "Predictor", 
+	ylabel::String = "Outcome", 
+	title::String = "",
+	xrot = 0
+	)
+
+	n = df[!, predictor] |> unique |> length
+	xs = df[!, predictor]
+	ys = df[!, outcome]
+	gp = df[!, group]
+	err = df.err
+
+	scatter(
+		xs, ys, group=gp, yerror=err,
+		color_palette=jama, ms=3, lw=1.5, 
+		xlabel=xlabel,
+		ylabel=ylabel, title=title,
+		xlim = (0, n), xrot = xrot
+	)
+end

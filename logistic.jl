@@ -31,7 +31,7 @@ md"""
 
 !!! note \"Josie Athens\"
 
-	20 June 2024
+	24 June 2024
 """
 
 # ╔═╡ 18df8213-6661-4f0a-b6d4-b702583d26e6
@@ -144,12 +144,11 @@ md"""
 The predicted probabilities can be displayed in an effect plot.
 """
 
-# ╔═╡ 5712ca88-6a2c-4b15-a41e-242fdad1d9ab
-@df eff_1 scatter(
-	:area, :mf_cont, yerr=:err,
+# ╔═╡ f1ffa303-b015-4ba4-a3cb-b8b3c941643f
+effect_plot(
+	eff_1, :area, :mf_cont,
 	xlabel="Residence",
-	ylabel="P (Infection)",
-	leg=false, mc=jama[1], ms=3
+	ylabel="P (Infection)"
 )
 
 # ╔═╡ 14b1a128-3d23-4924-9a16-6456538e8943
@@ -207,12 +206,15 @@ eff_2 = effects(
 )
 
 # ╔═╡ 6a0d8a09-191f-4506-9369-79e1cd375030
-@df eff_2 scatter(
-	:agegrp, :mf_cont, yerr=:err,
+effect_plot(
+	eff_2,
+	:agegrp, :mf_cont,
 	xlabel="Age group (years)",
-	ylabel="P (Infection)",
-	leg=false, mc=jama[1], ms=3
+	ylabel="P (Infection)"
 )
+
+# ╔═╡ 2f856a26-551f-43e4-b440-b2884ba27145
+
 
 # ╔═╡ 79ebf23d-cdb2-4f37-a50e-402c76cab057
 md"""
@@ -314,7 +316,7 @@ md"""
 """
 
 # ╔═╡ 4be6cfa5-a4fc-4363-bf12-a03bee44c03c
-glm_coef(model_4 |> coeftable |> DataFrame)[2:end, :]
+glm_coef(model_4 |> coeftable |> DataFrame)[2:end, :] |> print
 
 # ╔═╡ b204eff5-f8f7-4a2d-bc0e-0a695a0ea473
 md"""
@@ -347,29 +349,28 @@ eff_4 = effects(
 	model_4, invlink=inv_logit
 )
 
-# ╔═╡ fed33bc4-dbbc-438e-95b3-2865faa6031c
+# ╔═╡ c6aca4a2-83ea-4677-b255-0ce6b7ebf9fd
 let
 	females = @subset(eff_4, :sex == "Female")
 	males = @subset(eff_4, :sex == "Male")
 
-	p1 = @df females scatter(
-		:agegrp, :mf_cont,
-		group=:area, yerr=:err,
+	p1 = effgp_plot(
+		females,
+		:agegrp, :mf_cont, :area,
 		xlabel="Age group",
 		ylabel="P (Infection)",
-		title="Females", ms=3,
-		color_palette=jama, leg=false
-	)
-	p2 = @df males scatter(
-		:agegrp, :mf_cont,
-		group=:area, yerr=:err,
-		xlabel="Age group",
-		ylabel="",
-		title="Males", ms=3,
-		color_palette=jama
+		title="Females"
 	)
 
-	plot(p1, p2, layout=2)
+	p2 = effgp_plot(
+		males,
+		:agegrp, :mf_cont, :area,
+		xlabel="Age group",
+		ylabel="P (Infection)",
+		title="Males"
+	)
+
+	plot(p1, p2)
 end
 
 # ╔═╡ b8d9dab5-37ce-4a2f-825c-39b72a6ca742
@@ -410,7 +411,7 @@ fitted_params(mach).linear_binary_classifier.features
 report(mach).linear_binary_classifier.coef_table |> DataFrame
 
 # ╔═╡ d26ab13a-cdd2-4e86-bbc0-4732f04a9990
-glm_coef(report(mach).linear_binary_classifier.coef_table |> DataFrame)[1:end-1, :]
+glm_coef(report(mach).linear_binary_classifier.coef_table |> DataFrame)[1:end-1, :] |> print
 
 # ╔═╡ ce305147-27b4-425a-a890-ef8e6d5afb4b
 model_6 = glm(
@@ -420,7 +421,7 @@ model_6 = glm(
 );
 
 # ╔═╡ d0bdd820-64d7-4bbb-b855-1e7cafdcea17
-glm_coef(model_6 |> coeftable |> DataFrame)[2:end, :]
+glm_coef(model_6 |> coeftable |> DataFrame)[2:end, :] |> print
 
 # ╔═╡ ede56b19-e982-4bcb-9d4b-59e25809af23
 md"""
@@ -2605,7 +2606,7 @@ version = "1.4.1+1"
 # ╟─57643061-9c8c-458c-b24c-7c5103eab292
 # ╠═947a4a7d-2681-4d16-8af1-65d0754a9058
 # ╟─82ef7dad-ae19-4fea-a799-0f067bf1a0df
-# ╠═5712ca88-6a2c-4b15-a41e-242fdad1d9ab
+# ╠═f1ffa303-b015-4ba4-a3cb-b8b3c941643f
 # ╟─14b1a128-3d23-4924-9a16-6456538e8943
 # ╠═5b0691b0-e813-451f-9353-0326e626df0b
 # ╟─067be32a-69dd-4705-9fd2-ac14280baa8d
@@ -2618,6 +2619,7 @@ version = "1.4.1+1"
 # ╠═cda9e59d-dc30-4c69-ae8c-796bfeb9355e
 # ╠═1bdc794c-ef45-413f-9b92-914d5436dafb
 # ╠═6a0d8a09-191f-4506-9369-79e1cd375030
+# ╠═2f856a26-551f-43e4-b440-b2884ba27145
 # ╟─79ebf23d-cdb2-4f37-a50e-402c76cab057
 # ╠═32acc128-c408-4fae-b9ae-c84dcaab94aa
 # ╠═53015766-cb96-43f2-b5f8-6668f8868277
@@ -2641,7 +2643,7 @@ version = "1.4.1+1"
 # ╟─b204eff5-f8f7-4a2d-bc0e-0a695a0ea473
 # ╠═1e317be7-0058-4457-aa48-4227dca2ccfa
 # ╠═45124d08-54bb-4ab8-9617-0e04602836d7
-# ╠═fed33bc4-dbbc-438e-95b3-2865faa6031c
+# ╠═c6aca4a2-83ea-4677-b255-0ce6b7ebf9fd
 # ╟─b8d9dab5-37ce-4a2f-825c-39b72a6ca742
 # ╠═3cccfba7-e310-4dae-8679-bd7b61cadc7f
 # ╠═5f266c27-ad72-486c-ab36-b7f1b1067379
