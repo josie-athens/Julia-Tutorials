@@ -1,5 +1,12 @@
 ### A Pluto.jl notebook ###
-# v0.19.42
+# v0.19.45
+
+#> [frontmatter]
+#> title = "Statistical Modelling"
+#> date = "2024-08-03"
+#> 
+#>     [[frontmatter.author]]
+#>     name = "Josie Athens"
 
 using Markdown
 using InteractiveUtils
