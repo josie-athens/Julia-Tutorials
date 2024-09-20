@@ -1,11 +1,18 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.19.46
+
+#> [frontmatter]
+#> title = "Graphical Analysis"
+#> date = "2024-09-20"
+#> 
+#>     [[frontmatter.author]]
+#>     name = "Josie Athens"
 
 using Markdown
 using InteractiveUtils
 
 # ╔═╡ 5a13d996-e176-4955-b00e-48a34973f9b9
-using PlutoUI; PlutoUI.TableOfContents(aside=true, title="📚 Contents")
+using PlutoUI; TableOfContents(aside=true, title="📚 Contents")
 
 # ╔═╡ 2f3c57b6-c4fa-43ad-9a91-976b2cbf855e
 # ╠═╡ show_logs = false
@@ -20,12 +27,7 @@ end;
 using Loess
 
 # ╔═╡ 09803c29-0fab-410d-a2a8-e1fb843b15f5
-begin
-	include("pubh.jl")
-	import GLM.@formula
-	@rimport readr
-	@rimport pubh
-end
+include("pubh.jl");
 
 # ╔═╡ 914880c4-de76-4970-8f12-13e1a0317dcb
 md"""
@@ -33,13 +35,16 @@ md"""
 
 !!! note \"Josie Athens\"
 
-	23 July 2024
+	20 September 2024
 """
 
 # ╔═╡ 9f2bc172-51b2-41e9-bcdd-34652ab1deb5
 md"""
 ## [📖 Main Menu](index.html)
 """
+
+# ╔═╡ 3eccf2ad-67d3-46fa-ab1e-72d751120881
+@rimport readr as readr
 
 # ╔═╡ ee8350e2-081f-4678-a2c6-f99afef08bf8
 md"""
@@ -307,8 +312,8 @@ md"""
 	:mat_weight, :dl_milk, group = :sex,
 	xlabel = "Maternal weight (kg)",
 	ylabel = "Breast-milk intake (dl/day)",
-	legend = :topleft, lw=2,
-	marker=3, reg=:true, color_palette=jama
+	legend = :topleft, lw=2, pred_confidence=:true, ribbon=:true,
+	marker=3, smooth=true, color_palette=jama
 )
 
 # ╔═╡ e98d8e83-fc18-4209-9d04-70668b42cfbe
@@ -421,7 +426,7 @@ In the previous plot the presence of an outlier is clear. If we would like to re
 	:race, :bwt, group = :smoke, opacity=0.7,
 	xlabel = "",
 	ylabel = "Birth weight (g)",
-	msize = 2, bar_width = 0.7, leg=:top,
+	msize = 2, bar_width = 0.7, leg=:topleft,
 	color_palette = jama
 )
 
@@ -475,9 +480,6 @@ birth_bst = combine(groupby(birth, [:smoke, :race]), :bwt => cis => AsTable)
 	ylim=(2000, 4000), xlim=(0, 4),
 	xrot=20, lw=2
 )
-
-# ╔═╡ ee0ceea6-13ff-4e33-a01c-95fa0f6893ed
-birth_bst.race |> unique |> length
 
 # ╔═╡ 4bfd627a-0a3c-4d40-accc-98e7dea405f0
 md"## Violin plots"
@@ -642,6 +644,74 @@ Or we can call Plots.svg to save as an SVG file.
 	legend = :topright, color_palette=jama
 ); Plots.svg("fluplots.svg")
 
+# ╔═╡ cbb126d9-6713-43ff-a3b6-417870567e54
+md"""
+## Faceting
+"""
+
+# ╔═╡ 444faa89-ff9e-41d6-93e2-6b2223646e48
+@df birth density(
+	:bwt, group = (:race, :smoke),
+	layout=2, lw=2, legend=:outertop,
+	xlab="Birth weight (g)",
+	ylab="Density", fill=:true, link=:y,
+	opacity = 0.7, color_palette = jama,
+	foreground_color_legend=nothing, legendfontsize=7
+)
+
+# ╔═╡ 4c6180b9-ce01-47f1-b842-03505fa33afa
+md"""
+!!! tip
+
+	The number of panels in `layout` is defined by the number of levels in the second categorical varialbe in the `group` tuple (`:smoke` in the previous example).
+"""
+
+# ╔═╡ 54be58fb-1932-4393-a0ab-a62c09dfd671
+@df birth density(
+	:bwt, group = (:smoke, :race),
+	layout=3, lw=2, legend=:outertop,
+	xlab="Birth weight (g)",
+	ylab="Density", fill=:true,
+	opacity = 0.7, color_palette = jama,
+	foreground_color_legend = nothing, legendfontsize=7
+)
+
+# ╔═╡ 98274852-968e-4ef2-ab95-6b7643d262a0
+@df birth scatter(
+	:lwt, :bwt, group=(:smoke, :race),
+	layout = 3, ms=2.5, legend=:outertop, 
+	reg=:true, lw=2, opacity=0.6, link=:y,
+	xlab="Mother's weight (kg)",
+	ylab="Birth weight (g)", foreground_color_legend = nothing,
+	color_palette = jama, legendfontsize=7
+)
+
+# ╔═╡ ed691ff3-3132-40e0-b250-b63325848910
+md"""
+## Subplots
+
+We can also use stacks to display different plots in a grid.
+"""
+
+# ╔═╡ 87946f0f-1611-4591-8b4c-675b3369dcc7
+let
+	p1 = @df wcgs density(
+		:sbp, group=:chd, lw=2, fill=:true,
+		opacity=0.7, color_palette=jama,
+		xlab="SBP (mm Hg)", ylab="Density",
+		foreground_color_legend=nothing, title="(a)"
+	)
+
+	p2 = @df wcgs boxplot(
+		:chd, :sbp, leg=:false, ms=2, lw=1.5,
+		opacity=0.7, color_palette=jama,
+		xlab="Coronary Heart Disease", ylab="SBP (mm Hg)",
+		title="(b)"
+	)
+
+	plot(p1, p2)
+end
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -650,7 +720,6 @@ CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
 DataFrameMacros = "75880514-38bc-4a95-a458-c2aea5a3a702"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
-GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
 Loess = "4345ca2d-374a-55d4-8d30-97f9976e7612"
 MLJ = "add582a8-e3ab-11e8-2d5e-e98b27df1bc7"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
@@ -664,7 +733,6 @@ CategoricalArrays = "~0.10.8"
 DataFrameMacros = "~0.4.1"
 DataFrames = "~1.5.0"
 Distributions = "~0.25.106"
-GLM = "~1.8.3"
 Loess = "~0.6.3"
 MLJ = "~0.19.2"
 PlutoUI = "~0.7.51"
@@ -677,9 +745,9 @@ StatsPlots = "~0.15.6"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.5"
 manifest_format = "2.0"
-project_hash = "e98da46b6a2a5f62de52e422fd1b0c09e2500647"
+project_hash = "0bf04beb0f317aedc316178fefd8edbb14e77342"
 
 [[deps.ARFFFiles]]
 deps = ["CategoricalArrays", "Dates", "Parsers", "Tables"]
@@ -919,6 +987,12 @@ version = "1.0.0"
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
 
+[[deps.Dbus_jll]]
+deps = ["Artifacts", "Expat_jll", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "fc173b380865f70627d7dd1190dc2fce6cc105af"
+uuid = "ee1fde0b-3d02-5ea6-8484-8dfef6360eab"
+version = "1.14.10+0"
+
 [[deps.DelimitedFiles]]
 deps = ["Mmap"]
 git-tree-sha1 = "9e2f36d3c96a820c678f2f1f1782582fcf685bae"
@@ -1070,16 +1144,10 @@ deps = ["Random"]
 uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
 [[deps.GLFW_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll", "xkbcommon_jll"]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll", "libdecor_jll", "xkbcommon_jll"]
 git-tree-sha1 = "3f74912a156096bd8fdbef211eff66ab446e7297"
 uuid = "0656b61e-2033-5cc2-a64a-77c0f6c09b89"
 version = "3.4.0+0"
-
-[[deps.GLM]]
-deps = ["Distributions", "LinearAlgebra", "Printf", "Reexport", "SparseArrays", "SpecialFunctions", "Statistics", "StatsAPI", "StatsBase", "StatsFuns", "StatsModels"]
-git-tree-sha1 = "97829cfda0df99ddaeaafb5b370d6cab87b7013e"
-uuid = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
-version = "1.8.3"
 
 [[deps.GR]]
 deps = ["Artifacts", "Base64", "DelimitedFiles", "Downloads", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Preferences", "Printf", "Qt6Wayland_jll", "Random", "Serialization", "Sockets", "TOML", "Tar", "Test", "p7zip_jll"]
@@ -1587,6 +1655,12 @@ deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
 git-tree-sha1 = "949347156c25054de2db3b166c52ac4728cbad65"
 uuid = "90014a1f-27ba-587c-ab20-58faa44d9150"
 version = "0.11.31"
+
+[[deps.Pango_jll]]
+deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "FriBidi_jll", "Glib_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "9dd97171646850ee607593965ce1f55063d8d3f9"
+uuid = "36c8627f-9965-5494-a995-c6b170f724f3"
+version = "1.54.0+0"
 
 [[deps.Parameters]]
 deps = ["OrderedCollections", "UnPack"]
@@ -2306,7 +2380,13 @@ version = "0.15.1+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.8.0+1"
+version = "5.11.0+0"
+
+[[deps.libdecor_jll]]
+deps = ["Artifacts", "Dbus_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pango_jll", "Wayland_jll", "xkbcommon_jll"]
+git-tree-sha1 = "9bf7903af251d2050b467f76bdbe57ce541f7f4f"
+uuid = "1183f4f0-6f2a-5f1a-908b-139f9cdfea6f"
+version = "0.2.2+0"
 
 [[deps.libevdev_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -2385,6 +2465,7 @@ version = "1.4.1+1"
 # ╠═5a13d996-e176-4955-b00e-48a34973f9b9
 # ╠═2f3c57b6-c4fa-43ad-9a91-976b2cbf855e
 # ╠═09803c29-0fab-410d-a2a8-e1fb843b15f5
+# ╠═3eccf2ad-67d3-46fa-ab1e-72d751120881
 # ╟─ee8350e2-081f-4678-a2c6-f99afef08bf8
 # ╟─5ecd66a2-9827-44e6-a2f2-7821f0b8ac78
 # ╠═060257c0-a02e-48a4-b06c-5d00420af3b3
@@ -2454,7 +2535,6 @@ version = "1.4.1+1"
 # ╟─ef53db4b-e8ec-42ca-b1f2-4346a648699d
 # ╠═31043e75-3133-465d-8377-476825630f08
 # ╠═66adc25d-56a5-4817-b400-a07a2ef52336
-# ╠═ee0ceea6-13ff-4e33-a01c-95fa0f6893ed
 # ╟─4bfd627a-0a3c-4d40-accc-98e7dea405f0
 # ╠═6cec7689-b28e-44f5-8007-7dab7a3f028c
 # ╠═c580333a-ef00-4261-85cf-b08cb0eafa24
@@ -2472,5 +2552,12 @@ version = "1.4.1+1"
 # ╠═966ebf9f-98e8-4e28-9423-543d2404c2fd
 # ╟─e9329145-edc8-4f73-b42c-5e050e6ae085
 # ╠═c8847d45-1d19-4ab7-bd91-3bab3f3035ea
+# ╟─cbb126d9-6713-43ff-a3b6-417870567e54
+# ╠═444faa89-ff9e-41d6-93e2-6b2223646e48
+# ╟─4c6180b9-ce01-47f1-b842-03505fa33afa
+# ╠═54be58fb-1932-4393-a0ab-a62c09dfd671
+# ╠═98274852-968e-4ef2-ab95-6b7643d262a0
+# ╟─ed691ff3-3132-40e0-b250-b63325848910
+# ╠═87946f0f-1611-4591-8b4c-675b3369dcc7
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
