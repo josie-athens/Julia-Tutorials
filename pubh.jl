@@ -106,7 +106,7 @@ Args:
 Returns:
 - The lower and upper 95% CI of the sample.
 """
-cis(x, u=mean(x), s=1.96*std(x)/sqrt(length(x))) = (outcome=u, err=((u+s)-(u-s))/2,  lower=u-s, upper=u+s)
+cis(x, u=mean(x), s=1.96*std(x)/sqrt(length(x))) = (outcome=u, lower=u-s, upper=u+s)
 
 """
   reference_range(μ, σ)
@@ -508,9 +508,10 @@ strip_error = function (
 
 	xs = df_bst[:, 1]
 	ys = df_bst.outcome
-	err = df_bst.err
+	low = df_bst.lower
+	upp = df_bst.upper
 
-	scatter!(xs, ys, yerror=err, mc=jama[2], 
+	scatter!(xs, ys, yerror=(ys .- low, upp .- ys), mc=jama[2], 
 	lc=jama[2], ms=3, lw=2)
 end
 
@@ -557,16 +558,20 @@ strip_group = function (
 		bar_width = 0.3, layout=2, 
 		ms=2, mc=jama[1],
 		xlim=(0, n+1),
+		foreground_color_legend=nothing,
 		xrot=xrot
 	)
 
 	xs = df_bst[:, 1]
 	ys = df_bst.outcome
 	gs = df_bst[:, 2]
-	err = df_bst.err
+	low = df_bst.lower
+	upp = df_bst.upper
 
-	scatter!(xs, ys, group=gs, yerror=err, lw=2,
-	label=missing, mc=jama[2], lc=jama[2], ms=3)
+	scatter!(
+	xs, ys, group=gs, yerror=(ys .- low, upp .- ys), lw=2,
+	label=missing, mc=jama[2], lc=jama[2], ms=3
+	)
 end
 
 """
@@ -581,9 +586,20 @@ Args:
 Returns:
 - A data frame with descriptive statistics.
 """
-estat = function (df, labs=nothing)
-  res = describe(df, non_missing => :n, median => :Median, mean => :Mean, std => :SD, rel_dis => :CV)
+estat = function (df::DataFrames.DataFrame, labs=nothing)
+  res = describe(
+	  df, 
+	  non_missing => :n,
+	  minimum => :Min,
+	  maximum => :Max,
+	  median => :Median, 
+	  mean => :Mean, 
+	  std => :SD, 
+	  rel_dis => :CV
+  )
   @transform!(res,
+		:Min = r3(:Min),
+		:Max = r3(:Max),
     :Median = r3(:Median),
     :Mean = r3(:Mean),
     :SD = r3(:SD),
@@ -599,7 +615,7 @@ end
 """
 	glm_coef(model; ratio = true)
 	
-Reports table of coefficients from linear regression models, rounded to 3 digits. By default, exponentiates coefficients and confidence intervals.
+Reports table of coefficients from linear regression models rounded to 3 digits. By default, exponentiates coefficients and confidence intervals.
 
 Args: 
 - model_coef: A data frame with the table of coefficients.
@@ -702,13 +718,14 @@ effect_plot = function (
 	n = df[!, predictor] |> unique |> length
 	xs = df[!, predictor]
 	ys = df[!, outcome]
-	err = df.err
+	low = df.lower
+	upp = df.upper
 
 	scatter(
-		xs, ys, yerror=err, mc=jama[1],
+		xs, ys, yerror=(ys .- low, upp .- ys), mc=jama[1],
 		lc=jama[1], ms=3, lw=1.5, xlabel=xlabel,
 		ylabel=ylabel, title=title,
-		xlim = (0, n), xrot = xrot, leg=false
+		xlim = (0, n+1), xrot = xrot, leg=false
 	)
 end
 
@@ -732,26 +749,89 @@ Returns:
 """
 effgp_plot = function (
 	df::DataFrames.DataFrame,
-	predictor::DataFrames.Symbol, 
-	outcome::DataFrames.Symbol,
-	group::DataFrames.Symbol;
-	xlabel::String = "Predictor", 
-	ylabel::String = "Outcome", 
-	title::String = "",
-	xrot = 0
-	)
+		predictor::DataFrames.Symbol, 
+		outcome::DataFrames.Symbol,
+		group::DataFrames.Symbol;
+		xlabel::String = "Predictor", 
+		ylabel::String = "Outcome", 
+		title::String = "",
+		xrot = 0
+		)
 
-	n = df[!, predictor] |> unique |> length
-	xs = df[!, predictor]
-	ys = df[!, outcome]
-	gp = df[!, group]
-	err = df.err
+		xs = df[!, predictor]
+		n = xs |> unique |> length
+		ys = df[!, outcome]
+		gp = df[!, group]
+		ng = gp |> unique |> length
+		low = df.lower
+		upp = df.upper
+		ymin = minimum(low) * 0.95
+		ymax = maximum(upp) * 1.05
 
-	scatter(
-		xs, ys, group=gp, yerror=err,
-		color_palette=jama, ms=3, lw=1.5, 
-		xlabel=xlabel,
-		ylabel=ylabel, title=title,
-		xlim = (0, n), xrot = xrot
+		scatter(
+			xs, ys, group=gp, yerror=(ys .- low, upp .- ys),
+			lc=jama[2], ms=3, lw=1.5, layout=ng, mc=jama[2],
+			foreground_color_legend=nothing, 
+			xlabel=xlabel,
+			ylabel=ylabel, title=title,
+			xlim = (0, n+1), xrot = xrot,
+			ylim = (ymin, ymax)
 	)
 end
+
+"""
+	prop_or(p, or)
+	
+A simple function to calculate a proportion, from another proportion and the odds ratio between them.
+
+Args: 
+- p: The proportion value in the unexposed group.
+- or: The odds ratio of unexposed/exposed.
+
+Returns:
+- The proportion in the exposed group.
+"""
+prop_or = function (p, or)
+	p1 = 1 - p
+	por = (or * p)/(p1 + or * p)
+	return por
+end
+
+"""
+	epitab(df, outcome, exposure)
+
+Constructs two-by-two contingency tables, reversing the order of the levels in the categorical variables so that cases and exposed are shown first, as is standard in epidemiology.
+
+Args:
+- df: A data frame.
+- outcome: A categorical variable corresponding to the outcome or response.
+- exposure: A categorical variable corresponding to the exposure or predictor.
+
+Returns:
+- A data frame with the corresponding contingency table.
+"""
+epitab = function(df::DataFrames.DataFrame; outcome, exposure)
+	cont = DataFrames.combine(groupby(df, [outcome, exposure]), nrow => :count)
+	
+	a = cont.count[4]
+	b = cont.count[2]
+	c = cont.count[3]
+	d = cont.count[1]
+		
+	ab = a+b
+	cd = c+d
+	ac = a+b
+	bd = b+d
+	tot = ab + cd
+	out_yes = cont[4, 1]
+	out_no = cont[1, 1]
+	exp_yes = cont[2, 2]
+	exp_no = cont[1, 2]
+
+	Variables = ["Exposure/Outcome", exp_yes, exp_no, "Total"]
+	Cases = [out_yes, a, c, ac]
+	Controls = [out_no, b, d, bd]
+	Total = [missing, ab, cd, tot]
+	res = DataFrame(; Variables, Cases, Controls, Total)
+	return res
+end		
